@@ -1,0 +1,2 @@
+Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd backend; npm run server`""
+Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd frontend; npm run dev`""
