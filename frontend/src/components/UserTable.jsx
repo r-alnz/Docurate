@@ -56,6 +56,9 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                             Organization
                         </th>
                         <th scope="col" className="px-6 py-3">
+                            suborgs
+                        </th>
+                        <th scope="col" className="px-6 py-3">
                             Actions
                         </th>
                     </tr>
@@ -77,6 +80,11 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                                     <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
                                 )}
                                 <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
+                                <td className="px-6 py-4">
+                                    {user.suborganizations?.length > 0 
+                                        ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ") 
+                                        : "N/A"}
+                                </td>
                                 <td className="px-6 py-4">
                                     <div className="flex gap-5">
                                         {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (

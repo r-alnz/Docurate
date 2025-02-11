@@ -57,8 +57,9 @@ const AdminUsersPage = () => {
                     ...newUser.user,
                     organization: {
                         _id: userDetails.organization,
-                        name: userDetails.organizationName, // Include the organization name
+                        name: userDetails.organizationName,
                     },
+                    suborganizations: userDetails.suborganizations || [],
                 },
             });
             setIsAddUserModalOpen(false);
@@ -127,7 +128,7 @@ const AdminUsersPage = () => {
                 isOpen={isAddUserModalOpen}
                 onClose={() => setIsAddUserModalOpen(false)}
                 onSubmit={handleAddUser}
-                subOrganizations={suborganizations}  // Pass sub-orgs as prop
+                suborganizations={suborganizations}  // Pass sub-orgs as prop
             />
         </div>
     );

@@ -4,67 +4,35 @@ import Organization from '../models/organizationModel.js';
 // Admin: Create User Account
 const createUserAccount = async (req, res) => {
     try {
-        const { firstname, lastname, email, password, role, organization, studentId } = req.body;
-        console.log(req.body);
-        // Validate required fields
+        console.log('📥 Received user data:', JSON.stringify(req.body, null, 2));
+
+        const { firstname, lastname, email, password, role, organization, studentId, suborganizations } = req.body;
+
+
         if (!firstname || !lastname || !email || !password || !role) {
-            return res.status(400).json({
-                message: 'All fields are required: firstname, lastname, email, password, role',
-            });
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
-        // Allowed roles for users created by admin
-        const allowedRoles = ['student', 'organization'];
-        if (!allowedRoles.includes(role)) {
-            return res.status(400).json({
-                message: `Invalid role. Allowed roles: ${allowedRoles.join(', ')}`,
-            });
+        if (!['student', 'organization'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
         }
 
-        // Check if the organization exists for role assignment (if applicable)
-        if (role !== 'student') {
-            const orgExists = await Organization.findById(organization);
-            if (!orgExists) {
-                return res.status(404).json({ message: 'Organization not found' });
-            }
+        if (role !== 'student' && !organization) {
+            return res.status(400).json({ message: 'Organization is required for this role' });
         }
 
-        // Check for duplicate email
+        const orgExists = role !== 'student' ? await Organization.findById(organization) : true;
+        if (!orgExists) return res.status(404).json({ message: 'Organization not found' });
+
         const emailExists = await User.findOne({ email });
-        if (emailExists) {
-            return res.status(400).json({ message: 'User with this email already exists' });
-        }
+        if (emailExists) return res.status(400).json({ message: 'Email already exists' });
 
-        const userPayload = {
-            firstname,
-            lastname,
-            email,
-            password,
-            role,
-            organization,
-        };
+        const userPayload = { firstname, lastname, email, password, role, organization, suborganizations: suborganizations || [] };
+        if (role === 'student') userPayload.studentId = studentId;
 
-        // Add `studentId` only for students
-        if (role === 'student') {
-            userPayload.studentId = studentId;
-        }
-
-        // Create the user
         const newUser = await User.create(userPayload);
+        res.status(201).json({ message: 'User created successfully', user: newUser });
 
-        // Response
-        res.status(201).json({
-            message: 'User account created successfully',
-            user: {
-                _id: newUser._id,
-                firstname: newUser.firstname,
-                lastname: newUser.lastname,
-                email: newUser.email,
-                role: newUser.role,
-                studentId: newUser.studentId || null,
-                organization: newUser.organization || null,
-            },
-        });
     } catch (error) {
         console.error('Error creating user account:', error.message);
         res.status(500).json({ message: 'Failed to create user account', error: error.message });
@@ -94,6 +62,7 @@ const getUsers = async (req, res) => {
         // Fetch users from the database
         const users = await User.find(filter)
             .populate('organization', '_id name') // Populate the organization name
+            .populate('suborganizations', '_id firstname lastname') // Populate suborganizations names
             .select('-password') // Exclude password field
             .sort({ createdAt: -1 }); // Sort by creation date descending
 

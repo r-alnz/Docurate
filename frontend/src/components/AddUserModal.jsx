@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
-const AddUserModal = ({ isOpen, onClose, onSubmit, subOrganizations }) => {
+const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations }) => {
     const { user } = useAuthContext(); // Fetch current user context
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
@@ -11,13 +11,18 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, subOrganizations }) => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('student'); // Default role
     const [studentId, setStudentId] = useState('');
-    const [isStudentOrgMember, setIsStudentOrgMember] = useState(false);
-    const [selectedSubOrg, setSelectedSubOrg] = useState('');
+    // const [isStudentOrgMember, setIsStudentOrgMember] = useState(false);
+    const [isStudentOrgMember, setIsStudentOrgMember] = useState(true);
+    const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
 
     // Fetch sub-organizations when modal opens
 
     const handleSubmit = (e) => {
         e.preventDefault();
+    
+        // 🛠 Debugging: Log selected sub-orgs before sending
+        console.log("Submitting with suborganizations:", selectedSubOrgs);
+    
         const userDetails = {
             firstname,
             lastname,
@@ -27,9 +32,15 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, subOrganizations }) => {
             studentId: role === 'student' ? studentId : null, // Include studentId if role is student
             organization: user.organization._id, // Use admin's organization ID
             organizationName: user.organization.name, // Include the organization name
-            suborganization: isStudentOrgMember ? selectedSubOrg : null, // Include sub-organization if checked
+            suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [], // Ensure it's an array
         };
         onSubmit(userDetails);
+    
+        // 🛠 Debugging: Check after sending
+        console.log("User details submitted:", userDetails);
+    
+        //  Delay reset to prevent premature clearing
+        // setTimeout(() => {
         setFirstname('');
         setLastname('');
         setEmail('');
@@ -37,13 +48,20 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, subOrganizations }) => {
         setRole('student');
         setStudentId('');
         setIsStudentOrgMember(false);
-        setSelectedSubOrg('');
+        setSelectedSubOrgs([]); // Reset selection
+        // }, 200);
     };
+    
 
     if (!isOpen) return null;
 
+    console.log("Suborganizations Type:", typeof suborganizations, suborganizations);
+    suborganizations.forEach((org, index) => {
+        console.log(`Index ${index}:`, org);
+    });
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
             <div className="bg-white p-6 rounded shadow-lg w-1/3">
                 <h2 className="text-xl font-bold mb-4">Add User</h2>
                 <form onSubmit={handleSubmit}>
@@ -127,20 +145,30 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, subOrganizations }) => {
                                 <span className="text-gray-700 font-medium">Part of a suborganization (e.g., Student Organization)?</span>
                             </label>
 
-                            {/* Conditionally show Sub-organization dropdown */}
+                            {/* Conditionally show Sub-organization multi-select dropdown */}
                             {isStudentOrgMember && (
                                 <div className="mb-4">
-                                    <select name="organization"
-                                        value={selectedSubOrg}
-                                        className="border rounded p-2 w-full"
-                                        onChange={(e) => setSelectedSubOrg(e.target.value)}>
-                                    <option value="">Select Organization</option>
-                                    {subOrganizations.map(org => (
-                                        <option key={org._id} value={org._id}>
-                                            {org.firstname} {org.lastname}
-                                        </option>
-                                    ))}
-                                </select>
+
+                                    <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                                        {suborganizations.map((org) => (
+                                            <div
+                                                key={org._id}
+                                                onClick={() => {
+                                                    setSelectedSubOrgs(prev => 
+                                                        prev.includes(org._id)
+                                                            ? prev.filter(id => id !== org._id) // Remove if already selected
+                                                            : [...prev, org._id] // Add if not selected
+                                                    );
+                                                }}
+                                                className={`p-2 cursor-pointer ${
+                                                    selectedSubOrgs.includes(org._id) 
+                                                        ? "bg-blue-500 text-white" 
+                                                        : "bg-gray-100 text-gray-700"
+                                                } rounded mb-1`}>
+                                                {org.firstname + " " + org.lastname || "(No Name)"}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>

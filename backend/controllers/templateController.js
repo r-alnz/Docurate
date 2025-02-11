@@ -3,10 +3,10 @@ import Template from '../models/templateModel.js';
 // Fetch Templates
 const getTemplates = async (req, res) => {
     try {
-        const { role, organization, subOrganizations } = req.user;
+        const { role, organization, suborganizations } = req.user;
 
-        // Query that includes both main organization and subOrganizations
-        const orgQuery = { $in: [organization, ...(subOrganizations || [])] };
+        // Query that includes both main organization and suborganizations
+        const orgQuery = { $in: [organization, ...(suborganizations || [])] };
 
         // Query based on role
         const query = role === 'admin' 

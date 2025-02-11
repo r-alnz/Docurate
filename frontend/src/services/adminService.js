@@ -12,13 +12,23 @@ export const fetchUserAccounts = async (token) => {
 };
 
 // Add a user account
+// export const addUserAccount = async (token, userDetails) => {
+//     console.log(userDetails);
+//     const response = await axios.post(`${API_URL}/users`, userDetails, {
+//         headers: {
+//             Authorization: `Bearer ${token}`,
+//         },
+//     });
+//     return response.data;
+// };
+
 export const addUserAccount = async (token, userDetails) => {
-    console.log(userDetails);
+    console.log('📤 Sending user data:', JSON.stringify(userDetails, null, 2));
+
     const response = await axios.post(`${API_URL}/users`, userDetails, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
     });
+
     return response.data;
 };
 

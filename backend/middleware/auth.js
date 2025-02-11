@@ -11,26 +11,26 @@ const authToken = async (req, res, next) => {
         // console.log('📌 Authorization Header:', authHeader);
 
         if (!token) {
-            // console.log('❌ No token provided');
+            // console.log(' No token provided');
             return res.status(401).json({ message: 'Unauthorized: No token provided' });
         }
 
         // Verify the token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // console.log('✅ Token decoded:', decoded);
+        // console.log(' Token decoded:', decoded);
 
         // Attach user details to request
         req.user = await User.findById(decoded.id).select('_id role organization');
 
         if (!req.user) {
-            // console.log('❌ User not found in database');
+            // console.log(' User not found in database');
             return res.status(401).json({ message: 'Unauthorized: User not found' });
         }
 
         // console.log('👤 Authenticated User:', req.user);
         next();
     } catch (error) {
-        // console.error('❌ Token verification failed:', error.message);
+        // console.error(' Token verification failed:', error.message);
 
         // Return appropriate error messages
         if (error.name === 'JsonWebTokenError') {
