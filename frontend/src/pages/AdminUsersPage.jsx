@@ -13,23 +13,22 @@ const AdminUsersPage = () => {
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const suborganizations = users.filter(user => user.role === "organization");
 
+    const loadUsers = async () => {
+        try {
+            const data = await fetchUserAccounts(token);
+            dispatch({ type: 'SET_USERS', payload: data.users });
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        }
+    };
+
     // Fetch users and populate context only if not already loaded
     useEffect(() => {
         if (users.length === 0) {
-            const loadUsers = async () => {
-                try {
-                    const data = await fetchUserAccounts(token);
-                    dispatch({ type: 'SET_USERS', payload: data.users });
-                } catch (error) {
-                    console.error('Failed to fetch users:', error);
-                }
-            };
-    
             loadUsers();
         }
     }, [token, dispatch, users.length]);
     
-
     // Update filtered users when the context changes
     useEffect(() => {
         setFilteredUsers(users);
@@ -50,18 +49,8 @@ const AdminUsersPage = () => {
 
     const handleAddUser = async (userDetails) => {
         try {
-            const newUser = await addUserAccount(token, userDetails);
-            dispatch({
-                type: 'ADD_USER',
-                payload: {
-                    ...newUser.user,
-                    organization: {
-                        _id: userDetails.organization,
-                        name: userDetails.organizationName,
-                    },
-                    suborganizations: userDetails.suborganizations || [],
-                },
-            });
+            await addUserAccount(token, userDetails);
+            await loadUsers(); // Refresh users after adding a new one
             setIsAddUserModalOpen(false);
         } catch (error) {
             console.error('Failed to add user:', error.message);
