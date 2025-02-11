@@ -17,15 +17,22 @@ const createTemplate = async (templateData, token) => {
     }
 };
 
-const fetchTemplates = async (token) => {
+const fetchTemplates = async (token, organizationId) => {
+    console.log("fetchTemplates called with token:", token);
+    console.log("fetchTemplates called with organizationId:", organizationId);
+
     try {
-        const response = await axios.get(API_URL, {
+        // const response = await axios.get(API_URL, {
+        const response = await axios.get(`${API_URL}?organization=${organizationId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
+        
+        console.log('templateService.js: ayos fetching \n', response.data); // Debug log
         return response.data;
     } catch (error) {
+        console.error("[FROM templateService.js] fetchTemplates caught: \n", error.response?.data?.message || error.message);
         throw new Error(error.response?.data?.message || 'Error fetching templates');
     }
 };

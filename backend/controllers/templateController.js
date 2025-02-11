@@ -13,7 +13,7 @@ const getTemplates = async (req, res) => {
         const templates = await Template.find(query);
 
         if (!templates || templates.length === 0) {
-            return res.status(404).json({ message: 'No templates available for your role or organization' });
+            return res.status(404).json({ message: '[FROM templateController.js]:\nNo templates available for your role or organization' });
         }
 
         res.status(200).json(templates);

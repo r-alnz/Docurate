@@ -25,8 +25,10 @@ router.post('/', authToken, requireAdmin, createTemplate); // Create template
 router.put('/:id', authToken, requireAdmin, updateTemplate); // Update template
 router.delete('/:id', authToken, requireAdmin, deleteTemplate); // Delete template
 router.put('/recover/:id', authToken, requireAdmin, recoverTemplate); // Recover deleted template
-router.get('/', authToken, requireAdmin, getTemplates); // Fetch templates based on role and organization
+// router.get('/', authToken, requireAdmin, getTemplates); // Fetch templates based on role and organizatioand
+    // > this causes a glitch when a student opens the template list,
+    // i.e., returns error when loaded but shows it finally when reloaded
 
-
+router.get('/', authToken, getTemplates); // No requireAdmin
 
 export default router;

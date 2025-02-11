@@ -24,26 +24,22 @@ const TemplateListContainer = () => {
             dispatch({ type: 'SET_LOADING', payload: true });
             try {
                 const token = getToken();
-                var fetchedTemplates = [];
-                if (user.role === 'admin') {
-                    fetchedTemplates = await fetchTemplates(token);
-                } else {
-                    fetchedTemplates = await fetchActiveTemplates(token);
-                }
+                const organizationId = user.organization; // Ensure user has this property
+                const fetchedTemplates = await fetchTemplates(token, organizationId);
                 dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
             } catch (err) {
-                console.error(err);
+                // console.error(err);
                 dispatch({
                     type: 'SET_ERROR',
-                    payload: 'Failed to fetch templates. Please try again later.',
+                    payload: 'Failed to fetch templates. (Or there might be no templates yet!)',
                 });
             } finally {
                 dispatch({ type: 'SET_LOADING', payload: false });
             }
         };
-
+    
         loadTemplates();
-    }, [dispatch, user.role]);
+    }, [dispatch, user.role, user.organization]);    
 
     const handleOpenModal = (template) => {
         setTemplateToDelete(template);
