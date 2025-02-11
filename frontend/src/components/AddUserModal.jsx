@@ -1,15 +1,20 @@
 import { useAuthContext } from '../hooks/useAuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
-const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
+const AddUserModal = ({ isOpen, onClose, onSubmit, subOrganizations }) => {
     const { user } = useAuthContext(); // Fetch current user context
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('student'); // Default role
-    const [studentId, setStudentId] = useState(''); // Add studentId state
+    const [studentId, setStudentId] = useState('');
+    const [isStudentOrgMember, setIsStudentOrgMember] = useState(false);
+    const [selectedSubOrg, setSelectedSubOrg] = useState('');
+
+    // Fetch sub-organizations when modal opens
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -22,6 +27,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
             studentId: role === 'student' ? studentId : null, // Include studentId if role is student
             organization: user.organization._id, // Use admin's organization ID
             organizationName: user.organization.name, // Include the organization name
+            suborganization: isStudentOrgMember ? selectedSubOrg : null, // Include sub-organization if checked
         };
         onSubmit(userDetails);
         setFirstname('');
@@ -30,6 +36,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
         setPassword('');
         setRole('student');
         setStudentId('');
+        setIsStudentOrgMember(false);
+        setSelectedSubOrg('');
     };
 
     if (!isOpen) return null;
@@ -90,7 +98,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
                             <option value="organization">Organization</option>
                         </select>
                     </div>
-                    {role === 'student' && ( // Conditionally render studentId input field
+                    {role === 'student' && (
                         <div className="mb-4">
                             <label className="block text-gray-700 font-medium mb-2">Student ID</label>
                             <input
@@ -98,14 +106,46 @@ const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
                                 value={studentId}
                                 onChange={(e) => setStudentId(e.target.value)}
                                 className="border rounded p-2 w-full"
-                                required
-                            />
+                                required />
                         </div>
                     )}
+
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Organization</label>
                         <p className="text-gray-700">{user.organization?.name || 'N/A'}</p>
                     </div>
+                    
+                    {role === 'student' && (
+                        <> {/* Check if part of student org */}
+                        <div className="mb-4">
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    checked={isStudentOrgMember}
+                                    onChange={() => setIsStudentOrgMember(!isStudentOrgMember)}
+                                    className="w-4 h-4" />
+                                <span className="text-gray-700 font-medium">Part of a suborganization (e.g., Student Organization)?</span>
+                            </label>
+
+                            {/* Conditionally show Sub-organization dropdown */}
+                            {isStudentOrgMember && (
+                                <div className="mb-4">
+                                    <select name="organization"
+                                        value={selectedSubOrg}
+                                        className="border rounded p-2 w-full"
+                                        onChange={(e) => setSelectedSubOrg(e.target.value)}>
+                                    <option value="">Select Organization</option>
+                                    {subOrganizations.map(org => (
+                                        <option key={org._id} value={org._id}>
+                                            {org.firstname} {org.lastname}
+                                        </option>
+                                    ))}
+                                </select>
+                                </div>
+                            )}
+                        </div>
+                        </>
+                    )}
                     <div className="flex justify-end">
                         <button
                             type="button"

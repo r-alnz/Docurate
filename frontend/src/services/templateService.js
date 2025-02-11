@@ -17,13 +17,14 @@ const createTemplate = async (templateData, token) => {
     }
 };
 
-const fetchTemplates = async (token, organizationId) => {
+const fetchTemplates = async (token, organizationId, subOrganizationIds = []) => {
     console.log("fetchTemplates called with token:", token);
     console.log("fetchTemplates called with organizationId:", organizationId);
+    console.log("fetchTemplates called with subOrganizationIds:", subOrganizationIds);
 
     try {
-        // const response = await axios.get(API_URL, {
-        const response = await axios.get(`${API_URL}?organization=${organizationId}`, {
+        // Send organizationId and subOrganizationIds as query parameters
+        const response = await axios.get(`${API_URL}?organization=${organizationId}&subOrganizations=${subOrganizationIds.join(',')}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

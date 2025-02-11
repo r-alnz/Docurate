@@ -11,8 +11,7 @@ const AdminUsersPage = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-
-
+    const suborganizations = users.filter(user => user.role === "organization");
 
     // Fetch users and populate context only if not already loaded
     useEffect(() => {
@@ -128,6 +127,7 @@ const AdminUsersPage = () => {
                 isOpen={isAddUserModalOpen}
                 onClose={() => setIsAddUserModalOpen(false)}
                 onSubmit={handleAddUser}
+                subOrganizations={suborganizations}  // Pass sub-orgs as prop
             />
         </div>
     );

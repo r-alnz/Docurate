@@ -29,6 +29,6 @@ router.put('/recover/:id', authToken, requireAdmin, recoverTemplate); // Recover
     // > this causes a glitch when a student opens the template list,
     // i.e., returns error when loaded but shows it finally when reloaded
 
-router.get('/', authToken, getTemplates); // No requireAdmin
+router.get('/', authToken, getTemplates); // Fetch templates for user (admins, students, organizations)
 
 export default router;

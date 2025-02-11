@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema(
                 return this.role && this.role !== 'superadmin';
             }
         },
+        subOrganizations: [{ 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Suborganization' // Reference to sub-organizations
+        }],
+
         studentId: {
             type: String,
             required: function () {

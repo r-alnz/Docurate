@@ -3,12 +3,15 @@ import Template from '../models/templateModel.js';
 // Fetch Templates
 const getTemplates = async (req, res) => {
     try {
-        const { role, organization } = req.user;
+        const { role, organization, subOrganizations } = req.user;
+
+        // Query that includes both main organization and subOrganizations
+        const orgQuery = { $in: [organization, ...(subOrganizations || [])] };
 
         // Query based on role
         const query = role === 'admin' 
-            ? { organization } // Admins see all templates in their organization
-            : { requiredRole: role, organization }; // Others see role-based templates
+            ? { organization: orgQuery } // Admins see all templates in their organization and sub-organizations
+            : { requiredRole: role, organization: orgQuery }; // Others see role-based templates
 
         const templates = await Template.find(query);
 
