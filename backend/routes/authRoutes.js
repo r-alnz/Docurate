@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/login', loginUser);
 
 router.get('/profile', authToken, getUserDetails);
+// router.get('/profile', authToken, requireUser, getUserDetails);
 
 router.put('/change-password', authToken, changePassword);
 router.put('/reset-user-password', authToken, requireAdmin, resetUserPassword);

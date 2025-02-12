@@ -1,16 +1,16 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import cors from 'cors'
-import logger from './middleware/logger.js'
-import connectDB from './config/database.js'
-// import { createSuperAdminUser } from './models/userModel.js'
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import logger from './middleware/logger.js';
+import connectDB from './config/database.js';
+// import { createSuperAdminUser } from './models/userModel.js';
 import superAdminRoutes from './routes/superAdminRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import templateRoutes from './routes/templateRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
-
-dotenv.config()
+import orgRoutes from './routes/orgRoutes.js';
+dotenv.config();
 
 const PORT = process.env.PORT
 const app = express()
@@ -27,11 +27,12 @@ app.use(cors({
 }));
 
 // Routes
-app.use('/api/auth', authRoutes); 
+app.use('/api/auth', authRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/organizations', orgRoutes);
 
 connectDB()
     .then(async () => {

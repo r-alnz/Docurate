@@ -19,6 +19,7 @@ import SuperAdminOrganizationsPage from './pages/SuperAdminOrganizationsPage.jsx
 import AdminUsersPage from './pages/AdminUsersPage.jsx';
 import AdminTemplatesPage from './pages/AdminTemplatesPage.jsx';
 import AdminTemplateCreationPage from './pages/AdminTemplateCreationPage.jsx';
+import OrgUsersPage from './pages/OrgUsersPage.jsx';
 import UserTemplatesPage from './pages/UserTemplatesPage.jsx';
 import UserViewTemplatePage from './pages/UserViewTemplatePage.jsx';
 import UserDocumentsPage from './pages/UserDocumentsPage.jsx';
@@ -80,10 +81,26 @@ const App = () => {
                     <Route path="/templates/:id" element={<AdminTemplateCreationPage />} />
                 </Route>
 
-                {/* Protected Student and Organization Routes */}
+                {/* Organization Route: Manage Suborganization Users */}
                 <Route
                     element={
-                        <ProtectedRoute requiredRoles={['student', 'organization']}>
+                        <ProtectedRoute requiredRoles={['organization']}>
+                            <MainLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="/org-users" element={<OrgUsersPage />} />
+                    <Route path="/user-templates" element={<UserTemplatesPage />} />
+                    <Route path="/user-templates/:id" element={<UserViewTemplatePage />} />
+                    <Route path="/documents" element={<UserDocumentsPage />} />
+                    <Route path="/documents/:id" element={<UserDocumentCreationPage />} />
+                    <Route path="/document-creation/:templateId" element={<UserDocumentCreationPage />} />
+                </Route>
+
+                {/* Protected Student Routes */}
+                <Route
+                    element={
+                        <ProtectedRoute requiredRoles={['student']}>
                             <MainLayout />
                         </ProtectedRoute>
                     }

@@ -28,6 +28,12 @@ const authToken = async (req, res, next) => {
         }
 
         // console.log('👤 Authenticated User:', req.user);
+
+        // Ensure organization ID exists if required
+        if (req.user.role === 'organization' && !req.user.organization) {
+            return res.status(403).json({ message: 'Unauthorized: Missing organization ID' });
+        }
+
         next();
     } catch (error) {
         // console.error(' Token verification failed:', error.message);
@@ -60,12 +66,19 @@ const requireSuperAdmin = (req, res, next) => {
 }
 
 const requireUser = (req, res, next) => {
+    const { role, organization } = req.user;
 
-    const { role } = req.user
-    if(role !== 'student' && role !== 'organization') {
-        return res.status(401).json({ message: 'Access Denied: Not User' })
+    if (role !== 'student' && role !== 'organization') {
+        return res.status(401).json({ message: 'Access Denied: Not User' });
     }
-    next()
-}
+
+    // Ensure organization users have an assigned organization
+    if (role === 'organization' && !organization) {
+        return res.status(403).json({ message: 'Unauthorized: Missing organization ID' });
+    }
+
+    next();
+};
+
 
 export { authToken, requireAdmin, requireSuperAdmin, requireUser }
