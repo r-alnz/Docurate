@@ -110,6 +110,7 @@ const AdminUsersPage = () => {
                 users={filteredUsers}
                 onEdit={handleEditUser}
                 onDelete={handleDeleteUser}
+                suborganizations={suborganizations}
             />;
 
             {/* Add User Modal */}

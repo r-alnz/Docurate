@@ -80,7 +80,7 @@ const getUsers = async (req, res) => {
 // Edit User Account
 const editUserAccount = async (req, res) => {
     const { id } = req.params;
-    const { firstname, lastname, email, password, organization, role, studentId } = req.body;
+    const { firstname, lastname, email, password, organization, suborganizations, role, studentId } = req.body;
     console.log(req.body);
     try {
         if (!id) throw new Error('User account ID is required');
@@ -98,14 +98,13 @@ const editUserAccount = async (req, res) => {
         if (role === 'student') {
             updateData.studentId = studentId || null; // Include studentId only if role is student
         } else {
-            updateData.studentId = undefined; // Remove studentId for non-students
+            updateData.studentId = undefined;
         }
 
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            { $set: updateData },
-            { new: true, runValidators: true }
-        );
+        // Update the user
+        const updatedUser = await User.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true })
+            .populate('organization', '_id name')
+            .populate('suborganizations', '_id firstname lastname');
 
         if (!updatedUser) throw new Error('User account not found');
 

@@ -6,7 +6,7 @@ import EditAdminModal from "./EditAdminModal"
 import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 
-const UserTable = ({ users, onEdit, onDelete }) => {
+const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const [selectedUser, setSelectedUser] = useState(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -137,6 +137,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                 <EditAdminModal
                     isOpen={isEditModalOpen}
                     user={selectedUser}
+                    suborganizations={suborganizations}
                     onClose={() => setIsEditModalOpen(false)}
                     onEdit={onEdit}
                 />
