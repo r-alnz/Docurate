@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import UserTable from '../components/UserTable';
+import OrgUserTable from '../components/OrgUserTable';
 import AddUserModal from '../components/AddUserModal';
 import { fetchUserAccounts, addUserAccount, editUserAccount, deleteUserAccount } from '../services/adminService'; // Use the same service
 import { useAuthContext } from '../hooks/useAuthContext';
@@ -127,7 +127,7 @@ const OrgUsersPage = () => {
             </div>
 
             {/* User Table */}
-            <UserTable
+            <OrgUserTable
                 users={filteredUsers}
                 onEdit={handleEditUser}
                 onDelete={handleDeleteUser}

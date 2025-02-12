@@ -32,7 +32,8 @@ export const getOrgUsers = async (req, res) => {
         const students = await User.find({
             role: 'student',
             suborganizations: orgId
-        });
+        }).populate('organization', '_id name') // Populate the organization name
+        .populate('suborganizations', '_id firstname lastname'); // Populate suborganizations names
 
         res.json({ users: students });
     } catch (error) {
