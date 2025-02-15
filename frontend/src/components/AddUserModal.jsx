@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
-const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations }) => {
+const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlready }) => {
     const { user } = useAuthContext(); // Fetch current user context
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
@@ -14,6 +14,16 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations }) => {
     // const [isStudentOrgMember, setIsStudentOrgMember] = useState(false);
     const [isStudentOrgMember, setIsStudentOrgMember] = useState(true);
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
+    const currRole = suborgAlready.length > 0 ? suborgAlready[0].role : null;
+
+    console.log("Props received in AddUserModal:", { suborgAlready, suborganizations, currRole});
+
+    useEffect(() => {
+        if (currRole === "organization") {
+            setSelectedSubOrgs(suborgAlready.map(org => org._id));
+            console.log("Auto-selecting suborg: ", suborgAlready);
+        }
+    }, [currRole, suborgAlready]);    
 
     // Fetch sub-organizations when modal opens
 
@@ -132,48 +142,54 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations }) => {
                         <label className="block text-gray-700 font-medium mb-2">Organization</label>
                         <p className="text-gray-700">{user.organization?.name || 'N/A'}</p>
                     </div>
-                    
-                    {role === 'student' && (
-                        <> {/* Check if part of student org */}
-                        <div className="mb-4">
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={isStudentOrgMember}
-                                    onChange={() => setIsStudentOrgMember(!isStudentOrgMember)}
-                                    className="w-4 h-4" />
-                                <span className="text-gray-700 font-medium">Part of a suborganization (e.g., Student Organization)?</span>
-                            </label>
 
-                            {/* Conditionally show Sub-organization multi-select dropdown */}
-                            {isStudentOrgMember && (
-                                <div className="mb-4">
+                    {currRole === 'organization' ? (
+                        <>
+                        <label className="block text-gray-700 font-medium mb-2">Suborganization</label>
+                        <p className="text-gray-700">{suborgAlready.map(org => org.firstname + " " + org.lastname)}</p>
+                        </>
+                    ) : currRole === 'admin' ? (
+                        <>
+                        {role === 'student' && (
+                            <div className="mb-4">
+                                <label className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={isStudentOrgMember}
+                                        onChange={() => setIsStudentOrgMember(!isStudentOrgMember)}
+                                        className="w-4 h-4" />
+                                    <span className="text-gray-700 font-medium">Part of a suborganization (e.g., Student Organization)?</span>
+                                </label>
 
+                                {isStudentOrgMember && (
+                                    <div className="mb-4">
                                     <div className="border rounded p-2 w-full h-32 overflow-y-auto">
                                         {suborganizations.map((org) => (
                                             <div
                                                 key={org._id}
                                                 onClick={() => {
-                                                    setSelectedSubOrgs(prev => 
+                                                    setSelectedSubOrgs((prev) =>
                                                         prev.includes(org._id)
-                                                            ? prev.filter(id => id !== org._id) // Remove if already selected
+                                                            ? prev.filter((id) => id !== org._id) // Remove if already selected
                                                             : [...prev, org._id] // Add if not selected
                                                     );
                                                 }}
                                                 className={`p-2 cursor-pointer ${
-                                                    selectedSubOrgs.includes(org._id) 
-                                                        ? "bg-blue-500 text-white" 
+                                                    selectedSubOrgs.includes(org._id)
+                                                        ? "bg-blue-500 text-white"
                                                         : "bg-gray-100 text-gray-700"
-                                                } rounded mb-1`}>
+                                                } rounded mb-1`}
+                                            >
                                                 {org.firstname + " " + org.lastname || "(No Name)"}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
                         </>
-                    )}
+                    ) : null }
                     <div className="flex justify-end">
                         <button
                             type="button"

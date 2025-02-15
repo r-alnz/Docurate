@@ -6,11 +6,15 @@ import { useAuthContext } from '../hooks/useAuthContext';
 import { useUserContext } from '../hooks/useUserContext';
 
 const AdminUsersPage = () => {
-    const { token } = useAuthContext();
+    const { user, token } = useAuthContext();
+    const currUserID = user._id;
+    console.log("user idd: ", user._id);
     const { users, dispatch } = useUserContext();
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+    const suborgAlready = [user]; // the logged-in user
+    
     const suborganizations = users.filter(user => user.role === "organization");
 
     const loadUsers = async () => {
@@ -111,7 +115,7 @@ const AdminUsersPage = () => {
                 onEdit={handleEditUser}
                 onDelete={handleDeleteUser}
                 suborganizations={suborganizations}
-            />;
+            />
 
             {/* Add User Modal */}
             <AddUserModal
@@ -119,6 +123,7 @@ const AdminUsersPage = () => {
                 onClose={() => setIsAddUserModalOpen(false)}
                 onSubmit={handleAddUser}
                 suborganizations={suborganizations}  // Pass sub-orgs as prop
+                suborgAlready={suborgAlready}
             />
         </div>
     );
