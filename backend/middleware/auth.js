@@ -45,7 +45,7 @@ const authToken = async (req, res, next) => {
 
 const requireAdmin = (req, res, next) => {
     const { role } = req.user
-    if(role !== 'admin') {
+    if(role !== 'admin' && role !== 'organization') {
         return res.status(401).json({ message: 'Access Denied' })
     }
     next()

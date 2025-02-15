@@ -74,13 +74,23 @@ const App = () => {
                         </ProtectedRoute>
                     }
                 >
-                    <Route path="/users" element={<AdminUsersPage />} />
                     <Route path="/templates" element={<AdminTemplatesPage />} />
                     <Route path="/template-creation" element={<AdminTemplateCreationPage />} />
                     <Route path="/templates/:id" element={<AdminTemplateCreationPage />} />
                 </Route>
 
-                {/* Protected Student and Organization Routes */}
+                {/* Protected Admin and Organization Routes */}
+                <Route
+                    element={
+                        <ProtectedRoute requiredRoles={['admin', 'organization']}>
+                            <MainLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="/users" element={<AdminUsersPage />} />
+                </Route>
+
+                {/* Protected Student Routes */}
                 <Route
                     element={
                         <ProtectedRoute requiredRoles={['student', 'organization']}>

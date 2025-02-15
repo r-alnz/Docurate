@@ -46,14 +46,24 @@ const getUsers = async (req, res) => {
     try {
         const { role } = req.query; // Role filter
         const requestingAdminOrganization = req.user.organization; // Admin's organization ID from token
+        const requestingOrganizationId = req.user._id; // Organization user's ID
+        const requestingRole = req.user.role; // Get the role of the requester
+
         // Allowed roles: 'student' and 'organization'
         const allowedRoles = ['student', 'organization'];
 
         // Build the filter object dynamically
         const filter = {
             role: { $in: allowedRoles }, // Only 'student' and 'organization' roles
-            organization: requestingAdminOrganization, // Only users within the admin's organization
         };
+
+        if (requestingRole === 'admin') {
+            // Admins can only see users within their organization
+            filter.organization = requestingAdminOrganization;
+        } else if (requestingRole === 'organization') {
+            // Organizations can only see users where their ID is in suborganizations
+            filter.suborganizations = requestingOrganizationId;
+        }
 
         if (role && allowedRoles.includes(role)) {
             filter.role = role; // Additional role filter if provided
