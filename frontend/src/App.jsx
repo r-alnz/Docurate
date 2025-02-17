@@ -19,7 +19,6 @@ import SuperAdminOrganizationsPage from './pages/SuperAdminOrganizationsPage.jsx
 import AdminUsersPage from './pages/AdminUsersPage.jsx';
 import AdminTemplatesPage from './pages/AdminTemplatesPage.jsx';
 import AdminTemplateCreationPage from './pages/AdminTemplateCreationPage.jsx';
-import OrgUsersPage from './pages/OrgUsersPage.jsx';
 import UserTemplatesPage from './pages/UserTemplatesPage.jsx';
 import UserViewTemplatePage from './pages/UserViewTemplatePage.jsx';
 import UserDocumentsPage from './pages/UserDocumentsPage.jsx';
@@ -75,32 +74,26 @@ const App = () => {
                         </ProtectedRoute>
                     }
                 >
-                    <Route path="/users" element={<AdminUsersPage />} />
                     <Route path="/templates" element={<AdminTemplatesPage />} />
                     <Route path="/template-creation" element={<AdminTemplateCreationPage />} />
                     <Route path="/templates/:id" element={<AdminTemplateCreationPage />} />
                 </Route>
 
-                {/* Organization Route: Manage Suborganization Users */}
+                {/* Protected Admin and Organization Routes */}
                 <Route
                     element={
-                        <ProtectedRoute requiredRoles={['organization']}>
+                        <ProtectedRoute requiredRoles={['admin', 'organization']}>
                             <MainLayout />
                         </ProtectedRoute>
                     }
                 >
-                    <Route path="/org-users" element={<OrgUsersPage />} />
-                    <Route path="/user-templates" element={<UserTemplatesPage />} />
-                    <Route path="/user-templates/:id" element={<UserViewTemplatePage />} />
-                    <Route path="/documents" element={<UserDocumentsPage />} />
-                    <Route path="/documents/:id" element={<UserDocumentCreationPage />} />
-                    <Route path="/document-creation/:templateId" element={<UserDocumentCreationPage />} />
+                    <Route path="/users" element={<AdminUsersPage />} />
                 </Route>
 
                 {/* Protected Student Routes */}
                 <Route
                     element={
-                        <ProtectedRoute requiredRoles={['student']}>
+                        <ProtectedRoute requiredRoles={['student', 'organization']}>
                             <MainLayout />
                         </ProtectedRoute>
                     }

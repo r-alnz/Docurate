@@ -18,7 +18,7 @@ const SideNavigationBar = () => {
             { name: "Templates", path: "/templates" },
         ],
         organization: [
-            { name: "Users (Organization)", path: "/org-users" },
+            { name: "Users (Organization)", path: "/users"},
             { name: "Templates", path: "/user-templates" },
             { name: "Documents", path: "/documents" },
         ],

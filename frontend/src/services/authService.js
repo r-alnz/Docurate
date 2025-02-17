@@ -3,7 +3,11 @@ const API_URL = '/api/auth'
 
 export const logIn = async (email, password) => {
     const response = await axios.post(`${API_URL}/login`, { email, password });
-    return response.data; // Expected to return { token }
+    const { token } = response.data;
+    if (token) {
+        localStorage.setItem('authToken', token);
+    }
+    return response.data;
 };
  
 
