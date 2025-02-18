@@ -75,6 +75,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             <div className="bg-white p-6 rounded shadow-lg w-1/3">
                 <h2 className="text-xl font-bold mb-4">Add User</h2>
                 <form onSubmit={handleSubmit}>
+                {role === 'student' ? (
+                    <>
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">First Name</label>
                         <input
@@ -95,6 +97,20 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                             required
                         />
                     </div>
+                    </>
+                    ): role === 'organization' ? (
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">Organization Name</label>
+                            <input
+                                type="text"
+                                value={firstname}
+                                onChange={(e) => setFirstname(e.target.value)}
+                                className="border rounded p-2 w-full"
+                                required
+                            />
+                        </div>
+                    ) : null }
+                    
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Email</label>
                         <input
@@ -146,7 +162,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     {currRole === 'organization' ? (
                         <>
                         <label className="block text-gray-700 font-medium mb-2">Suborganization</label>
-                        <p className="text-gray-700">{suborgAlready.map(org => org.firstname + " " + org.lastname)}</p>
+                        <p className="text-gray-700">{suborgAlready.map(org => org.firstname)}</p>
                         </>
                     ) : currRole === 'admin' ? (
                         <>
@@ -163,27 +179,33 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
 
                                 {isStudentOrgMember && (
                                     <div className="mb-4">
-                                    <div className="border rounded p-2 w-full h-32 overflow-y-auto">
-                                        {suborganizations.map((org) => (
-                                            <div
-                                                key={org._id}
-                                                onClick={() => {
-                                                    setSelectedSubOrgs((prev) =>
-                                                        prev.includes(org._id)
-                                                            ? prev.filter((id) => id !== org._id) // Remove if already selected
-                                                            : [...prev, org._id] // Add if not selected
-                                                    );
-                                                }}
-                                                className={`p-2 cursor-pointer ${
-                                                    selectedSubOrgs.includes(org._id)
-                                                        ? "bg-blue-500 text-white"
-                                                        : "bg-gray-100 text-gray-700"
-                                                } rounded mb-1`}
-                                            >
-                                                {org.firstname + " " + org.lastname || "(No Name)"}
+                                        {suborganizations.length === 0 ? (
+                                            <div className="border rounded p-2 w-full text-gray-500">
+                                                No suborganizations under {user.organization?.name}
                                             </div>
-                                        ))}
-                                    </div>
+                                        ) : (
+                                        <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                                            {suborganizations.map((org) => (
+                                                <div
+                                                    key={org._id}
+                                                    onClick={() => {
+                                                        setSelectedSubOrgs((prev) =>
+                                                            prev.includes(org._id)
+                                                                ? prev.filter((id) => id !== org._id) // Remove if already selected
+                                                                : [...prev, org._id] // Add if not selected
+                                                        );
+                                                    }}
+                                                    className={`p-2 cursor-pointer ${
+                                                        selectedSubOrgs.includes(org._id)
+                                                            ? "bg-blue-500 text-white"
+                                                            : "bg-gray-100 text-gray-700"
+                                                    } rounded mb-1`}
+                                                >
+                                                    {org.firstname|| "(No Name)"}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        )}
                                 </div>
                                 )}
                             </div>
