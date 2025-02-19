@@ -24,6 +24,12 @@ export const fetchUserAccounts = async (token) => {
 
 export const addUserAccount = async (token, userDetails) => {
     console.log('📤 Sending user data:', JSON.stringify(userDetails, null, 2));
+    
+    Object.entries(userDetails).forEach(([key, value]) => {
+        if (value === null || value === undefined) {
+            console.warn(`🚨 Missing value for: ${key}`);
+        }
+    });
 
     const response = await axios.post(`${API_URL}/users`, userDetails, {
         headers: { Authorization: `Bearer ${token}` },

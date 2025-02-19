@@ -34,8 +34,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
         console.log("Submitting with suborganizations:", selectedSubOrgs);
     
         const userDetails = {
-            firstname,
-            lastname,
+            firstname: firstname.trim() === '' ? null : firstname,
+            lastname: lastname.trim() === '' ? ' ' : lastname,
             email,
             password,
             role,

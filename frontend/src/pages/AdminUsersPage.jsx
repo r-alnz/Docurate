@@ -56,6 +56,7 @@ const AdminUsersPage = () => {
             await addUserAccount(token, userDetails);
             await loadUsers(); // Refresh users after adding a new one
             setIsAddUserModalOpen(false);
+            console.log("User added successfully!");
         } catch (error) {
             console.error('Failed to add user:', error.message);
         }
