@@ -17,20 +17,14 @@ const createTemplate = async (templateData, token) => {
     }
 };
 
-const fetchTemplates = async (token, organizationId, suborganizationIds = []) => {
-    // console.log("fetchTemplates called with token:", token);
-    // console.log("fetchTemplates called with organizationId:", organizationId);
-    // console.log("fetchTemplates called with suborganizationIds:", suborganizationIds);
-
+const fetchTemplates = async (token) => {
     try {
-        // Send organizationId and suborganizationIds as query parameters
-        const response = await axios.get(`${API_URL}?organization=${organizationId}&suborganizations=${suborganizationIds.join(',')}`, {
+        const response = await axios.get(API_URL, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
-        
-        // console.log('templateService.js: ayos fetching \n', response.data); // Debug log
+
         return response.data;
     } catch (error) {
         console.error("[FROM templateService.js] fetchTemplates caught: \n", error.response?.data?.message || error.message);

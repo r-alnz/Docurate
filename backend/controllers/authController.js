@@ -18,9 +18,10 @@ const loginUser = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        console.log(user);
+
+        console.log("suborgsssL ", user.suborganizations);
         // Generate token
-        const token = generateToken(user._id, user.role);
+        const token = generateToken(user._id, user.role, user.organization, user.suborganizations);
 
         // Return user data and token
         res.status(200).json({
@@ -31,6 +32,7 @@ const loginUser = async (req, res) => {
                 lastname: user.lastname,
                 email: user.email,
                 role: user.role,
+
             },
             token,
         });
@@ -49,6 +51,7 @@ const getUserDetails = async (req, res) => {
                 select: 'name',       // Include only the 'name' field from Organization
                 options: { nullable: true } // Ensure nullable if the organization does not exist
             })
+            .populate('suborganizations', 'firstname')
             .select('-password'); // Exclude password field
 
         if (!user) {

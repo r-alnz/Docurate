@@ -2,25 +2,84 @@ import Template from '../models/templateModel.js';
 
 // Fetch Templates
 const getTemplates = async (req, res) => {
+
+    // console.log("🚀 User in middleware (before getTemplates):", JSON.stringify(req.user));
+
     try {
-        const { role, organization, suborganizations } = req.user;
+        const { organization, suborganizations } = req.user;
 
-        // Query that includes both main organization and suborganizations
-        const orgQuery = { $in: [organization, ...(suborganizations || [])] };
+        console.log("User in getTemplates:", JSON.stringify(req.user));
 
-        // Query based on role
-        const query = role === 'admin' 
-            ? { organization: orgQuery } // Admins see all templates in their organization and sub-organizations
-            : { requiredRole: role, organization: orgQuery }; // Others see role-based templates
+        // console.log("Fetching templates for organization & suborganizations:", {
+        //     organization,
+        //     suborganizations,
+        // });
 
-        const templates = await Template.find(query);
+        // let query = {
+        //     $and: [
+        //         { organization }, 
+        //         {
+        //             $or: [
+        //                 { suborganizations: { $in: suborganizations.map(id => id.toString()) } },
+        //                 { status: 'active' }
+        //             ]
+        //         }
+        //     ]
+        // };
+        
+
+        // const query = { 
+        //     organization, 
+        //     ...(suborganizations?.length > 0 && { suborganizations: { $in: suborganizations } })
+        // };
+        
+
+        let query = {
+            organization: req.user.organization,  // Always filter by organization
+            $or: [
+                { suborganizations: { $exists: false } }, // General-use templates (null)
+                { suborganizations: { $size: 0 } },       // General-use templates (empty array)
+            ],
+        };
+        
+        query.$and = query.$and || [];
+
+        // Add role-specific conditions dynamically
+        if (req.user.role === "student") {
+            console.warn("studet acc")
+            query.$and.push({requiredRole: req.user.role})
+            query.$or.push({ suborganizations: { $in: suborganizations } });
+        } else if (req.user.role === "organization") {
+            console.warn("org acc")
+            query.$and.push({requiredRole: req.user.role})
+            query.$or.push({ suborganizations: req.user._id }); // Match org itself
+        }
+        
+        // // Future expansion: Easily add more roles!
+        if (req.user.role === "admin") {
+            query.$or.push({ status: "active" }); // Example: Admins see all active templates
+        // } else if (req.user.role === "superadmin") {
+        //     delete query.organization; // Example: Superadmins can see all templates, regardless of org
+        }
+        
+        console.log("Final Query:", JSON.stringify(query, null, 2));       
+
+        console.log("Applied filters:", JSON.stringify(query, null, 2));
+
+        // Fetch templates
+        const templates = await Template.find(query)
+            .populate('suborganizations', '_id firstname')
+          
+
+        console.log("Fetched Templates:", templates.length ? templates : "No templates found");
 
         if (!templates || templates.length === 0) {
-            return res.status(404).json({ message: '[FROM templateController.js]:\nNo templates available for your role or organization' });
+            return res.status(404).json({ message: 'No templates available for your organization or suborganizations' });
         }
 
         res.status(200).json(templates);
     } catch (error) {
+        console.error('Error fetching templates:', error.message);
         res.status(500).json({ message: 'Error fetching templates', error: error.message });
     }
 };

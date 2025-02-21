@@ -116,7 +116,12 @@ userSchema.statics.login = async function (email, password) {
             throw new Error('Email and password are required');
         }
 
-        const user = await this.findOne({ email });
+        const user = await this.findOne({ email })
+            .populate('organization', 'name') // Populate organization name
+            .populate('suborganizations', 'firstname'); // Populate suborganizations
+        
+            console.log("🚀 User from DB (before returning):", JSON.stringify(user, null, 2));
+
         if (!user) {
             throw new Error('Invalid credentials');
         }

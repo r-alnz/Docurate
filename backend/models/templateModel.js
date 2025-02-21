@@ -32,6 +32,12 @@ const templateSchema = new mongoose.Schema(
             ref: 'Organization', 
             required: true 
         },
+        suborganizations: [
+            {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+            }
+        ],
         margins: {
             top: { type: Number, default: 1 }, // Default value: 1 inch
             bottom: { type: Number, default: 1 },

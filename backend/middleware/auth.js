@@ -20,7 +20,9 @@ const authToken = async (req, res, next) => {
         // console.log(' Token decoded:', decoded);
 
         // Attach user details to request
-        req.user = await User.findById(decoded.id).select('_id role organization');
+        req.user = await User.findById(decoded.id)
+        .select('_id role organization suborganizations')  // Include suborganizations
+        .populate('suborganizations', '_id firstname');  // Populate details if needed    
 
         if (!req.user) {
             // console.log(' User not found in database');

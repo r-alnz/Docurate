@@ -25,7 +25,17 @@ const TemplateListContainer = () => {
             try {
                 const token = getToken();
                 const organizationId = user.organization; // Ensure user has this property
-                const fetchedTemplates = await fetchTemplates(token, organizationId);
+                // const suborganizationIds = user.suborganizations || [];
+                const suborganizationIds = Array.isArray(user.suborganizations) ? user.suborganizations : [];
+
+                // console.log("Fssetching templates for organization & suborganizations:", {
+                //     organization: user.organization,
+                //     suborganizations: suborganizationIds
+                //   });
+
+                // const fetchedTemplates = await fetchTemplates(token, organizationId, suborganizationIds);
+                const fetchedTemplates = await fetchTemplates(token);
+                console.log("Fetched templates from API:", fetchedTemplates);
                 dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
             } catch (err) {
                 // console.error(err);
@@ -86,6 +96,30 @@ const TemplateListContainer = () => {
         const matchesRole =
             roleFilter === 'All' || template.requiredRole === roleFilter;
 
+    // 🛠️ Debugging Log
+    // console.log(`Checking template: ${template.name}`);
+    // console.log(`- Template Required Role: ${template.requiredRole}`);
+    // console.log(`- User Role: ${user.role}`);
+    // console.log(`- User Organization: ${JSON.stringify(user.organization)}`);
+    // console.log(`- User Suborganizations: ${JSON.stringify(user.suborganizations)}`);
+
+    // console.log(`Checking role condition for template: ${template.name}`);
+    // console.log(`- User Role: ${user.role}`);
+    // console.log(`- Template Required Role: ${template.requiredRole}`);
+
+
+
+    // Allow students to see organization templates if they belong to suborganizations
+    if (user.role === 'student' && template.requiredRole === 'organization') {
+        const belongsToSubOrg = user.suborganizations?.includes(template.organization); // Fix condition
+        // console.log(`- Template Organization: ${template.organization}`);
+        // console.log(`- Matches Student's Suborganization: ${belongsToSubOrg}`);
+
+        if (belongsToSubOrg) {
+            matchesRole = true;
+        }
+    }
+
         const matchesStatus =
             statusFilter === 'All' || template.status === statusFilter.toLowerCase();
 
@@ -112,7 +146,9 @@ const TemplateListContainer = () => {
     if (loading) return <p>Loading templates...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
 
+
     return (
+        
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
@@ -169,6 +205,36 @@ const TemplateListContainer = () => {
                             className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white ${template.status === 'inactive' ? 'opacity-50' : ''
                                 }`}
                         >
+
+                        {(() => {
+                            const matchingSuborg = template?.suborganizations?.find(templateSuborg =>
+                                user?.suborganizations?.some(userSuborg => 
+                                    String(userSuborg._id) === String(templateSuborg._id)
+                                )
+                            );
+                            return matchingSuborg ?
+                                <p className='flex justify-end text-yellow-600 italic'>
+                                Member Privilege!
+                                </p>
+                            : null;
+                        })()}
+
+                        <div className="flex justify-end gap-2 mb-2">
+                            {template.suborganizations && template.suborganizations.length > 0 ? (
+                                template.suborganizations.map((suborg) => (
+                                    <>
+                                    <span key={suborg._id} className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                                        Special for: {suborg.firstname}
+                                    </span>
+                                    </>
+                                ))
+                            ) : (
+                                <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                                    General for: {user.organization.name}
+                                </span>
+                            )}
+                        </div>
+
                             <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
                             <p className="text-gray-700 mb-1">
                                 <strong>Type:</strong> {template.type}
@@ -176,7 +242,7 @@ const TemplateListContainer = () => {
                             <p className="text-gray-700 mb-1">
                                 <strong>Subtype:</strong> {template.subtype || 'N/A'}
                             </p>
-                            <p className="text-gray-700">
+                            <p className="text-gray-700 mb-1">
                                 <strong>Role:</strong> {template.requiredRole}
                             </p>
                             <div className="mt-4 flex gap-2">
