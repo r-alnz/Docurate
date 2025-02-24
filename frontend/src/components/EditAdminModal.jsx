@@ -16,6 +16,23 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         suborganizations: [],
     });
 
+    const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
+
+    useEffect(() => {
+        // Initialize selected suborganizations only when formData.suborganizations is available
+        if (formData.suborganizations) {
+            setSelectedSubOrgs([...formData.suborganizations]);
+        }
+    }, [formData.suborganizations]);
+
+    const toggleSubOrg = (suborgId) => {
+        setSelectedSubOrgs((prev) =>
+            prev.includes(suborgId)
+                ? prev.filter((id) => id !== suborgId) // Remove if selected
+                : [...prev, suborgId] // Add if not selected
+        );
+    };
+
     useEffect(() => {
         if (user) {
             setFormData({
@@ -48,8 +65,24 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onEdit(formData);
+    
+        if (!user || !user._id) {
+            console.error("❌ Error: Missing user ID");
+            return;
+        }
+    
+        const updatedUser = { 
+            ...formData, 
+            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [] 
+        };
+    
+        console.log("🔹 Updating user:", user._id);
+        console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2));
+    
+        onEdit(user._id, updatedUser);
     };
+    
+    
 
     if (!isOpen) return null;
 
@@ -104,9 +137,31 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Suborganizations</label>
-                        <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                        {/* <div className="border rounded p-2 w-full h-32 overflow-y-auto">
                             {userSuborganizations}
+                        </div> */}
+
+{suborganizations.length === 0 ? (
+                <div className="border rounded p-2 w-full text-gray-500">
+                    No suborganizations available.
+                </div>
+            ) : (
+                <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                    {suborganizations.map((org) => (
+                        <div
+                            key={org._id}
+                            onClick={() => toggleSubOrg(org._id)}
+                            className={`p-2 cursor-pointer ${
+                                selectedSubOrgs.includes(org._id)
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-100 text-gray-700"
+                            } rounded mb-1`}
+                        >
+                            {org.firstname || "(No Name)"}
                         </div>
+                    ))}
+                </div>
+            )}
                     </div>
 
                     <div className="flex justify-end">

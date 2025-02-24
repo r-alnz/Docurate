@@ -63,18 +63,32 @@ const AdminUsersPage = () => {
     };
 
     const handleEditUser = async (userId, updatedData) => {
-            try {
-                await editUserAccount(token, userId, updatedData);
-                dispatch({
-                    type: 'SET_USERS',
-                    payload: users.map((user) =>
-                        user._id === userId ? { ...user, ...updatedData } : user
-                    ),
-                });
-            } catch (error) {
-                console.error('Failed to update user:', error);
-            }
+        if (!userId || !updatedData) {
+            console.error("❌ Error: Missing user ID or form data");
+            return;
+        }
+    
+        // Ensure suborganizations is always a valid array
+        const sanitizedData = {
+            ...updatedData,
+            suborganizations: Array.isArray(updatedData.suborganizations)
+                ? updatedData.suborganizations.filter(id => id) // Remove undefined/null
+                : [],
         };
+    
+        console.log("🔹 Sending update request for user:", userId);
+        console.log("📤 Payload:", JSON.stringify(sanitizedData, null, 2));
+    
+        try {
+            await editUserAccount(token, userId, sanitizedData);
+            await loadUsers(); // Fetch latest users from backend after editing ✅
+    
+        } catch (error) {
+            console.error("❌ Failed to update user:", error);
+        }
+    };
+    
+    
         
     const handleDeleteUser = async (userId) => {
         try {

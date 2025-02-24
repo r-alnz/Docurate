@@ -90,6 +90,8 @@ const getUsers = async (req, res) => {
 // Edit User Account
 const editUserAccount = async (req, res) => {
     const { id } = req.params;
+    console.log("📥 Raw Request Body:", JSON.stringify(req.body, null, 2)); // Log received body
+
     const { firstname, lastname, email, password, organization, suborganizations, role, studentId } = req.body;
     console.log(req.body);
     try {
@@ -111,10 +113,23 @@ const editUserAccount = async (req, res) => {
             updateData.studentId = undefined;
         }
 
+        if (suborganizations !== undefined) {
+            if (Array.isArray(suborganizations)) {
+                updateData.suborganizations = suborganizations.map((suborg) => 
+                    typeof suborg === "object" && suborg._id ? String(suborg._id) : String(suborg)
+                );
+            } else {
+                console.error("⚠️ suborganizations is not an array:", suborganizations);
+                return res.status(400).json({ message: "suborganizations must be an array" });
+            }
+        }
+
+        console.log("🛠️ Update Payload:", JSON.stringify(updateData, null, 2));
+
         // Update the user
         const updatedUser = await User.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true })
             .populate('organization', '_id name')
-            .populate('suborganizations', '_id firstname lastname');
+            .populate('suborganizations', '_id firstname');
 
         if (!updatedUser) throw new Error('User account not found');
 

@@ -15,6 +15,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const { user: currentUser } = useAuthContext()
 
     const handleEditClick = (user) => {
+        console.log("eidt button clicked!");
+        
         setSelectedUser(user)
         setIsEditModalOpen(true)
     }
