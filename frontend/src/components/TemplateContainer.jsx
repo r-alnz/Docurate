@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../hooks/useAuthContext';
+import { useParams, useNavigate, useAsyncError } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import { getToken } from '../utils/authUtil.js';
 import { createTemplate, getTemplateById, updateTemplate, fetchDecisionTree } from '../services/templateService.js';
 import imageCompression from 'browser-image-compression';
 
-const TemplateContainer = () => {
+const TemplateContainer = ({suborgs}) => {
+    console.log("suborgs:", suborgs);
+    
+    const { user } = useAuthContext();
     const { id } = useParams(); // Fetch ID from the URL if available
     const [pages, setPages] = useState([{ id: 1, content: '' }]);
     const [currentPage, setCurrentPage] = useState(1);
     
     const [requiredRole, setRequiredRole] = useState('student');
+    const [suborganizations, setSuborganizations] = useState([]);
+    const [selectedSubOrg, setSelectedSubOrg] = useState("");
     const [paperSize, setPaperSize] = useState('letter');
     const [strictMode, setStrictMode] = useState(false); // Strict mode toggle
     const [editorLoaded, setEditorLoaded] = useState(false);
@@ -337,7 +343,9 @@ const TemplateContainer = () => {
             setDocumentName(templateData.name);
             setRequiredRole(templateData.requiredRole);
             setPaperSize(templateData.paperSize);
-      
+            setSelectedSubOrg(templateData.suborganizations)
+            console.log("heyyy", templateData.suborganizations);
+            
             // Split pages on the page-break <hr>
             setPages(
               templateData.content
@@ -552,9 +560,12 @@ const TemplateContainer = () => {
             subtype: isCustomType ? customSubtype : documentSubtype,
             requiredRole,
             paperSize,
-            margins
+            margins,
+            suborganizations: selectedSubOrg.length === 0 ? [] : [selectedSubOrg], // Allow empty
+
           };
           
+          console.log("Submitting template:", templateData);
 
         try {
             const token = getToken();
@@ -773,6 +784,31 @@ const TemplateContainer = () => {
                     <option value="student">Student</option>
                     <option value="organization">Organization</option>
                 </select>
+                <label className="block text-gray-700 font-medium mb-2">Suborganization:</label>
+                
+                {suborgs.length === 0 ? (
+    <div className="border rounded p-2 w-full text-gray-500">
+        No suborganizations under {user.organization?.name}
+    </div>
+) : (
+    <select
+        value={selectedSubOrg.length === 0 ? "" : selectedSubOrg}
+        onChange={(e) => {
+            const value = e.target.value;
+            setSelectedSubOrg(value === "" ? [] : value);
+        }}
+        className="border rounded p-2 mb-4"
+    >
+    <option value="">For general use (under {user.organization?.name})</option>
+    {suborgs.map((org) => (
+        <option key={org._id} value={org._id}>
+            {org.firstname || "(No Name)"}
+        </option>
+    ))}
+</select>
+
+)}
+
                 <label className="block text-gray-700 font-medium mb-2">Strict Mode:</label>
                 <input
                     type="checkbox"

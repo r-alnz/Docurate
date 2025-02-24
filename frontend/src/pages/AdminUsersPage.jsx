@@ -8,7 +8,7 @@ import { useUserContext } from '../hooks/useUserContext';
 const AdminUsersPage = () => {
     const { user, token } = useAuthContext();
     const currUserID = user._id;
-    console.log("user idd: ", user._id);
+    console.log("user idd: ", currUserID);
     const { users, dispatch } = useUserContext();
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
