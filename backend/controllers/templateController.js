@@ -8,7 +8,7 @@ const getTemplates = async (req, res) => {
     try {
         const { organization, suborganizations } = req.user;
 
-        console.log("User in getTemplates:", JSON.stringify(req.user));
+        // console.log("User in getTemplates:", JSON.stringify(req.user));
 
         // console.log("Fetching templates for organization & suborganizations:", {
         //     organization,
@@ -62,16 +62,16 @@ const getTemplates = async (req, res) => {
         //     delete query.organization; // Example: Superadmins can see all templates, regardless of org
         }
         
-        console.log("Final Query:", JSON.stringify(query, null, 2));       
+        // console.log("Final Query:", JSON.stringify(query, null, 2));       
 
-        console.log("Applied filters:", JSON.stringify(query, null, 2));
+        // console.log("Applied filters:", JSON.stringify(query, null, 2));
 
         // Fetch templates
         const templates = await Template.find(query)
             .populate('suborganizations', '_id firstname')
           
 
-        console.log("Fetched Templates:", templates.length ? templates : "No templates found");
+        // console.log("Fetched Templates:", templates.length ? templates : "No templates found");
 
         if (!templates || templates.length === 0) {
             return res.status(404).json({ message: 'No templates available for your organization or suborganizations' });
