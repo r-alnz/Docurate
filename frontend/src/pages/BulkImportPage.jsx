@@ -64,7 +64,7 @@ const BulkImportPage = () => {
                     setMessage({
                         type: "error",
                         text: `Some users already exist:\n${result.conflicts
-                            .map((user) => `${user.email} (${user.name})`)
+                            .map((user) => `\n${user.email} (${user.name})`)
                             .join(", ")}`,
                     });
                     return;
