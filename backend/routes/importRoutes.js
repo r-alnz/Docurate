@@ -49,7 +49,7 @@ router.post("/bulk-import", authToken, async (req, res) => {
             });
         }
 
-        //  CHECK: duplicates
+        // CHECK: duplicates
         const emails = users.map(user => user.email);
         const existingUsers = await User.find({ email: { $in: emails } });
 
@@ -57,6 +57,7 @@ router.post("/bulk-import", authToken, async (req, res) => {
             return res.status(409).json({
                 message: "Some users already exist.",
                 conflicts: existingUsers.map(u => ({ email: u.email, name: `${u.firstname} ${u.lastname}` })),
+                nonDuplicates: users.filter(user => !existingUsers.some(e => e.email === user.email)) // Users that are NOT duplicates
             });
         }
 
@@ -67,7 +68,7 @@ router.post("/bulk-import", authToken, async (req, res) => {
             studentId: user.studentId || "00000", // Auto-generate if missing
         }));
 
-        // INSERT
+        // INSERT non-duplicate users
         const newUsers = await User.insertMany(formattedUsers);
 
         return res.status(201).json({ message: "Users imported successfully", newUsers });
@@ -76,6 +77,6 @@ router.post("/bulk-import", authToken, async (req, res) => {
         console.error("Error importing users:", error.message, error.stack);
         res.status(500).json({ error: error.message || "Internal Server Error" });
     }    
-});
+  });
 
 export default router;

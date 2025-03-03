@@ -18,7 +18,9 @@ const BulkImportPage = () => {
 
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            // setting defval: "" → preserve empty cells
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
             setData(jsonData);
         };
@@ -38,7 +40,7 @@ const BulkImportPage = () => {
 
         try {
             const token = localStorage.getItem("authToken");
-            console.log("Retrieved Token:", token); // ✅ Debugging
+            console.log("Retrieved Token:", token);
 
             if (!token) {
                 alert("No authentication token found. Please log in again.");
@@ -56,17 +58,41 @@ const BulkImportPage = () => {
             });
 
             const result = await response.json();
-            console.log("Server Response:", result); // ✅ Log full response
+            console.log("Server Response:", result);
 
             if (!response.ok) {
                 if (response.status === 409 && result.conflicts) {
-                    // 🚨 Handle duplicate users (conflicts found)
-                    setMessage({
-                        type: "error",
-                        text: `Some users already exist:\n${result.conflicts
-                            .map((user) => `\n${user.email} (${user.name})`)
-                            .join(", ")}`,
-                    });
+                  // 🚨 Handle duplicate users
+                  const userChoice = window.confirm(
+                    `Some users already exist:\n${result.conflicts
+                      .map((user) => `\n${user.email} (${user.name})`)
+                      .join(", ")}\n\nDo you want to skip these and upload the rest?`
+                    );
+
+                    if (userChoice && result.nonDuplicates.length > 0) {
+                      // User chose to skip duplicates; re-upload only non-duplicates
+                      const retryResponse = await fetch("http://localhost:8000/api/import/bulk-import", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(result.nonDuplicates),
+                        credentials: "include",
+                      });
+    
+                        const retryResult = await retryResponse.json();
+    
+                        if (!retryResponse.ok) {
+                            throw new Error(retryResult.error || "Failed to import non-duplicate users");
+                        }
+    
+                        setMessage({ type: "success", text: "Non-duplicate users imported successfully!" });
+                        setData([]); // Clear table after successful upload
+                        return;
+                    }
+    
+                    setMessage({ type: "error", text: "Import aborted due to duplicate users." });
                     return;
                 }
 
@@ -75,28 +101,28 @@ const BulkImportPage = () => {
                     setMessage({
                         type: "error",
                         text: `Some users are missing required fields:\n${result.invalidUsers
-                            .map((user) => `For ${user.name}: Missing [${user.missingFields.join(", ")}]`)
+                            .map((user) => `For ${user.email}: Missing [${user.missingFields.join(", ")}]`)
                             .join("\n")}`,
                     });
                     return;
                 }
-
+    
                 throw new Error(result.error || "Failed to import data");
             }
-
+    
             setMessage({ type: "success", text: "Users imported successfully!" });
             setData([]); // Clear table after successful upload
         } catch (error) {
-            console.error("Import error:", error); // ✅ Log error details
+            console.error("Import error:", error);
             setMessage({ type: "error", text: error.message });
         } finally {
             setLoading(false);
         }
-    };
+    };  
 
     return (
         <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Import Users from Excel</h2>
+            <h2 className="text-xl font-bold mb-4">Import Users</h2>
 
             {/* File Upload Input */}
             <input
