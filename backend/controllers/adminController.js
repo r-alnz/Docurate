@@ -6,7 +6,7 @@ const createUserAccount = async (req, res) => {
     try {
         console.log('📥 Received user data:', JSON.stringify(req.body, null, 2));
 
-        const { firstname, lastname, email, password, role, organization, studentId, suborganizations, birthdate } = req.body;
+        const { firstname, lastname, email, password, role, organization, college, course, studentId, suborganizations, birthdate } = req.body;
 
 
         if (!firstname || !lastname || !email || !password || !role || !birthdate) {
@@ -27,7 +27,7 @@ const createUserAccount = async (req, res) => {
         const emailExists = await User.findOne({ email });
         if (emailExists) return res.status(400).json({ message: 'Email already exists' });
 
-        const userPayload = { firstname, lastname, birthdate, email, password, role, organization, suborganizations: suborganizations || [] };
+        const userPayload = { firstname, lastname, birthdate, email, password, role, organization, college, course, suborganizations: suborganizations || [] };
         if (role === 'student') userPayload.studentId = studentId;
 
         const newUser = await User.create(userPayload);

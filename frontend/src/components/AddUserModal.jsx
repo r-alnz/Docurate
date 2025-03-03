@@ -15,6 +15,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
     const [isStudentOrgMember, setIsStudentOrgMember] = useState(true);
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
     const [birthdate, setBirthdate] = useState('');
+    const [college, setCollege] = useState('');
+    const [course, setCourse] = useState('');
 
     const currRole = suborgAlready.length > 0 ? suborgAlready[0].role : null;
 
@@ -46,6 +48,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             organization: user.organization._id, // Use admin's organization ID
             organizationName: user.organization.name, // Include the organization name
             suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [], // Ensure it's an array
+            college,
+            course,
         };
         onSubmit(userDetails);
     
@@ -63,6 +67,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
         setIsStudentOrgMember(false);
         setSelectedSubOrgs([]); // Reset selection
         setBirthdate(''); // Reset birthdate 
+        setCollege('');
+        setCourse('');
         // }, 200);
     };
     
@@ -158,6 +164,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                         </select>
                     </div>
                     {role === 'student' && (
+                        <>
                         <div className="mb-4">
                             <label className="block text-gray-700 font-medium mb-2">Student ID</label>
                             <input
@@ -167,6 +174,25 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                 className="border rounded p-2 w-full"
                                 required />
                         </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">College</label>
+                            <input
+                                type="text"
+                                value={college}
+                                onChange={(e) => setCollege(e.target.value)}
+                                className="border rounded p-2 w-full"
+                                required />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">Course</label>
+                            <input
+                                type="text"
+                                value={course}
+                                onChange={(e) => setCourse(e.target.value)}
+                                className="border rounded p-2 w-full"
+                                required />
+                        </div>
+                        </>
                     )}
 
                     <div className="mb-4">
