@@ -9,21 +9,21 @@ router.post("/bulk-import", authToken, async (req, res) => {
     try {
         console.log("Received bulk import request:", req.body);
 
-        const users = req.body;
-        const loggedInUser = req.user; // Retrieved from authToken middleware
-
+        // FETCH: User currently logged in
+        const loggedInUser = req.user;
         if (!loggedInUser || !loggedInUser.organization) {
             return res.status(400).json({ error: "User's organization is missing" });
         }
 
         console.log("Logged-in User's Organization:", loggedInUser.organization);
 
+        // FETCH: Users concerned
+        const users = req.body;
         if (!Array.isArray(users) || users.length === 0) {
-            console.log("Invalid data format received:", users);
             return res.status(400).json({ error: "Invalid data format. Expected a non-empty array of users." });
         }
 
-        // Validate users and track missing fields
+        // CHECK: missing required fields
         const invalidUsers = users
             .map((user, index) => {
                 const missingFields = [];
@@ -33,10 +33,12 @@ router.post("/bulk-import", authToken, async (req, res) => {
                 if (!user.password) missingFields.push("password");
                 if (!user.role) missingFields.push("role");
 
-                console.log(`User at index ${index}:`, JSON.stringify(user, null, 2));
-                console.log(`Missing fields:`, missingFields);
-
-                return missingFields.length > 0 ? { index, missingFields } : null;
+                return missingFields.length > 0 ? { 
+                    index, 
+                    email: user.email, 
+                    name: `${user.firstname || "Unknown"} ${user.lastname || "User"}`, // Add name field
+                    missingFields 
+                } : null;
             })
             .filter(Boolean);
 
@@ -47,21 +49,33 @@ router.post("/bulk-import", authToken, async (req, res) => {
             });
         }
 
-        // 🔥 Assign the logged-in user's organization ID to imported users
-        const formattedUsers = users.map((user) => ({
+        //  CHECK: duplicates
+        const emails = users.map(user => user.email);
+        const existingUsers = await User.find({ email: { $in: emails } });
+
+        if (existingUsers.length > 0) {
+            return res.status(409).json({
+                message: "Some users already exist.",
+                conflicts: existingUsers.map(u => ({ email: u.email, name: `${u.firstname} ${u.lastname}` })),
+            });
+        }
+
+        // Assign organization and insert valid users
+        const formattedUsers = users.map(user => ({
             ...user,
-            organization: new mongoose.Types.ObjectId(loggedInUser.organization), // Convert to ObjectId
-            studentId: user.studentId || new mongoose.Types.ObjectId(), // Generate if missing
+            organization: new mongoose.Types.ObjectId(loggedInUser.organization),
+            studentId: user.studentId || "00000", // Auto-generate if missing
         }));
 
-        // Insert users
+        // INSERT
         const newUsers = await User.insertMany(formattedUsers);
 
-        res.status(201).json({ message: "Users imported successfully", newUsers });
+        return res.status(201).json({ message: "Users imported successfully", newUsers });
+
     } catch (error) {
-        console.error("Error importing users:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+        console.error("Error importing users:", error.message, error.stack);
+        res.status(500).json({ error: error.message || "Internal Server Error" });
+    }    
 });
 
 export default router;

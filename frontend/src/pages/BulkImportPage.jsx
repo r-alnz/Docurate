@@ -25,51 +25,74 @@ const BulkImportPage = () => {
     };
 
     const handleConfirmUpload = async () => {
-      if (data.length === 0) {
-          alert("No data to import. Please upload a file first.");
-          return;
-      }
-  
-      const confirmUpload = window.confirm("Are you sure you want to upload this data?");
-      if (!confirmUpload) return;
-  
-      setLoading(true);
-      setMessage(null);
-  
-      try {
-        const token = localStorage.getItem("authToken");
-        console.log("Retrieved Token:", token); // ✅ Debugging
-    
-        if (!token) {
-            alert("No authentication token found. Please log in again.");
+        if (data.length === 0) {
+            alert("No data to import. Please upload a file first.");
             return;
         }
-  
-          const response = await fetch("http://localhost:8000/api/import/bulk-import", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${token}` // ✅ Add token here
-              },
-              body: JSON.stringify(data),
-              credentials: "include",
-          });
-  
-          const result = await response.json();
-  
-          if (!response.ok) {
-              throw new Error(result.error || "Failed to import data");
-          }
-  
-          setMessage({ type: "success", text: "Users imported successfully!" });
-          setData([]); // Clear table after successful upload
-      } catch (error) {
-          setMessage({ type: "error", text: error.message });
-      } finally {
-          setLoading(false);
-      }
-  };
-  
+
+        const confirmUpload = window.confirm("Are you sure you want to upload this data?");
+        if (!confirmUpload) return;
+
+        setLoading(true);
+        setMessage(null);
+
+        try {
+            const token = localStorage.getItem("authToken");
+            console.log("Retrieved Token:", token); // ✅ Debugging
+
+            if (!token) {
+                alert("No authentication token found. Please log in again.");
+                return;
+            }
+
+            const response = await fetch("http://localhost:8000/api/import/bulk-import", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(data),
+                credentials: "include",
+            });
+
+            const result = await response.json();
+            console.log("Server Response:", result); // ✅ Log full response
+
+            if (!response.ok) {
+                if (response.status === 409 && result.conflicts) {
+                    // 🚨 Handle duplicate users (conflicts found)
+                    setMessage({
+                        type: "error",
+                        text: `Some users already exist:\n${result.conflicts
+                            .map((user) => `${user.email} (${user.name})`)
+                            .join(", ")}`,
+                    });
+                    return;
+                }
+
+                if (response.status === 400 && result.invalidUsers) {
+                    // 🚨 Handle users with missing fields
+                    setMessage({
+                        type: "error",
+                        text: `Some users are missing required fields:\n${result.invalidUsers
+                            .map((user) => `For ${user.name}: Missing [${user.missingFields.join(", ")}]`)
+                            .join("\n")}`,
+                    });
+                    return;
+                }
+
+                throw new Error(result.error || "Failed to import data");
+            }
+
+            setMessage({ type: "success", text: "Users imported successfully!" });
+            setData([]); // Clear table after successful upload
+        } catch (error) {
+            console.error("Import error:", error); // ✅ Log error details
+            setMessage({ type: "error", text: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="p-4">
@@ -119,7 +142,9 @@ const BulkImportPage = () => {
             {/* Message Display */}
             {message && (
                 <div className={`mt-4 p-2 text-white rounded ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`}>
-                    {message.text}
+                    {message.text.split("\n").map((line, i) => (
+                        <p key={i}>{line}</p>
+                    ))}
                 </div>
             )}
         </div>
