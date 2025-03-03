@@ -9,6 +9,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import templateRoutes from './routes/templateRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
+import importRoutes from "./routes/importRoutes.js";
 
 dotenv.config()
 
@@ -23,7 +24,8 @@ app.use(logger)
 app.use(cors({
     origin: 'http://localhost:7000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true, // ✅ Allow credentials (tokens/cookies)
 }));
 
 // Routes
@@ -32,6 +34,7 @@ app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/documents', documentRoutes);
+app.use("/api/import", importRoutes);
 
 connectDB()
     .then(async () => {
