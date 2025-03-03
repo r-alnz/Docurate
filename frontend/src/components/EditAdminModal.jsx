@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useOrganizationContext } from "../hooks/useOrganizationContext";
@@ -14,6 +15,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         role: "",
         studentId: "",
         suborganizations: [],
+        birthdate: "",
     });
 
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
@@ -44,6 +46,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 suborganizations: Array.isArray(user?.suborganizations)
                     ? user.suborganizations.map(suborg => suborg._id)
                     : [],
+                birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
             });
         }
     }, [user]);
@@ -73,7 +76,8 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
     
         const updatedUser = { 
             ...formData, 
-            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [] 
+            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
+            birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
         };
     
         console.log("🔹 Updating user:", user._id);
@@ -117,6 +121,17 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             type="email"
                             name="email"
                             value={formData.email}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Birthdate</label>
+                        <input
+                            type="date"
+                            name="birthdate"
+                            value={formData.birthdate}
                             onChange={handleInputChange}
                             className="w-full border p-2 rounded"
                         />
