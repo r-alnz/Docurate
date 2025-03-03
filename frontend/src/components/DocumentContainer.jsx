@@ -16,6 +16,7 @@ const DocumentContainer = () => {
     const [isUpdateMode, setIsUpdateMode] = useState(false);
     const navigate = useNavigate();
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    const [message, setMessage] = useState(null);
 
     const DPI = 96; // Fixed DPI for page dimensions
     const pageSizes = {
@@ -166,7 +167,7 @@ const DocumentContainer = () => {
             width: ${selectedPageSize.width / DPI}in;
             height: ${selectedPageSize.height / DPI}in;
             // padding: ${margins.top}in ${margins.right}in ${margins.bottom}in ${margins.left}in;
-            padding: ${margins.top - 0.25}in ${margins.right- 0.25}in ${margins.bottom- 0.25}in ${margins.left- 0.25}in;
+            padding: ${margins.top - 0.25}in ${margins.right - 0.25}in ${margins.bottom - 0.25}in ${margins.left - 0.25}in;
 
             box-sizing: border-box;
             background-color: white;
@@ -211,7 +212,7 @@ const DocumentContainer = () => {
                 if (id) {
                     const documentData = await getDocumentById(id, token);
 
-                    
+
                     if (documentData?.template?.margins) {
                         const { top, bottom, left, right } = documentData.template.margins;
                         setMargins({
@@ -225,30 +226,30 @@ const DocumentContainer = () => {
                     setTitle(documentData.title);
                     setTemplate(documentData.template);
                     setPaperSize(documentData.template?.paperSize);
-                    
+
                     setPages(
                         documentData.content.split('<hr style="page-break-after: always;">').map((content, index) => ({
                             id: index + 1,
                             content,
                         }))
                     );
-                    
+
                     setIsUpdateMode(true);
                 } else if (templateId) {
                     const templateData = await getTemplateById(templateId, token);
-    
+
                     console.log(templateData);
                     if (templateData?.margins) { // Check if margins exist
                         console.log(1);
                         const { top, bottom, left, right } = templateData.margins;
                         setMargins({
-                            top:top ,
+                            top: top,
                             bottom: bottom,
-                            left: left ,
+                            left: left,
                             right: right,
                         });
                     }
-    
+
                     setTemplate(templateData);
                     setPaperSize(templateData.paperSize); // Lock paper size for updates
                     setPages(
@@ -261,7 +262,7 @@ const DocumentContainer = () => {
                 setIsDataLoaded(true); // Mark data as loaded
             } catch (error) {
                 console.error('Error loading data:', error.message);
-                alert('Failed to load data. Please try again.');
+                showMessage('Failed to load data. Please try again.');
             }
         };
 
@@ -281,7 +282,7 @@ const DocumentContainer = () => {
             throw new Error('Failed to compress image');
         }
     };
-    
+
 
     const addImageToEditor = (editor, file) => {
         const reader = new FileReader();
@@ -303,7 +304,7 @@ const DocumentContainer = () => {
                     addImageToEditor(editor, compressedFile);
                 } catch (error) {
                     console.error('Error compressing image:', error.message);
-                    alert('Failed to compress and insert image. Please try again.');
+                    showMessage('Failed to compress and insert image. Please try again.');
                 }
             }
         };
@@ -335,14 +336,14 @@ const DocumentContainer = () => {
                     insertHeaderFooterImage(editor, position, compressedFile);
                 } catch (error) {
                     console.error('Error compressing header/footer image:', error.message);
-                    alert('Failed to add header/footer image. Please try again.');
+                    showMessage('Failed to add header/footer image. Please try again.');
                 }
             }
         };
         input.click();
     };
 
-        
+
     const handleEditorChange = (content, pageId) => {
         setPages((prevPages) =>
             prevPages.map((page) => (page.id === pageId ? { ...page, content } : page))
@@ -367,7 +368,7 @@ const DocumentContainer = () => {
                 setCurrentPage((prev) => (prev > newPages.length ? newPages.length : prev));
             }
         } else {
-            alert('You cannot delete the last page!');
+            showMessage('You cannot delete the last page!');
         }
     };
 
@@ -383,9 +384,14 @@ const DocumentContainer = () => {
         }
     };
 
+    const showMessage = (text, type = 'success') => {
+        setMessage({ text, type });
+        setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    };
+
     const handleSaveOrUpdateDocument = async () => {
         if (!title || pages.length === 0) {
-            alert('Please fill in all required fields and ensure there is content.');
+            showMessage('⚠️ Please fill in all required fields and ensure there is content.', 'warning');
             return;
         }
 
@@ -402,16 +408,15 @@ const DocumentContainer = () => {
             const token = getToken();
             if (isUpdateMode) {
                 await updateDocument(id, documentData, token);
-                alert('Document updated successfully!');
+                showMessage('✅ Document updated successfully!', 'success');
             } else {
                 await createDocument(documentData, token);
-                alert('Document created successfully!');
+                showMessage('✅ Document created successfully!', 'success');
                 navigate('/documents');
             }
-             // Redirect after save/update
         } catch (error) {
             console.error('Error saving/updating document:', error.message);
-            alert('Failed to save/update document. Please try again.');
+            showMessage('❌ Failed to save/update document. Please try again.', 'error');
         }
     };
 
@@ -419,11 +424,11 @@ const DocumentContainer = () => {
         const iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
         const iframeDoc = iframe.contentWindow.document;
-    
+
         // Get the font family from the editor dynamically
         //const editorContentBody = document.querySelector('.mce-content-body');
         // const editorFontFamily = window.getComputedStyle(editorContentBody).fontFamily;
-    
+
         // Combine content of all pages
         const combinedContent = pages
             .map(
@@ -434,7 +439,7 @@ const DocumentContainer = () => {
             `
             )
             .join('');
-    
+
         iframeDoc.open();
         iframeDoc.write(`
             <html>
@@ -455,9 +460,9 @@ const DocumentContainer = () => {
             </html>
         `);
         iframeDoc.close();
-    
+
         const iframeWindow = iframe.contentWindow;
-    
+
         // Ensure images load before printing
         const images = iframeDoc.getElementsByTagName('img');
         const promises = Array.from(images).map((img) => {
@@ -470,7 +475,7 @@ const DocumentContainer = () => {
                 }
             });
         });
-    
+
         Promise.all(promises).then(() => {
             iframeWindow.focus();
             iframeWindow.print();
@@ -541,20 +546,20 @@ const DocumentContainer = () => {
 
                 {/* Add/Delete Buttons */}
                 <div className="mb-4 flex justify-end gap-4">
-                        <button
-                            onClick={handleAddPage}
-                            
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                        >
-                            Add Page
-                        </button>
-                        <button
-                            onClick={handleDeletePage}
-                            className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-                        >
-                            Delete Page
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleAddPage}
+
+                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+                    >
+                        Add Page
+                    </button>
+                    <button
+                        onClick={handleDeletePage}
+                        className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
+                    >
+                        Delete Page
+                    </button>
+                </div>
 
                 {isDataLoaded ? (pages.map((page) => (
                     <div key={page.id} style={{ display: currentPage === page.id ? 'block' : 'none' }}>
@@ -566,7 +571,7 @@ const DocumentContainer = () => {
                                 menubar: true,
                                 plugins: [
                                     'advlist', 'autolink', 'lists', 'link', 'image', 'lists', 'pagebreak',
-                                    'searchreplace', 'wordcount','code', 'fullscreen',
+                                    'searchreplace', 'wordcount', 'code', 'fullscreen',
                                     'insertdatetime', 'media', 'table', 'paste', 'code', 'help', 'wordcount'
                                 ],
                                 toolbar:
@@ -582,26 +587,26 @@ const DocumentContainer = () => {
                                         event.preventDefault(); // Prevent TinyMCE's default drop handling
                                         event.stopPropagation(); // Stop propagation of the event to prevent other handlers
                                     });
-                                    
+
                                     editor.on('init', () => {
                                         const iframeDoc = editor.getDoc(); // Access TinyMCE's iframe document
-                                    
+
                                         iframeDoc.addEventListener('mousedown', (e) => {
                                             const target = e.target.closest('.draggable-image');
                                             if (!target) return;
-                                    
+
                                             let offsetX = e.clientX - target.offsetLeft;
                                             let offsetY = e.clientY - target.offsetTop;
-                                    
+
                                             const onMouseMove = (event) => {
                                                 target.style.left = `${event.clientX - offsetX}px`;
                                                 target.style.top = `${event.clientY - offsetY}px`;
                                             };
-                                    
+
                                             const onMouseUp = () => {
                                                 iframeDoc.removeEventListener('mousemove', onMouseMove);
                                                 iframeDoc.removeEventListener('mouseup', onMouseUp);
-                                    
+
                                                 // Update TinyMCE's content
                                                 const uniqueId = target.getAttribute('id');
                                                 if (uniqueId) {
@@ -610,11 +615,11 @@ const DocumentContainer = () => {
                                                         left: target.style.left,
                                                         top: target.style.top,
                                                     });
-                                    
+
                                                     // Synchronize TinyMCE content
                                                     const updatedContent = editor.getContent();
                                                     editor.setContent(updatedContent);
-                                    
+
                                                     // Trigger TinyMCE's change event to ensure synchronization
                                                     editor.undoManager.add();
                                                     editor.fire('change');
@@ -623,14 +628,14 @@ const DocumentContainer = () => {
                                                     console.warn('Draggable image has no ID. Ensure unique IDs are assigned.');
                                                 }
                                             };
-                                    
+
                                             iframeDoc.addEventListener('mousemove', onMouseMove);
                                             iframeDoc.addEventListener('mouseup', onMouseUp);
                                         });
                                     });
-                                    
-                                    
-                                    
+
+
+
                                     editor.ui.registry.addButton('addDraggableImage', {
                                         text: 'Insert Image',
                                         icon: 'image',
@@ -645,7 +650,7 @@ const DocumentContainer = () => {
                                                         addDraggableImage(editor, file);
                                                     } catch (error) {
                                                         console.error('Error adding draggable image:', error.message);
-                                                        alert('Failed to add image. Please try again.');
+                                                        showMessage('Failed to add image. Please try again.');
                                                     }
                                                 }
                                             };
@@ -658,7 +663,7 @@ const DocumentContainer = () => {
                                             event.preventDefault(); // Prevent default tab behavior
                                             const selection = editor.selection;
                                             const content = selection.getContent({ format: 'html' });
-                                            
+
                                             // Insert a "tab" as multiple non-breaking spaces
                                             const tabEquivalent = '&nbsp;&nbsp;&nbsp;&nbsp;'; // 4 spaces (adjust as needed)
                                             const newContent = `${tabEquivalent}${content}`;
@@ -682,7 +687,7 @@ const DocumentContainer = () => {
                                     //     icon: 'image',
                                     //     onAction: () => handleImageUpload(editor),
                                     // });
-                                    
+
                                     // Prevent interaction outside of editable spans within non-editable blocks
                                     editor.on('BeforeExecCommand', (e) => {
                                         const selectedNode = editor.selection.getNode();
@@ -735,7 +740,7 @@ const DocumentContainer = () => {
                                         onAction: () => {
                                             const selectedNode = editor.selection.getNode(); // Get the selected node
                                             const isParagraph = selectedNode.nodeName === 'P'; // Check if it's a <p> element
-                                
+
                                             if (isParagraph) {
                                                 // Update the style directly for <p> elements
                                                 selectedNode.style.textIndent = '-40px';
@@ -749,7 +754,7 @@ const DocumentContainer = () => {
                                             }
                                         },
                                     });
-                                
+
                                     // Remove Hanging Indent Button
                                     editor.ui.registry.addButton('removeHangingIndent', {
                                         text: 'Remove Hanging Indent',
@@ -758,7 +763,7 @@ const DocumentContainer = () => {
                                         onAction: () => {
                                             const selectedNode = editor.selection.getNode(); // Get the selected node
                                             const isParagraph = selectedNode.nodeName === 'P'; // Check if it's a <p> element
-                                
+
                                             if (isParagraph) {
                                                 // Remove the hanging indent styles
                                                 selectedNode.style.textIndent = '';
@@ -772,17 +777,17 @@ const DocumentContainer = () => {
                                             }
                                         },
                                     });
-                                },                                                 
+                                },
                             }}
                             onEditorChange={(content) => handleEditorChange(content, page.id)}
                         />
                     </div>
-                ))): (
+                ))) : (
                     <p>Loading editor...</p>
                 )}
             </div>
 
-            
+
 
             <div className="mt-4 flex gap-4">
                 <button
@@ -791,6 +796,20 @@ const DocumentContainer = () => {
                 >
                     {isUpdateMode ? 'Update Document' : 'Save Document'}
                 </button>
+
+                {/* Mini Message Box (Centered) */}
+                {message && (
+                    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                    p-4 rounded shadow-lg text-white text-center w-80"
+                        style={{
+                            backgroundColor: message.type === 'success' ? '#4CAF50'
+                                : message.type === 'error' ? '#F44336'
+                                    : '#FFC107'
+                        }}>
+                        {message.text}
+                    </div>
+                )}
+
                 <button
                     onClick={() => navigate('/documents')}
                     className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-700"

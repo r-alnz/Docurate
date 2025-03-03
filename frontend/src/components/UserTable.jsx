@@ -16,7 +16,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
 
     const handleEditClick = (user) => {
         console.log("eidt button clicked!");
-        
+
         setSelectedUser(user)
         setIsEditModalOpen(true)
     }
@@ -83,8 +83,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                 )}
                                 <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
                                 <td className="px-6 py-4">
-                                    {user.suborganizations?.length > 0 
-                                        ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ") 
+                                    {user.suborganizations?.length > 0
+                                        ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
                                         : "N/A"}
                                 </td>
                                 <td className="px-6 py-4">
@@ -109,9 +109,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                         >
                                             Inactive
                                         </button>
-                                        <button className="font-medium text-green-600 dark:text-green-500 hover:underline">
+                                        {/* <button className="font-medium text-green-600 dark:text-green-500 hover:underline">
                                             Send Email
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </td>
                             </tr>
