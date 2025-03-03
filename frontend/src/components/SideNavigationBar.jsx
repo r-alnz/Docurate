@@ -19,7 +19,7 @@ const SideNavigationBar = () => {
             { name: "Import Students", path: "/import" },
         ],
         organization: [
-            { name: "Users (Organization)", path: "/users"},
+            { name: "Users (Organization)", path: "/users" },
             { name: "Templates", path: "/user-templates" },
             { name: "Documents", path: "/documents" },
         ],
@@ -36,7 +36,7 @@ const SideNavigationBar = () => {
     }
 
     return (
-        <nav className="flex flex-col h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 text-white p-4 rounded-r-lg shadow-lg">
+        <nav className="flex flex-col h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-400 text-white p-4 rounded-r-lg shadow-lg">
             {/* Top Section: Icon and User Info */}
             <div className="flex items-start mb-6 bg-white bg-opacity-20 p-3 rounded-lg">
                 <img
@@ -76,7 +76,7 @@ const SideNavigationBar = () => {
             <NavLink
                 to="/change-password"
                 className={({ isActive }) =>
-                    `block p-2 mb-2 text-center rounded-lg transition-all duration-200 truncate ${isActive ? "bg-white text-blue-600 shadow-md" : "bg-white bg-opacity-20 hover:bg-opacity-30"
+                    `block p-2 mb-2 text-center rounded-lg transition-all duration-200 truncate ${isActive ? "bg-green-300 text-blue-600 shadow-md" : "bg-green-500 hover:bg-green-600"
                     }`
                 }
             >
