@@ -14,6 +14,12 @@ const DocumentListContainer = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState(''); // Search query state
     const [sortOption, setSortOption] = useState('name-asc'); // Sort option state
+    const [message, setMessage] = useState(null);
+
+    const showMessage = (text, type = 'success') => {
+        setMessage({ text, type });
+        setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    };
 
     useEffect(() => {
         const loadDocuments = async () => {
@@ -38,10 +44,10 @@ const DocumentListContainer = () => {
             const token = getToken();
             await deleteDocument(documentId, token);
             dispatch({ type: 'DELETE_DOCUMENT', payload: documentId });
-            alert('Document deleted successfully!');
+            showMessage('Document deleted successfully!');
         } catch (error) {
             console.error(error);
-            alert('Failed to delete the document. Please try again.');
+            showMessage('Failed to delete the document. Please try again.');
         }
     };
 
@@ -140,6 +146,19 @@ const DocumentListContainer = () => {
                     onClose={() => setIsModalOpen(false)}
                     onDelete={() => handleDeleteDocument(selectedDocument._id)}
                 />
+            )}
+
+            {/* Mini Message Box (Centered) */}
+            {message && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                    p-4 rounded shadow-lg text-white text-center w-80"
+                    style={{
+                        backgroundColor: message.type === 'success' ? '#4CAF50'
+                            : message.type === 'error' ? '#F44336'
+                                : '#FFC107'
+                    }}>
+                    {message.text}
+                </div>
             )}
         </div>
     );
