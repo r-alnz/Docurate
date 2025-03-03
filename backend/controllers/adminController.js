@@ -92,7 +92,7 @@ const editUserAccount = async (req, res) => {
     const { id } = req.params;
     console.log("📥 Raw Request Body:", JSON.stringify(req.body, null, 2)); // Log received body
 
-    const { firstname, lastname, email, birthdate, password, organization, suborganizations, role, studentId } = req.body;
+    const { firstname, lastname, email, birthdate, password, organization, suborganizations, role, studentId, college, course } = req.body;
     console.log(req.body);
     try {
         if (!id) throw new Error('User account ID is required');
@@ -106,6 +106,8 @@ const editUserAccount = async (req, res) => {
         if (password) updateData.password = await User.hashPassword(password); // Hash new password
         if (organization) updateData.organization = organization;
         if (role) updateData.role = role;
+        if (course) updateData.course = course;
+        if (college) updateData.college = college;
 
         // Conditionally handle `studentId`
         if (role === 'student') {
