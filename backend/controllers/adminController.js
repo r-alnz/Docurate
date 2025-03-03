@@ -6,10 +6,10 @@ const createUserAccount = async (req, res) => {
     try {
         console.log('📥 Received user data:', JSON.stringify(req.body, null, 2));
 
-        const { firstname, lastname, email, password, role, organization, studentId, suborganizations } = req.body;
+        const { firstname, lastname, email, password, role, organization, college, course, studentId, suborganizations, birthdate } = req.body;
 
 
-        if (!firstname || !lastname || !email || !password || !role) {
+        if (!firstname || !lastname || !email || !password || !role || !birthdate) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -27,7 +27,7 @@ const createUserAccount = async (req, res) => {
         const emailExists = await User.findOne({ email });
         if (emailExists) return res.status(400).json({ message: 'Email already exists' });
 
-        const userPayload = { firstname, lastname, email, password, role, organization, suborganizations: suborganizations || [] };
+        const userPayload = { firstname, lastname, birthdate, email, password, role, organization, college, course, suborganizations: suborganizations || [] };
         if (role === 'student') userPayload.studentId = studentId;
 
         const newUser = await User.create(userPayload);
@@ -92,7 +92,7 @@ const editUserAccount = async (req, res) => {
     const { id } = req.params;
     console.log("📥 Raw Request Body:", JSON.stringify(req.body, null, 2)); // Log received body
 
-    const { firstname, lastname, email, password, organization, suborganizations, role, studentId } = req.body;
+    const { firstname, lastname, email, birthdate, password, organization, suborganizations, role, studentId, college, course } = req.body;
     console.log(req.body);
     try {
         if (!id) throw new Error('User account ID is required');
@@ -102,9 +102,12 @@ const editUserAccount = async (req, res) => {
         if (firstname) updateData.firstname = firstname;
         if (lastname) updateData.lastname = lastname;
         if (email) updateData.email = email;
+        if (birthdate) updateData.birthdate = birthdate;
         if (password) updateData.password = await User.hashPassword(password); // Hash new password
         if (organization) updateData.organization = organization;
         if (role) updateData.role = role;
+        if (course) updateData.course = course;
+        if (college) updateData.college = college;
 
         // Conditionally handle `studentId`
         if (role === 'student') {

@@ -14,6 +14,10 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
     // const [isStudentOrgMember, setIsStudentOrgMember] = useState(false);
     const [isStudentOrgMember, setIsStudentOrgMember] = useState(true);
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
+    const [birthdate, setBirthdate] = useState('');
+    const [college, setCollege] = useState('');
+    const [course, setCourse] = useState('');
+
     const currRole = suborgAlready.length > 0 ? suborgAlready[0].role : null;
 
     console.log("Props received in AddUserModal:", { suborgAlready, suborganizations, currRole });
@@ -40,9 +44,12 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             password,
             role,
             studentId: role === 'student' ? studentId : null, // Include studentId if role is student
+            birthdate: birthdate || null, // Include birthdate
             organization: user.organization._id, // Use admin's organization ID
             organizationName: user.organization.name, // Include the organization name
             suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [], // Ensure it's an array
+            college,
+            course,
         };
         onSubmit(userDetails);
 
@@ -59,6 +66,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
         setStudentId('');
         setIsStudentOrgMember(false);
         setSelectedSubOrgs([]); // Reset selection
+        setBirthdate(''); // Reset birthdate 
+        setCollege('');
+        setCourse('');
         // }, 200);
     };
 
@@ -112,6 +122,17 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     ) : null}
 
                     <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
+                        <input
+                            type="date"
+                            value={birthdate}
+                            onChange={(e) => setBirthdate(e.target.value)}
+                            className="border rounded p-2 w-full"
+                            required
+                        />
+                    </div>
+                    
+                    <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Email</label>
                         <input
                             type="email"
@@ -143,6 +164,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                         </select>
                     </div>
                     {role === 'student' && (
+                        <>
                         <div className="mb-4">
                             <label className="block text-gray-700 font-medium mb-2">Student ID</label>
                             <input
@@ -152,6 +174,25 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                 className="border rounded p-2 w-full"
                                 required />
                         </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">College</label>
+                            <input
+                                type="text"
+                                value={college}
+                                onChange={(e) => setCollege(e.target.value)}
+                                className="border rounded p-2 w-full"
+                                required />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-2">Course</label>
+                            <input
+                                type="text"
+                                value={course}
+                                onChange={(e) => setCourse(e.target.value)}
+                                className="border rounded p-2 w-full"
+                                required />
+                        </div>
+                        </>
                     )}
 
                     <div className="mb-4">

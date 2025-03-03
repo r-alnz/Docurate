@@ -45,12 +45,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         <th scope="col" className="px-6 py-3">#</th>
                         <th scope="col" className="px-6 py-3">Full Name</th>
                         <th scope="col" className="px-6 py-3">Email</th>
+                        <th scope="col" className="px-6 py-3">Birthdate</th>
                         <th scope="col" className="px-6 py-3">Role</th>
                         {currentUser?.role === "admin" && (
                             <th scope="col" className="px-6 py-3">Student ID</th>
                         )}
-                        <th scope="col" className="px-6 py-3">Organization</th>
-                        <th scope="col" className="px-6 py-3">Suborgs</th>
+                        {/* <th scope="col" className="px-6 py-3">Organization</th> */}
+                        <th scope="col" className="px-6 py-3">Suborganizations</th>
                         <th scope="col" className="px-6 py-3">Actions</th>
                     </tr>
                 </thead>
@@ -66,11 +67,22 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                     {user.firstname} {user.lastname}
                                 </td>
                                 <td className="px-6 py-4">{user.email}</td>
+                                
+                                <td className="px-6 py-4">
+                                    {user.birthdate
+                                        ? new Date(user.birthdate).toLocaleDateString("en-US", {
+                                            year: "numeric",
+                                            month: "2-digit",
+                                            day: "2-digit",
+                                        })
+                                        : "N/A"}
+                                </td>
+
                                 <td className="px-6 py-4">{user.role}</td>
                                 {currentUser?.role === "admin" && (
                                     <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
                                 )}
-                                <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
+                                {/* <td className="px-6 py-4">{user.organization?.name || "N/A"}</td> */}
                                 <td className="px-6 py-4">
                                     {user.suborganizations?.length > 0
                                         ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")

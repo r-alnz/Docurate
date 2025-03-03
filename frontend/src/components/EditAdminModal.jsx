@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useOrganizationContext } from "../hooks/useOrganizationContext";
@@ -14,6 +15,9 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         role: "",
         studentId: "",
         suborganizations: [],
+        birthdate: "",
+        college: "",
+        course: "",
     });
 
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
@@ -44,6 +48,9 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 suborganizations: Array.isArray(user?.suborganizations)
                     ? user.suborganizations.map(suborg => suborg._id)
                     : [],
+                birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
+                college: user.college || "",
+                course: user.course || "",
             });
         }
     }, [user]);
@@ -73,7 +80,10 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
     
         const updatedUser = { 
             ...formData, 
-            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [] 
+            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
+            birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
+            college: formData.college.trim(),
+            course: formData.course.trim(),
         };
     
         console.log("🔹 Updating user:", user._id);
@@ -121,8 +131,20 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             className="w-full border p-2 rounded"
                         />
                     </div>
-                    
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Birthdate</label>
+                        <input
+                            type="date"
+                            name="birthdate"
+                            value={formData.birthdate}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                        />
+                    </div>
+
                     {user.role === 'student' && (
+                        <>
                         <div className="mb-4">
                             <label className="block text-gray-700">Student ID</label>
                             <input
@@ -133,6 +155,29 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                                 className="w-full border p-2 rounded"
                             />
                         </div>
+
+                        <div className="mb-4">
+                        <label className="block text-gray-700">College</label>
+                        <input
+                            type="text"
+                            name="college"
+                            value={formData.college}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                        />
+                        </div>
+
+                        <div className="mb-4">
+                        <label className="block text-gray-700">Course</label>
+                        <input
+                            type="text"
+                            name="course"
+                            value={formData.course}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                        />
+                        </div>
+                        </>
                     )}
 
                     <div className="mb-4">

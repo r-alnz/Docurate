@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema(
             type: String, 
             required: true, 
         },
+        birthdate: {
+            type: Date
+        },
         email: { 
             type: String, 
             required: true, 
@@ -29,6 +32,13 @@ const userSchema = new mongoose.Schema(
             required: function () {
                 return this.role && this.role !== 'superadmin';
             }
+        },
+
+        college: { 
+            type: String,
+        },
+        course: { 
+            type: String,
         },
         suborganizations: [{ 
             type: mongoose.Schema.Types.ObjectId, 
