@@ -1,5 +1,5 @@
 import PropTypes from "prop-types"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuthContext } from "../hooks/useAuthContext"
 import DeleteAdminModal from "./DeleteAdminModal"
 import EditAdminModal from "./EditAdminModal"
@@ -13,10 +13,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const [isResetModalOpen, setIsResetModalOpen] = useState(false)
     const [resetMode, setResetMode] = useState("")
     const { user: currentUser } = useAuthContext()
+    const [filteredUsers, setFilteredUsers] = useState(users) // Add filteredUsers state
+
+    // Sync filteredUsers with users when it changes
+    useEffect(() => {
+        setFilteredUsers(users)
+    }, [users])
 
     const handleEditClick = (user) => {
-        console.log("eidt button clicked!");
-
+        console.log("Edit button clicked!")
         setSelectedUser(user)
         setIsEditModalOpen(true)
     }
@@ -37,37 +42,21 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                        <th scope="col" className="px-6 py-3">
-                            #
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Full Name
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Email
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Role
-                        </th>
+                        <th scope="col" className="px-6 py-3">#</th>
+                        <th scope="col" className="px-6 py-3">Full Name</th>
+                        <th scope="col" className="px-6 py-3">Email</th>
+                        <th scope="col" className="px-6 py-3">Role</th>
                         {currentUser?.role === "admin" && (
-                            <th scope="col" className="px-6 py-3">
-                                Student ID
-                            </th>
+                            <th scope="col" className="px-6 py-3">Student ID</th>
                         )}
-                        <th scope="col" className="px-6 py-3">
-                            Organization
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            suborgs
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Actions
-                        </th>
+                        <th scope="col" className="px-6 py-3">Organization</th>
+                        <th scope="col" className="px-6 py-3">Suborgs</th>
+                        <th scope="col" className="px-6 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {users.length > 0 ? (
-                        users.map((user, index) => (
+                    {filteredUsers.length > 0 ? (
+                        filteredUsers.map((user, index) => (
                             <tr
                                 key={user._id}
                                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -164,4 +153,3 @@ UserTable.propTypes = {
 }
 
 export default UserTable
-
