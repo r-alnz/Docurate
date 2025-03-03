@@ -17,6 +17,12 @@ const TemplateListContainer = () => {
     const [roleFilter, setRoleFilter] = useState('All'); // Dropdown state
     const [sortOption, setSortOption] = useState('date-desc'); // Sorting state
     const [statusFilter, setStatusFilter] = useState('active'); // Dropdown state for status
+    const [message, setMessage] = useState(null);
+
+    const showMessage = (text, type = 'success') => {
+        setMessage({ text, type });
+        setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    };
 
 
     useEffect(() => {
@@ -47,9 +53,9 @@ const TemplateListContainer = () => {
                 dispatch({ type: 'SET_LOADING', payload: false });
             }
         };
-    
+
         loadTemplates();
-    }, [dispatch, user.role, user.organization]);    
+    }, [dispatch, user.role, user.organization]);
 
     const handleOpenModal = (template) => {
         setTemplateToDelete(template);
@@ -66,9 +72,10 @@ const TemplateListContainer = () => {
             const token = getToken();
             await deleteTemplate(templateId, token);
             dispatch({ type: 'DELETE_TEMPLATE', payload: templateId });
+            showMessage('Template archive successfully!');
         } catch (err) {
             console.error('Failed to delete template:', err.message);
-            alert(err.message || 'Failed to delete template. Please try again.');
+            showMessage(err.message || 'Failed to delete template. Please try again.');
         }
     };
 
@@ -77,12 +84,12 @@ const TemplateListContainer = () => {
         try {
             const response = await recoverTemplate(templateId, token);
             console.log('Template recovered:', response.template);
-            alert('Template recovered successfully!');
+            showMessage('Template recovered successfully!');
             // Optionally dispatch an action to update the state
             dispatch({ type: 'RECOVER_TEMPLATE', payload: response.template });
         } catch (error) {
             console.error(error.message);
-            alert('Failed to recover the template. Please try again.');
+            showMessage('Failed to recover the template. Please try again.');
         }
     };
 
@@ -96,29 +103,29 @@ const TemplateListContainer = () => {
         const matchesRole =
             roleFilter === 'All' || template.requiredRole === roleFilter;
 
-    // 🛠️ Debugging Log
-    // console.log(`Checking template: ${template.name}`);
-    // console.log(`- Template Required Role: ${template.requiredRole}`);
-    // console.log(`- User Role: ${user.role}`);
-    // console.log(`- User Organization: ${JSON.stringify(user.organization)}`);
-    // console.log(`- User Suborganizations: ${JSON.stringify(user.suborganizations)}`);
+        // 🛠️ Debugging Log
+        // console.log(`Checking template: ${template.name}`);
+        // console.log(`- Template Required Role: ${template.requiredRole}`);
+        // console.log(`- User Role: ${user.role}`);
+        // console.log(`- User Organization: ${JSON.stringify(user.organization)}`);
+        // console.log(`- User Suborganizations: ${JSON.stringify(user.suborganizations)}`);
 
-    // console.log(`Checking role condition for template: ${template.name}`);
-    // console.log(`- User Role: ${user.role}`);
-    // console.log(`- Template Required Role: ${template.requiredRole}`);
+        // console.log(`Checking role condition for template: ${template.name}`);
+        // console.log(`- User Role: ${user.role}`);
+        // console.log(`- Template Required Role: ${template.requiredRole}`);
 
 
 
-    // Allow students to see organization templates if they belong to suborganizations
-    if (user.role === 'student' && template.requiredRole === 'organization') {
-        const belongsToSubOrg = user.suborganizations?.includes(template.organization); // Fix condition
-        // console.log(`- Template Organization: ${template.organization}`);
-        // console.log(`- Matches Student's Suborganization: ${belongsToSubOrg}`);
+        // Allow students to see organization templates if they belong to suborganizations
+        if (user.role === 'student' && template.requiredRole === 'organization') {
+            const belongsToSubOrg = user.suborganizations?.includes(template.organization); // Fix condition
+            // console.log(`- Template Organization: ${template.organization}`);
+            // console.log(`- Matches Student's Suborganization: ${belongsToSubOrg}`);
 
-        if (belongsToSubOrg) {
-            matchesRole = true;
+            if (belongsToSubOrg) {
+                matchesRole = true;
+            }
         }
-    }
 
         const matchesStatus =
             statusFilter === 'All' || template.status === statusFilter.toLowerCase();
@@ -148,7 +155,7 @@ const TemplateListContainer = () => {
 
 
     return (
-        
+
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
@@ -206,34 +213,34 @@ const TemplateListContainer = () => {
                                 }`}
                         >
 
-                        {(() => {
-                            const matchingSuborg = template?.suborganizations?.find(templateSuborg =>
-                                user?.suborganizations?.some(userSuborg => 
-                                    String(userSuborg._id) === String(templateSuborg._id)
-                                )
-                            );
-                            return matchingSuborg ?
-                                <p className='flex justify-end text-yellow-600 italic'>
-                                Member Privilege!
-                                </p>
-                            : null;
-                        })()}
+                            {(() => {
+                                const matchingSuborg = template?.suborganizations?.find(templateSuborg =>
+                                    user?.suborganizations?.some(userSuborg =>
+                                        String(userSuborg._id) === String(templateSuborg._id)
+                                    )
+                                );
+                                return matchingSuborg ?
+                                    <p className='flex justify-end text-yellow-600 italic'>
+                                        Member Privilege!
+                                    </p>
+                                    : null;
+                            })()}
 
-                        <div className="flex justify-end gap-2 mb-2">
-                            {template.suborganizations && template.suborganizations.length > 0 ? (
-                                template.suborganizations.map((suborg) => (
-                                    <>
-                                    <span key={suborg._id} className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                                        Special for: {suborg.firstname}
+                            <div className="flex justify-end gap-2 mb-2">
+                                {template.suborganizations && template.suborganizations.length > 0 ? (
+                                    template.suborganizations.map((suborg) => (
+                                        <>
+                                            <span key={suborg._id} className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                                                Special for: {suborg.firstname}
+                                            </span>
+                                        </>
+                                    ))
+                                ) : (
+                                    <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                                        General for: {user.organization.name}
                                     </span>
-                                    </>
-                                ))
-                            ) : (
-                                <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                                    General for: {user.organization.name}
-                                </span>
-                            )}
-                        </div>
+                                )}
+                            </div>
 
                             <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
                             <p className="text-gray-700 mb-1">
@@ -293,6 +300,20 @@ const TemplateListContainer = () => {
                     onDelete={handleDeleteTemplate}
                 />
             )}
+
+            {/* Mini Message Box (Centered) */}
+            {message && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                    p-4 rounded shadow-lg text-white text-center w-80"
+                    style={{
+                        backgroundColor: message.type === 'success' ? '#4CAF50'
+                            : message.type === 'error' ? '#F44336'
+                                : '#FFC107'
+                    }}>
+                    {message.text}
+                </div>
+            )}
+
         </div>
     );
 };

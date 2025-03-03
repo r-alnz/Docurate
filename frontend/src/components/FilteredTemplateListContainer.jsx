@@ -7,6 +7,12 @@ const FilteredTemplateListContainer = ({ templates, onSelectTemplate }) => {
     const [detailedTemplates, setDetailedTemplates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTemplateId, setSelectedTemplateId] = useState(null); // Track selected template ID
+    const [message, setMessage] = useState(null);
+
+    const showMessage = (text, type = 'success') => {
+        setMessage({ text, type });
+        setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    };
 
     useEffect(() => {
         const fetchTemplateHeaders = async () => {
@@ -21,7 +27,7 @@ const FilteredTemplateListContainer = ({ templates, onSelectTemplate }) => {
                 setDetailedTemplates(fetchedTemplates);
             } catch (error) {
                 console.error('Error fetching template headers:', error.message);
-                alert('Failed to fetch template headers. Please try again.');
+                showMessage('Failed to fetch template headers. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -48,9 +54,8 @@ const FilteredTemplateListContainer = ({ templates, onSelectTemplate }) => {
             {detailedTemplates.map((template) => (
                 <div
                     key={template._id}
-                    className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 ${
-                        template._id === selectedTemplateId ? 'border-blue-500 ring-2 ring-blue-500' : ''
-                    }`}
+                    className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 ${template._id === selectedTemplateId ? 'border-blue-500 ring-2 ring-blue-500' : ''
+                        }`}
                     onClick={() => handleSelect(template)}
                 >
                     <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
@@ -68,6 +73,19 @@ const FilteredTemplateListContainer = ({ templates, onSelectTemplate }) => {
                     </p>
                 </div>
             ))}
+
+            {/* Mini Message Box (Centered) */}
+            {message && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                    p-4 rounded shadow-lg text-white text-center w-80"
+                    style={{
+                        backgroundColor: message.type === 'success' ? '#4CAF50'
+                            : message.type === 'error' ? '#F44336'
+                                : '#FFC107'
+                    }}>
+                    {message.text}
+                </div>
+            )}
         </div>
     );
 };
