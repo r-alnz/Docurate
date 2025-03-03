@@ -31,7 +31,7 @@ router.post("/bulk-import", authToken, async (req, res) => {
                 if (!user.lastname) missingFields.push("lastname");
                 if (!user.email) missingFields.push("email");
                 if (!user.password) missingFields.push("password");
-                if (!user.role) missingFields.push("role");
+                // if (!user.role) missingFields.push("role");
 
                 return missingFields.length > 0 ? { 
                     index, 
@@ -65,6 +65,7 @@ router.post("/bulk-import", authToken, async (req, res) => {
         const formattedUsers = users.map(user => ({
             ...user,
             organization: new mongoose.Types.ObjectId(loggedInUser.organization),
+            role: "student",
             studentId: user.studentId || "00000", // Auto-generate if missing
         }));
 

@@ -19,10 +19,23 @@ const BulkImportPage = () => {
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
 
-            // setting defval: "" → preserve empty cells
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+            // explicitly set missing values to `null`
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: null });
 
-            setData(jsonData);
+            // remove empty columns dynamically
+            if (jsonData.length > 0) {
+                const validKeys = Object.keys(jsonData[0]).filter(key => jsonData.some(row => row[key] !== null));
+
+                const filteredData = jsonData.map(row => {
+                    const newRow = {};
+                    validKeys.forEach(key => newRow[key] = row[key]);
+                    return newRow;
+                });
+
+                setData(filteredData);
+            } else {
+                setData([]);
+            }
         };
     };
 
@@ -122,7 +135,7 @@ const BulkImportPage = () => {
 
     return (
         <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Import Users</h2>
+            <h2 className="text-xl font-bold mb-4">Import Students</h2>
 
             {/* File Upload Input */}
             <input
