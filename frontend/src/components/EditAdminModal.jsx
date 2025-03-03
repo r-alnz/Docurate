@@ -56,14 +56,14 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
     }, [user]);
 
     const userSuborganizations = formData.suborganizations.length
-    ? formData.suborganizations
-        .map(suborgId => {
-            const suborg = suborganizations.find(org => org._id === suborgId);
-            return suborg ? suborg.firstname + " " + suborg.lastname || "(No Name)" : "Unknown";
-        })
-        .join(", ")
-    : "No suborganizations assigned";
-    
+        ? formData.suborganizations
+            .map(suborgId => {
+                const suborg = suborganizations.find(org => org._id === suborgId);
+                return suborg ? suborg.firstname + " " + suborg.lastname || "(No Name)" : "Unknown";
+            })
+            .join(", ")
+        : "No suborganizations assigned";
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -72,33 +72,33 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-    
+
         if (!user || !user._id) {
             console.error("❌ Error: Missing user ID");
             return;
         }
-    
-        const updatedUser = { 
-            ...formData, 
+
+        const updatedUser = {
+            ...formData,
             suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
             birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
             college: formData.college.trim(),
             course: formData.course.trim(),
         };
-    
+
         console.log("🔹 Updating user:", user._id);
         console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2));
-    
+
         onEdit(user._id, updatedUser);
     };
-    
-    
+
+
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
-            <div className="bg-white p-6 rounded shadow-lg max-w-sm">
+            <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <h2 className="text-lg font-bold mb-4">Edit User</h2>
                 <form>
                     <div className="mb-4">
@@ -145,38 +145,38 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
                     {user.role === 'student' && (
                         <>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Student ID</label>
-                            <input
-                                type="text"
-                                name="studentId"
-                                value={formData.studentId}
-                                onChange={handleInputChange}
-                                className="w-full border p-2 rounded"
-                            />
-                        </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Student ID</label>
+                                <input
+                                    type="text"
+                                    name="studentId"
+                                    value={formData.studentId}
+                                    onChange={handleInputChange}
+                                    className="w-full border p-2 rounded"
+                                />
+                            </div>
 
-                        <div className="mb-4">
-                        <label className="block text-gray-700">College</label>
-                        <input
-                            type="text"
-                            name="college"
-                            value={formData.college}
-                            onChange={handleInputChange}
-                            className="w-full border p-2 rounded"
-                        />
-                        </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700">College</label>
+                                <input
+                                    type="text"
+                                    name="college"
+                                    value={formData.college}
+                                    onChange={handleInputChange}
+                                    className="w-full border p-2 rounded"
+                                />
+                            </div>
 
-                        <div className="mb-4">
-                        <label className="block text-gray-700">Course</label>
-                        <input
-                            type="text"
-                            name="course"
-                            value={formData.course}
-                            onChange={handleInputChange}
-                            className="w-full border p-2 rounded"
-                        />
-                        </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Course</label>
+                                <input
+                                    type="text"
+                                    name="course"
+                                    value={formData.course}
+                                    onChange={handleInputChange}
+                                    className="w-full border p-2 rounded"
+                                />
+                            </div>
                         </>
                     )}
 
@@ -186,27 +186,26 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             {userSuborganizations}
                         </div> */}
 
-{suborganizations.length === 0 ? (
-                <div className="border rounded p-2 w-full text-gray-500">
-                    No suborganizations available.
-                </div>
-            ) : (
-                <div className="border rounded p-2 w-full h-32 overflow-y-auto">
-                    {suborganizations.map((org) => (
-                        <div
-                            key={org._id}
-                            onClick={() => toggleSubOrg(org._id)}
-                            className={`p-2 cursor-pointer ${
-                                selectedSubOrgs.includes(org._id)
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-100 text-gray-700"
-                            } rounded mb-1`}
-                        >
-                            {org.firstname || "(No Name)"}
-                        </div>
-                    ))}
-                </div>
-            )}
+                        {suborganizations.length === 0 ? (
+                            <div className="border rounded p-2 w-full text-gray-500">
+                                No suborganizations available.
+                            </div>
+                        ) : (
+                            <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                                {suborganizations.map((org) => (
+                                    <div
+                                        key={org._id}
+                                        onClick={() => toggleSubOrg(org._id)}
+                                        className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
+                                                ? "bg-blue-500 text-white"
+                                                : "bg-gray-100 text-gray-700"
+                                            } rounded mb-1`}
+                                    >
+                                        {org.firstname || "(No Name)"}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex justify-end">
