@@ -55,16 +55,6 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         }
     }, [user]);
 
-    const userSuborganizations = formData.suborganizations.length
-        ? formData.suborganizations
-            .map(suborgId => {
-                const suborg = suborganizations.find(org => org._id === suborgId);
-                return suborg ? suborg.firstname + " " + suborg.lastname || "(No Name)" : "Unknown";
-            })
-            .join(", ")
-        : "No suborganizations assigned";
-
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -80,7 +70,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
         const updatedUser = {
             ...formData,
-            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
+            // suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
             birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
             college: formData.college.trim(),
             course: formData.course.trim(),
@@ -181,36 +171,33 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                                     className="w-full border p-2 rounded"
                                 />
                             </div>
+
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Suborganizations</label>
+
+                                {suborganizations.length === 0 ? (
+                                    <div className="border rounded p-2 w-full text-gray-500">
+                                        No suborganizations available.
+                                    </div>
+                                ) : (
+                                    <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                                        {suborganizations.map((org) => (
+                                            <div
+                                                key={org._id}
+                                                onClick={() => toggleSubOrg(org._id)}
+                                                className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
+                                                    ? "bg-blue-500 text-white"
+                                                    : "bg-gray-100 text-gray-700"
+                                                    } rounded mb-1`}
+                                            >
+                                                {org.firstname || "(No Name)"}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </>
                     )}
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Suborganizations</label>
-                        {/* <div className="border rounded p-2 w-full h-32 overflow-y-auto">
-                            {userSuborganizations}
-                        </div> */}
-
-                        {suborganizations.length === 0 ? (
-                            <div className="border rounded p-2 w-full text-gray-500">
-                                No suborganizations available.
-                            </div>
-                        ) : (
-                            <div className="border rounded p-2 w-full h-32 overflow-y-auto">
-                                {suborganizations.map((org) => (
-                                    <div
-                                        key={org._id}
-                                        onClick={() => toggleSubOrg(org._id)}
-                                        className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                            ? "bg-blue-500 text-white"
-                                            : "bg-gray-100 text-gray-700"
-                                            } rounded mb-1`}
-                                    >
-                                        {org.firstname || "(No Name)"}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
 
                     <div className="flex justify-end">
                         <button
