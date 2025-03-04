@@ -50,8 +50,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         {currentUser?.role === "admin" && (
                             <th scope="col" className="px-6 py-3">Student ID</th>
                         )}
-                        {/* <th scope="col" className="px-6 py-3">Organization</th> */}
-                        <th scope="col" className="px-6 py-3">Suborganizations</th>
+
+                        {/* pag superadmins, show org.
+                        else, show suborganizations*/}
+                        <th scope="col" className="px-6 py-3">
+                            {currentUser?.role === "superadmin" ? "Organization" : "Suborganizations"}
+                        </th>
+
                         <th scope="col" className="px-6 py-3">Actions</th>
                     </tr>
                 </thead>
@@ -82,12 +87,17 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                 {currentUser?.role === "admin" && (
                                     <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
                                 )}
-                                {/* <td className="px-6 py-4">{user.organization?.name || "N/A"}</td> */}
-                                <td className="px-6 py-4">
-                                    {user.suborganizations?.length > 0
-                                        ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
-                                        : "N/A"}
-                                </td>
+
+                                {currentUser?.role === "superadmin" ? (
+                                    <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
+                                ) : (
+                                    <td className="px-6 py-4">
+                                        {user.suborganizations?.length > 0
+                                            ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
+                                            : "N/A"}
+                                    </td>
+                                )}
+
                                 <td className="px-6 py-4">
                                     <div className="flex gap-5">
                                         {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
