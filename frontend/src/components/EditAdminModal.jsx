@@ -70,7 +70,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!user || !user._id) {
@@ -89,10 +89,14 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         console.log("🔹 Updating user:", user._id);
         console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2));
 
-        onEdit(user._id, updatedUser);
+        try {
+            await onEdit(user._id, updatedUser);
+            alert("✅ Edit successful!");
+        } catch (error) {
+            console.error("❌ Edit failed:", error);
+            alert("❌ Edit failed. Please try again.");
+        }
     };
-
-
 
     if (!isOpen) return null;
 
@@ -197,8 +201,8 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                                         key={org._id}
                                         onClick={() => toggleSubOrg(org._id)}
                                         className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                                ? "bg-blue-500 text-white"
-                                                : "bg-gray-100 text-gray-700"
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-gray-100 text-gray-700"
                                             } rounded mb-1`}
                                     >
                                         {org.firstname || "(No Name)"}

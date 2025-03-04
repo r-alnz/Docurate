@@ -42,17 +42,28 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
         }
     }, [token, isOpen, contextOrganizations, dispatch]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         const userDetails = { firstname, lastname, email, password, role, organization };
-        onSubmit(userDetails);
-        setFirstname('');
-        setLastname('');
-        setEmail('');
-        setPassword('');
-        setRole('admin'); // Reset role to default
-        setOrganization('');
+
+        try {
+            await onSubmit(userDetails);
+            alert("✅ Submission successful!");
+
+            // Reset form fields
+            setFirstname('');
+            setLastname('');
+            setEmail('');
+            setPassword('');
+            setRole('admin'); // Reset role to default
+            setOrganization('');
+        } catch (error) {
+            console.error("❌ Submission failed:", error);
+            alert("❌ Submission failed. Please try again.");
+        }
     };
+
 
     if (!isOpen) return null;
 

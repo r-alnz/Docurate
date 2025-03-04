@@ -31,10 +31,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
 
     // Fetch sub-organizations when modal opens
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // 🛠 Debugging: Log selected sub-orgs before sending
         console.log("Submitting with suborganizations:", selectedSubOrgs);
 
         const userDetails = {
@@ -43,33 +42,35 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             email,
             password,
             role,
-            studentId: role === 'student' ? studentId : null, // Include studentId if role is student
-            birthdate: birthdate || null, // Include birthdate
-            organization: user.organization._id, // Use admin's organization ID
-            organizationName: user.organization.name, // Include the organization name
-            suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [], // Ensure it's an array
+            studentId: role === 'student' ? studentId : null,
+            birthdate: birthdate || null,
+            organization: user.organization._id,
+            organizationName: user.organization.name,
+            suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [],
             college,
             course,
         };
-        onSubmit(userDetails);
 
-        // 🛠 Debugging: Check after sending
-        console.log("User details submitted:", userDetails);
+        try {
+            await onSubmit(userDetails); // Wait for submission
+            alert("✅ Submission successful!");
 
-        //  Delay reset to prevent premature clearing
-        // setTimeout(() => {
-        setFirstname('');
-        setLastname('');
-        setEmail('');
-        setPassword('');
-        setRole('student');
-        setStudentId('');
-        setIsStudentOrgMember(false);
-        setSelectedSubOrgs([]); // Reset selection
-        setBirthdate(''); // Reset birthdate 
-        setCollege('');
-        setCourse('');
-        // }, 200);
+            // Reset form fields
+            setFirstname('');
+            setLastname('');
+            setEmail('');
+            setPassword('');
+            setRole('student');
+            setStudentId('');
+            setIsStudentOrgMember(false);
+            setSelectedSubOrgs([]);
+            setBirthdate('');
+            setCollege('');
+            setCourse('');
+        } catch (error) {
+            console.error("❌ Submission failed:", error);
+            alert("❌ Submission failed. Please try again.");
+        }
     };
 
 
@@ -131,7 +132,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                             required
                         />
                     </div>
-                    
+
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Email</label>
                         <input
@@ -165,33 +166,33 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     </div>
                     {role === 'student' && (
                         <>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-2">Student ID</label>
-                            <input
-                                type="text"
-                                value={studentId}
-                                onChange={(e) => setStudentId(e.target.value)}
-                                className="border rounded p-2 w-full"
-                                required />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-2">College</label>
-                            <input
-                                type="text"
-                                value={college}
-                                onChange={(e) => setCollege(e.target.value)}
-                                className="border rounded p-2 w-full"
-                                required />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-2">Course</label>
-                            <input
-                                type="text"
-                                value={course}
-                                onChange={(e) => setCourse(e.target.value)}
-                                className="border rounded p-2 w-full"
-                                required />
-                        </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Student ID</label>
+                                <input
+                                    type="text"
+                                    value={studentId}
+                                    onChange={(e) => setStudentId(e.target.value)}
+                                    className="border rounded p-2 w-full"
+                                    required />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">College</label>
+                                <input
+                                    type="text"
+                                    value={college}
+                                    onChange={(e) => setCollege(e.target.value)}
+                                    className="border rounded p-2 w-full"
+                                    required />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Course</label>
+                                <input
+                                    type="text"
+                                    value={course}
+                                    onChange={(e) => setCourse(e.target.value)}
+                                    className="border rounded p-2 w-full"
+                                    required />
+                            </div>
                         </>
                     )}
 
