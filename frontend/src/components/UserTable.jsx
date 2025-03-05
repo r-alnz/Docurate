@@ -20,6 +20,10 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         let updatedUsers = users;
         if (filterRole === "students") {
             updatedUsers = users.filter(user => user.role === "student");
+        } else if (filterRole === "studentsUnderOrgs") {
+            updatedUsers = users.filter(user => user.role === "student" && user.suborganizations?.length > 0);
+        } else if (filterRole === "studentsNotUnderOrgs") {
+            updatedUsers = users.filter(user => user.role === "student" && (!user.suborganizations || user.suborganizations.length === 0));
         } else if (filterRole === "organizations") {
             updatedUsers = users.filter(user => user.role === "organization");
         } else if (filterRole === "all") {
@@ -28,15 +32,40 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setFilteredUsers(updatedUsers);
     }, [users, filterRole]);
 
+    const handleEditClick = (user) => {
+        console.log("Edit button clicked!")
+        setSelectedUser(user)
+        setIsEditModalOpen(true)
+    }
+
+    const handleDeleteClick = (user) => {
+        setSelectedUser(user)
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleResetPasswordClick = (user, mode) => {
+        setSelectedUser(user)
+        setResetMode(mode)
+        setIsResetModalOpen(true)
+    }
+
     return (
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
             {currentUser?.role === "admin" && (
+
+                // Filters
                 <div className="mb-4 flex justify-end gap-2">
                     <button onClick={() => setFilterRole("all")} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                        All
+                        All Users
                     </button>
                     <button onClick={() => setFilterRole("students")} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                         Students
+                    </button>
+                    <button onClick={() => setFilterRole("studentsUnderOrgs")} className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                        Students (Under Orgs)
+                    </button>
+                    <button onClick={() => setFilterRole("studentsNotUnderOrgs")} className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
+                        Students (Not Under Orgs)
                     </button>
                     <button onClick={() => setFilterRole("organizations")} className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
                         Organizations
