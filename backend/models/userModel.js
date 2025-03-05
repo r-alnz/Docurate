@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema(
             required: true, 
         },
         birthdate: {
-            type: Date
+            type: Date,
+            default: null
         },
         email: { 
             type: String, 
@@ -35,6 +36,7 @@ const userSchema = new mongoose.Schema(
         },
         position: {
             type: String,
+            default: ""
         },
         college: { 
             type: String,
@@ -97,7 +99,11 @@ userSchema.statics.signup = async function (
             throw new Error('Student ID is required for a student role');
         }
 
-        console.log('1 Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
+        if (role === 'organization' && !organization) {
+            throw new Error('Organization ID is required for an organization role');
+        }
+
+        console.log('Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
 
         const exists = await this.findOne({ email });
         if (exists) {
@@ -107,12 +113,12 @@ userSchema.statics.signup = async function (
         const user = await this.create({
             firstname,
             lastname,
-            birthdate,
+            birthdate: birthdate || null,
             email,
             password,
             role,
             organization,
-            position,
+            position: position || "",
         });
 
         // Check role and create appropriate Admin if needed
@@ -129,12 +135,14 @@ userSchema.statics.signup = async function (
 
         console.log('Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
 
+        res.status(201).json(user);
         return user;
     } catch (error) {
-        console.error('Error signing up user:', error.message);
+        console.error('❌ Error signing up user:', error); // Log the full error
         throw new Error(error.message);
     }
 };
+
 
 
 // Static method to login user

@@ -9,9 +9,13 @@ const createUserAccount = async (req, res) => {
         const { firstname, lastname, email, password, role, organization, college, course, studentId, suborganizations, birthdate } = req.body;
 
 
-        if (!firstname || !lastname || !email || !password || !role || !birthdate) {
+        if (!firstname || !lastname || !email || !password || !role) {
             return res.status(400).json({ message: 'All fields are required' });
         }
+        
+        if (role === 'student' && !birthdate) {
+            return res.status(400).json({ message: 'Birthdate is required for students' });
+        }        
 
         if (!['student', 'organization'].includes(role)) {
             return res.status(400).json({ message: 'Invalid role' });

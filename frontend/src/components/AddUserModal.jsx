@@ -42,8 +42,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             email,
             password,
             role,
-            studentId: role === 'student' ? studentId : null,
-            birthdate: birthdate || null,
+            ...(role === 'student' && { studentId }),
+            ...(role === 'student' && { birthdate }),
             organization: user.organization._id,
             organizationName: user.organization.name,
             suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [],
@@ -108,6 +108,17 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                     required
                                 />
                             </div>
+
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
+                                <input
+                                    type="date"
+                                    value={birthdate}
+                                    onChange={(e) => setBirthdate(e.target.value)}
+                                    className="border rounded p-2 w-full"
+                                    required
+                                />
+                            </div>
                         </>
                     ) : role === 'organization' ? (
                         <div className="mb-4">
@@ -121,17 +132,6 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                             />
                         </div>
                     ) : null}
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
-                        <input
-                            type="date"
-                            value={birthdate}
-                            onChange={(e) => setBirthdate(e.target.value)}
-                            className="border rounded p-2 w-full"
-                            required
-                        />
-                    </div>
 
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Email</label>
