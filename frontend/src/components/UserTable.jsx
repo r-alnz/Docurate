@@ -1,44 +1,49 @@
-import PropTypes from "prop-types"
-import { useState, useEffect } from "react"
-import { useAuthContext } from "../hooks/useAuthContext"
-import DeleteAdminModal from "./DeleteAdminModal"
-import EditAdminModal from "./EditAdminModal"
-import ResetPasswordModal from "./ResetPasswordModal"
-import { resetUserPassword, resetAdminPassword } from "../services/authService"
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { useAuthContext } from "../hooks/useAuthContext";
+import DeleteAdminModal from "./DeleteAdminModal";
+import EditAdminModal from "./EditAdminModal";
+import ResetPasswordModal from "./ResetPasswordModal";
+import { resetUserPassword, resetAdminPassword } from "../services/authService";
 
 const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
-    const [selectedUser, setSelectedUser] = useState(null)
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [isResetModalOpen, setIsResetModalOpen] = useState(false)
-    const [resetMode, setResetMode] = useState("")
-    const { user: currentUser } = useAuthContext()
-    const [filteredUsers, setFilteredUsers] = useState(users) // Add filteredUsers state
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [resetMode, setResetMode] = useState("");
+    const { user: currentUser } = useAuthContext();
+    const [filteredUsers, setFilteredUsers] = useState(users);
+    const [filterRole, setFilterRole] = useState("all");
 
-    // Sync filteredUsers with users when it changes
     useEffect(() => {
-        setFilteredUsers(users)
-    }, [users])
-
-    const handleEditClick = (user) => {
-        console.log("Edit button clicked!")
-        setSelectedUser(user)
-        setIsEditModalOpen(true)
-    }
-
-    const handleDeleteClick = (user) => {
-        setSelectedUser(user)
-        setIsDeleteModalOpen(true)
-    }
-
-    const handleResetPasswordClick = (user, mode) => {
-        setSelectedUser(user)
-        setResetMode(mode)
-        setIsResetModalOpen(true)
-    }
+        let updatedUsers = users;
+        if (filterRole === "students") {
+            updatedUsers = users.filter(user => user.role === "student");
+        } else if (filterRole === "organizations") {
+            updatedUsers = users.filter(user => user.role === "organization");
+        } else if (filterRole === "all") {
+            updatedUsers = users;
+        }
+        setFilteredUsers(updatedUsers);
+    }, [users, filterRole]);
 
     return (
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
+            {currentUser?.role === "admin" && (
+                <div className="mb-4 flex justify-end gap-2">
+                    <button onClick={() => setFilterRole("all")} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                        All
+                    </button>
+                    <button onClick={() => setFilterRole("students")} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        Students
+                    </button>
+                    <button onClick={() => setFilterRole("organizations")} className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                        Organizations
+                    </button>
+                </div>
+            )}
+            
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
