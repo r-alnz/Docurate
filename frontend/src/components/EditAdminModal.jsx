@@ -74,7 +74,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
         const updatedUser = {
             ...formData,
-            // suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
+            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
             birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
             college: formData.college.trim(),
             course: formData.course.trim(),
