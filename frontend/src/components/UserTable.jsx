@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useAuthContext } from "../hooks/useAuthContext";
@@ -72,7 +73,17 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     </button>
                 </div>
             )}
-            
+
+            {/* --------------- */}
+            {/* for simple animation */}
+            <motion.div 
+                key={filterRole} 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ duration: 0.3 }}
+            >
+
+            {/* actual table */}
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
@@ -177,6 +188,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     )}
                 </tbody>
             </table>
+
+            </motion.div>
+            {/* --------------- */}
 
             {isDeleteModalOpen && (
                 <DeleteAdminModal
