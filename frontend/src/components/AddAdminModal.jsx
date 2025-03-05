@@ -11,10 +11,12 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
     const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [birthdate, setBirthdate] = useState('');
     const [role, setRole] = useState('admin'); // Default role is admin
     const [organization, setOrganization] = useState('');
     const [loading, setLoading] = useState(false);
     const [organizations, setOrganizations] = useState([]);
+    const [position, setPosition] = useState('');
 
     useEffect(() => {
         const loadOrganizations = async () => {
@@ -45,7 +47,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const userDetails = { firstname, lastname, email, password, role, organization };
+        const userDetails = { firstname, lastname, email, birthdate, password, role, organization, position };
 
         try {
             await onSubmit(userDetails);
@@ -55,9 +57,11 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
             setFirstname('');
             setLastname('');
             setEmail('');
+            setBirthdate('');
             setPassword('');
             setRole('admin'); // Reset role to default
             setOrganization('');
+            setPosition('');        
         } catch (error) {
             console.error("❌ Submission failed:", error);
             alert("❌ Submission failed. Please try again.");
@@ -92,6 +96,18 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
                             required
                         />
                     </div>
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
+                        <input
+                            type="date"
+                            value={birthdate}
+                            onChange={(e) => setBirthdate(e.target.value)}
+                            className="border rounded p-2 w-full"
+                            required
+                        />
+                    </div>
+
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Email</label>
                         <input
@@ -113,14 +129,13 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Role</label>
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
+                        <label className="block text-gray-700 font-medium mb-2">Position</label>
+                        <input
+                            type="text"
+                            value={position}
+                            onChange={(e) => setPosition(e.target.value)}
                             className="border rounded p-2 w-full"
-                        >
-                            <option value="admin">Admin</option>
-                        </select>
+                        />
                     </div>
                     <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">Organization</label>

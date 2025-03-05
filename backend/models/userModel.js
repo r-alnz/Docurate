@@ -33,7 +33,9 @@ const userSchema = new mongoose.Schema(
                 return this.role && this.role !== 'superadmin';
             }
         },
-
+        position: {
+            type: String,
+        },
         college: { 
             type: String,
         },
@@ -82,22 +84,36 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 
-userSchema.statics.signup = async function (firstname, lastname, email, password, role = "student", organization = null) {
+userSchema.statics.signup = async function (
+    firstname, lastname, birthdate, email, password, role, organization = null, position = null
+) {
     try {
-        if (!firstname || !lastname || !email || !password) {
-            throw new Error('Please provide name, email, and password');
+        if (!firstname || !lastname || !email || !password || !role) {
+            throw new Error('Please provide all required fields');
         }
 
+        // Ensure student role requires studentId
         if (role === 'student' && !studentId) {
             throw new Error('Student ID is required for a student role');
         }
+
+        console.log('1 Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
 
         const exists = await this.findOne({ email });
         if (exists) {
             throw new Error('User with this email already exists');
         }
 
-        const user = await this.create({ firstname, lastname, email, password, role, organization });
+        const user = await this.create({
+            firstname,
+            lastname,
+            birthdate,
+            email,
+            password,
+            role,
+            organization,
+            position,
+        });
 
         // Check role and create appropriate Admin if needed
         if (role === 'admin') {
@@ -110,6 +126,8 @@ userSchema.statics.signup = async function (firstname, lastname, email, password
             });
             await admin.save();
         }
+
+        console.log('Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
 
         return user;
     } catch (error) {

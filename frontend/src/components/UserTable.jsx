@@ -46,7 +46,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         <th scope="col" className="px-6 py-3">Full Name</th>
                         <th scope="col" className="px-6 py-3">Email</th>
                         <th scope="col" className="px-6 py-3">Birthdate</th>
-                        <th scope="col" className="px-6 py-3">Role</th>
+                        <th scope="col" className="px-6 py-3">
+                            {currentUser?.role === "superadmin" ? "Position" : "Role"}
+                        </th>
                         {currentUser?.role === "admin" && (
                             <th scope="col" className="px-6 py-3">Student ID</th>
                         )}
@@ -83,7 +85,12 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                         : "N/A"}
                                 </td>
 
-                                <td className="px-6 py-4">{user.role}</td>
+                                {currentUser?.role === "admin" ? (
+                                    <td className="px-6 py-4">{user.role}</td>
+                                ) : currentUser?.role === "superadmin" ? (
+                                    <td className="px-6 py-4">{user.position || "N/A"}</td>
+                                ) : (null) }
+                                
                                 {currentUser?.role === "admin" && (
                                     <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
                                 )}

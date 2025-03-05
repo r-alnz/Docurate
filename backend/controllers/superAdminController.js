@@ -18,15 +18,16 @@ const createOrganization = async (req, res) => {
 
 // Create Admin Account
 const createAdminAccount = async (req, res) => {
-    const { firstname, lastname, email, password, organization } = req.body;
-
+    console.log('Received body:', req.body); // Debugging
+    const { firstname, lastname, birthdate, email, password, organization, position } = req.body;
+    
     try {
         if (!firstname || !lastname || !email || !password || !organization) {
             throw new Error('All fields are required');
         }
 
         // Create the admin user
-        const adminUser = await User.signup(firstname, lastname, email, password, 'admin', organization);
+        const adminUser = await User.signup(firstname, lastname, birthdate, email, password, 'admin', organization, position);
 
         // Populate the organization field
         const populatedAdmin = await User.findById(adminUser._id).populate('organization', 'name _id');
@@ -61,7 +62,7 @@ const getAdminAccounts = async (req, res) => {
 // Edit Admin Account
 const editAdminAccount = async (req, res) => {
     const { id } = req.params; // Admin account ID
-    const { firstname, lastname, email, password, organization } = req.body;
+    const { firstname, lastname, email, birthdate, password, organization, position } = req.body;
 
     try {
         if (!id) throw new Error('Admin account ID is required');
@@ -74,8 +75,10 @@ const editAdminAccount = async (req, res) => {
         if (firstname) updateData.firstname = firstname;
         if (lastname) updateData.lastname = lastname;
         if (email) updateData.email = email;
+        if (birthdate) updateData.birthdate = birthdate;
         if (password) updateData.password = await User.hashPassword(password); // Hash new password
         if (organization) updateData.organization = organization;
+        if (position) updateData.position = position;
 
         const updatedAdmin = await User.findByIdAndUpdate(
             id,

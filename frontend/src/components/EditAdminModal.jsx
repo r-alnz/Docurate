@@ -14,10 +14,12 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         email: "",
         role: "",
         studentId: "",
+        organization: "",
         suborganizations: [],
         birthdate: "",
         college: "",
         course: "",
+        position: "",
     });
 
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
@@ -51,6 +53,8 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
                 college: user.college || "",
                 course: user.course || "",
+                organization: user.organization || "",
+                position: user.role === 'admin' ? user.position || '' : ''
             });
         }
     }, [user]);
@@ -74,6 +78,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
             birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
             college: formData.college.trim(),
             course: formData.course.trim(),
+            position: formData.position.trim(),
         };
 
         console.log("🔹 Updating user:", user._id);
@@ -196,6 +201,28 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                                     </div>
                                 )}
                             </div>
+                        </>
+                    )}
+
+                    {user.role === 'admin' && (
+                        <>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Position</label>
+                            <input
+                                type="text"
+                                name="position"
+                                value={formData.position}
+                                onChange={handleInputChange}
+                                className="w-full border p-2 rounded"
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Organization</label>
+                            <div className="w-full border p-2 rounded">
+                                    {user.organization.name}
+                            </div>
+                        </div>
                         </>
                     )}
 
