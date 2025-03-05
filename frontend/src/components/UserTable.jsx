@@ -90,11 +90,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         <th scope="col" className="px-6 py-3">#</th>
                         <th scope="col" className="px-6 py-3">Full Name</th>
                         <th scope="col" className="px-6 py-3">Email</th>
-                        <th scope="col" className="px-6 py-3">Birthdate</th>
+                        {filterRole !== "organizations" &&
+                            <th scope="col" className="px-6 py-3">Birthdate</th>
+                        }
+                        
                         <th scope="col" className="px-6 py-3">
                             {currentUser?.role === "superadmin" ? "Position" : "Role"}
                         </th>
-                        {currentUser?.role === "admin" && (
+                        {currentUser?.role === "admin" && filterRole !== "organizations" && (
                             <th scope="col" className="px-6 py-3">Student ID</th>
                         )}
 
@@ -120,15 +123,17 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                 </td>
                                 <td className="px-6 py-4">{user.email}</td>
                                 
-                                <td className="px-6 py-4">
-                                    {user.birthdate
+                                {filterRole !== "organizations" && (
+                                    <td className="px-6 py-4">
+                                        {user.birthdate
                                         ? new Date(user.birthdate).toLocaleDateString("en-US", {
                                             year: "numeric",
                                             month: "2-digit",
                                             day: "2-digit",
                                         })
                                         : "N/A"}
-                                </td>
+                                    </td>
+                                )}
 
                                 {currentUser?.role === "admin" ? (
                                     <td className="px-6 py-4">{user.role}</td>
@@ -136,7 +141,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                     <td className="px-6 py-4">{user.position || "N/A"}</td>
                                 ) : (null) }
                                 
-                                {currentUser?.role === "admin" && (
+                                {currentUser?.role === "admin" && filterRole !== "organizations" && (
                                     <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
                                 )}
 
