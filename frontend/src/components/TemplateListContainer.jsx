@@ -155,166 +155,173 @@ const TemplateListContainer = () => {
 
 
     return (
+      <div className="p-4">
+        <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
-        <div className="p-4">
-            <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
+        <div className="mb-4 flex gap-4">
+          <input
+            type="text"
+            placeholder="Search templates by name, type, or subtype..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border rounded w-full p-2 shadow"
+          />
+          {user.role === "admin" && (
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="border rounded p-2 shadow bg-white"
+            >
+              <option value="All">All</option>
+              <option value="student">Student</option>
+              <option value="organization">Organization</option>
+            </select>
+          )}
+          {user.role === "admin" && (
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border rounded p-2 shadow bg-white"
+            >
+              <option value="All">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          )}
 
-            <div className="mb-4 flex gap-4">
-                <input
-                    type="text"
-                    placeholder="Search templates by name, type, or subtype..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border rounded w-full p-2 shadow"
-                />
-                {user.role === 'admin' && (
-                    <select
-                        value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
-                        className="border rounded p-2 shadow bg-white"
-                    >
-                        <option value="All">All</option>
-                        <option value="student">Student</option>
-                        <option value="organization">Organization</option>
-                    </select>
-                )}
-                {user.role === 'admin' && (
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="border rounded p-2 shadow bg-white"
-                    >
-                        <option value="All">All Statuses</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                )}
-
-                <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    className="border rounded p-2 shadow bg-white"
-                >
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                    <option value="date-asc">Date (Oldest First)</option>
-                    <option value="date-desc">Date (Newest First)</option>
-                </select>
-            </div>
-
-            {sortedTemplates.length === 0 ? (
-                <p>No templates found matching your criteria.</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {sortedTemplates.map((template) => (
-                        <div
-                            key={template._id}
-                            className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white ${template.status === 'inactive' ? 'opacity-50' : ''
-                                }`}
-                        >
-
-                            {(() => {
-                                const matchingSuborg = template?.suborganizations?.find(templateSuborg =>
-                                    user?.suborganizations?.some(userSuborg =>
-                                        String(userSuborg._id) === String(templateSuborg._id)
-                                    )
-                                );
-                                return matchingSuborg ?
-                                    <p className='flex justify-end text-yellow-600 italic'>
-                                        Member Privilege!
-                                    </p>
-                                    : null;
-                            })()}
-
-                            <div className="flex justify-end gap-2 mb-2">
-                                {template.suborganizations && template.suborganizations.length > 0 ? (
-                                    template.suborganizations.map((suborg) => (
-                                        <>
-                                            <span key={suborg._id} className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                                                Special for: {suborg.firstname}
-                                            </span>
-                                        </>
-                                    ))
-                                ) : (
-                                    <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                                        General for: {user.organization.name}
-                                    </span>
-                                )}
-                            </div>
-
-                            <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
-                            <p className="text-gray-700 mb-1">
-                                <strong>Type:</strong> {template.type}
-                            </p>
-                            <p className="text-gray-700 mb-1">
-                                <strong>Subtype:</strong> {template.subtype || 'N/A'}
-                            </p>
-                            <p className="text-gray-700 mb-1">
-                                <strong>Role:</strong> {template.requiredRole}
-                            </p>
-                            <div className="mt-4 flex gap-2">
-                                {template.status === 'inactive' ? (
-                                    <button
-                                        className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
-                                        onClick={() => handleRecoverTemplate(template._id)}
-                                    >
-                                        Recover
-                                    </button>
-                                ) : (
-                                    <>
-                                        <button
-                                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                                            onClick={() =>
-                                                navigate(
-                                                    user.role === 'admin'
-                                                        ? `/templates/${template._id}`
-                                                        : `/user-templates/${template._id}`
-                                                )
-                                            }
-                                        >
-                                            View
-                                        </button>
-                                        {user.role === 'admin' && (
-                                            <button
-                                                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-                                                onClick={() => handleOpenModal(template)}
-                                            >
-                                                Inactive
-                                            </button>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-
-                    ))}
-                </div>
-            )}
-
-            {templateToDelete && (
-                <DeleteTemplateModal
-                    isOpen={isModalOpen}
-                    template={templateToDelete}
-                    onClose={handleCloseModal}
-                    onDelete={handleDeleteTemplate}
-                />
-            )}
-
-            {/* Mini Message Box (Centered) */}
-            {message && (
-                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                    p-4 rounded shadow-lg text-white text-center w-80"
-                    style={{
-                        backgroundColor: message.type === 'success' ? '#4CAF50'
-                            : message.type === 'error' ? '#F44336'
-                                : '#FFC107'
-                    }}>
-                    {message.text}
-                </div>
-            )}
-
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="border rounded p-2 shadow bg-white"
+          >
+            <option value="name-asc">Name (A-Z)</option>
+            <option value="name-desc">Name (Z-A)</option>
+            <option value="date-asc">Date (Oldest First)</option>
+            <option value="date-desc">Date (Newest First)</option>
+          </select>
         </div>
+
+        {sortedTemplates.length === 0 ? (
+          <p>No templates found matching your criteria.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sortedTemplates.map((template) => (
+              <div
+                key={template._id}
+                className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white ${
+                  template.status === "inactive" ? "opacity-50" : ""
+                }`}
+              >
+                {(() => {
+                  const matchingSuborg = template?.suborganizations?.find(
+                    (templateSuborg) =>
+                      user?.suborganizations?.some(
+                        (userSuborg) =>
+                          String(userSuborg._id) === String(templateSuborg._id)
+                      )
+                  );
+                  return matchingSuborg ? (
+                    <p className="flex justify-end text-yellow-600 italic">
+                      Member Privilege!
+                    </p>
+                  ) : null;
+                })()}
+
+                <div className="flex justify-end gap-2 mb-2">
+                  {template.suborganizations &&
+                  template.suborganizations.length > 0 ? (
+                    template.suborganizations.map((suborg) => (
+                      <>
+                        <span
+                          key={suborg._id}
+                          className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
+                        >
+                          Special for: {suborg.firstname}
+                        </span>
+                      </>
+                    ))
+                  ) : (
+                    <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                      General for: {user.organization.name}
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
+                <p className="text-gray-700 mb-1">
+                  <strong>Type:</strong> {template.type}
+                </p>
+                <p className="text-gray-700 mb-1">
+                  <strong>Subtype:</strong> {template.subtype || "N/A"}
+                </p>
+                <p className="text-gray-700 mb-1">
+                  <strong>Role:</strong> {template.requiredRole}
+                </p>
+                <div className="mt-4 flex gap-2">
+                  {template.status === "inactive" ? (
+                    <button
+                      className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+                      onClick={() => handleRecoverTemplate(template._id)}
+                    >
+                      Recover
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
+                        onClick={() =>
+                          navigate(
+                            user.role === "admin"
+                              ? `/templates/${template._id}`
+                              : `/user-templates/${template._id}`
+                          )
+                        }
+                      >
+                        View
+                      </button>
+                      {user.role === "admin" && (
+                        <button
+                          className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
+                          onClick={() => handleOpenModal(template)}
+                        >
+                          Inactive
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {templateToDelete && (
+          <DeleteTemplateModal
+            isOpen={isModalOpen}
+            template={templateToDelete}
+            onClose={handleCloseModal}
+            onDelete={handleDeleteTemplate}
+          />
+        )}
+
+        {/* Mini Message Box (Centered) */}
+        {message && (
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                    p-4 rounded shadow-lg text-white text-center w-80"
+            style={{
+              backgroundColor:
+                message.type === "success"
+                  ? "#4CAF50"
+                  : message.type === "error"
+                  ? "#F44336"
+                  : "#FFC107",
+            }}
+          >
+            {message.text}
+          </div>
+        )}
+      </div>
     );
 };
 

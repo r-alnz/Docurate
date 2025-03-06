@@ -707,588 +707,687 @@ const TemplateContainer = ({ suborgs }) => {
 
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Template Editor</h1>
-            <div className="mb-4 border p-4 rounded shadow">
-                <h2 className="text-xl font-medium mb-4">Template Information</h2>
-                <label className="block text-gray-700 font-medium mb-2">Template Name:</label>
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={documentName}
-                        onChange={handleTemplateNameChange}
-                        placeholder="Enter document name"
-                        className="w-full border rounded p-2 mb-4"
-                        required
-                        list="template-name-suggestions"
-                    />
-                    <datalist id="template-name-suggestions">
-                        {filteredSuggestions.map((name, index) => (
-                            <option key={index} value={name} />
-                        ))}
-                    </datalist>
-                </div>
-                <label className="block text-gray-700 font-medium mb-2">Document Type:</label>
-                <select
-                    value={isCustomType ? 'custom' : documentType}
-                    onChange={(e) => {
-                        const selectedType = e.target.value;
-                        setDocumentType(selectedType);
-                        setDocumentSubtype('');
-                        if (selectedType === 'custom') {
-                            setIsCustomType(true);
-                            setSubtypeOptions([]);
-                        } else {
-                            setIsCustomType(false);
-                            setSubtypeOptions(Object.keys(decisionTree[selectedType]?.subtype || {}));
-                        }
-                    }}
-                    className="w-full border rounded p-2 mb-4"
-                >
-                    <option value="">Select Type</option>
-                    {Object.keys(decisionTree).map((type) => (
-                        <option key={type} value={type}>
-                            {type}
-                        </option>
-                    ))}
-                    <option value="custom">Add Custom Type</option>
-                </select>
-                {isCustomType && (
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-2">Custom Type:</label>
-                        <input
-                            type="text"
-                            value={customType}
-                            onChange={(e) => setCustomType(e.target.value)}
-                            placeholder="Enter custom type"
-                            className="w-full border rounded p-2 mb-4"
-                        />
-                    </div>
-                )}
-                <label className="block text-gray-700 font-medium mb-2">Document Subtype:</label>
-                <input
-                    type="text"
-                    value={isCustomType ? customSubtype : documentSubtype}
-                    onChange={(e) => {
-                        if (isCustomType) {
-                            setCustomSubtype(e.target.value);
-                        } else {
-                            setDocumentSubtype(e.target.value);
-                        }
-                    }}
-                    placeholder="Enter subtype"
-                    className="w-full border rounded p-2 mb-4"
-                />
-                <label className="block text-gray-700 font-medium mb-2">Template For:</label>
-                <select
-                    value={requiredRole}
-                    onChange={(e) => setRequiredRole(e.target.value)}
-                    className="border rounded p-2 mb-4"
-                    required
-                >
-                    <option value="">Select Role</option>
-                    <option value="student">Student</option>
-                    <option value="organization">Organization</option>
-                </select>
-                <label className="block text-gray-700 font-medium mb-2">Suborganization:</label>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-4">Template Editor</h1>
+        <div className="mb-4 border p-4 rounded shadow">
+          <h2 className="text-xl font-medium mb-4">Template Information</h2>
+          <label className="block text-gray-700 font-medium mb-2">
+            Template Name:
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={documentName}
+              onChange={handleTemplateNameChange}
+              placeholder="Enter document name"
+              className="w-full border rounded p-2 mb-4"
+              required
+              list="template-name-suggestions"
+            />
+            <datalist id="template-name-suggestions">
+              {filteredSuggestions.map((name, index) => (
+                <option key={index} value={name} />
+              ))}
+            </datalist>
+          </div>
+          <label className="block text-gray-700 font-medium mb-2">
+            Document Type:
+          </label>
+          <select
+            value={isCustomType ? "custom" : documentType}
+            onChange={(e) => {
+              const selectedType = e.target.value;
+              setDocumentType(selectedType);
+              setDocumentSubtype("");
+              if (selectedType === "custom") {
+                setIsCustomType(true);
+                setSubtypeOptions([]);
+              } else {
+                setIsCustomType(false);
+                setSubtypeOptions(
+                  Object.keys(decisionTree[selectedType]?.subtype || {})
+                );
+              }
+            }}
+            className="w-full border rounded p-2 mb-4"
+          >
+            <option value="">Select Type</option>
+            {Object.keys(decisionTree).map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+            <option value="custom">Add Custom Type</option>
+          </select>
+          {isCustomType && (
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Custom Type:
+              </label>
+              <input
+                type="text"
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                placeholder="Enter custom type"
+                className="w-full border rounded p-2 mb-4"
+              />
+            </div>
+          )}
+          <label className="block text-gray-700 font-medium mb-2">
+            Document Subtype:
+          </label>
+          <input
+            type="text"
+            value={isCustomType ? customSubtype : documentSubtype}
+            onChange={(e) => {
+              if (isCustomType) {
+                setCustomSubtype(e.target.value);
+              } else {
+                setDocumentSubtype(e.target.value);
+              }
+            }}
+            placeholder="Enter subtype"
+            className="w-full border rounded p-2 mb-4"
+          />
+          <label className="block text-gray-700 font-medium mb-2">
+            Template For:
+          </label>
+          <select
+            value={requiredRole}
+            onChange={(e) => setRequiredRole(e.target.value)}
+            className="border rounded p-2 mb-4"
+            required
+          >
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="organization">Organization</option>
+          </select>
+          <label className="block text-gray-700 font-medium mb-2">
+            Suborganization:
+          </label>
+          {suborgs.length === 0 ? (
+            <div className="border rounded p-2 w-full text-gray-500">
+              No suborganizations under {user.organization?.name}
+            </div>
+          ) : (
+            <select
+              value={selectedSubOrg.length === 0 ? "" : selectedSubOrg}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedSubOrg(value === "" ? [] : value);
+              }}
+              className="border rounded p-2 mb-4"
+            >
+              <option value="">
+                For general use (under {user.organization?.name})
+              </option>
+              {suborgs.map((org) => (
+                <option key={org._id} value={org._id}>
+                  {org.firstname || "(No Name)"}
+                </option>
+              ))}
+            </select>
+          )}
+          <label className="block text-gray-700 font-medium mb-2">
+            Strict Mode:
+          </label>
+          <input
+            type="checkbox"
+            checked={strictMode}
+            onChange={toggleStrictMode}
+            className="mr-2"
+          />
+          Enable strict mode
+          <label className="block text-gray-700 font-medium mb-2">
+            Paper Size:
+          </label>
+          <select
+            value={paperSize}
+            onChange={(e) => setPaperSize(e.target.value)}
+            disabled={editorLoaded}
+            className="border rounded p-2 mb-4"
+            required
+          >
+            <option value="letter">Letter (8.5in x 11in)</option>
+            <option value="legal">Legal (8.5in x 14in)</option>
+            <option value="a4">A4 (8.27in x 11.69in)</option>
+          </select>
+          <h2 className="text-xl font-medium mb-4">Margins (in inches):</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Top Margin:
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                name="top"
+                value={margins.top}
+                onChange={handleMarginChange}
+                className="w-full border rounded p-2 mb-4"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Bottom Margin:
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                name="bottom"
+                value={margins.bottom}
+                onChange={handleMarginChange}
+                className="w-full border rounded p-2 mb-4"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Left Margin:
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                name="left"
+                value={margins.left}
+                onChange={handleMarginChange}
+                className="w-full border rounded p-2 mb-4"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Right Margin:
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                name="right"
+                value={margins.right}
+                onChange={handleMarginChange}
+                className="w-full border rounded p-2 mb-4"
+              />
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              if (
+                !documentName ||
+                (!documentType && !customType) ||
+                !requiredRole ||
+                !paperSize
+              ) {
+                showMessage(
+                  "Please fill in all required fields before starting template creation."
+                );
+                return;
+              }
+              setEditorLoaded(true);
+            }}
+            disabled={editorLoaded}
+            className={`bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] ${
+              editorLoaded ? "hidden" : ""
+            }`}
+          >
+            Begin Template Creation
+          </button>
+        </div>
 
-                {suborgs.length === 0 ? (
-                    <div className="border rounded p-2 w-full text-gray-500">
-                        No suborganizations under {user.organization?.name}
-                    </div>
-                ) : (
-                    <select
-                        value={selectedSubOrg.length === 0 ? "" : selectedSubOrg}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setSelectedSubOrg(value === "" ? [] : value);
-                        }}
-                        className="border rounded p-2 mb-4"
-                    >
-                        <option value="">For general use (under {user.organization?.name})</option>
-                        {suborgs.map((org) => (
-                            <option key={org._id} value={org._id}>
-                                {org.firstname || "(No Name)"}
-                            </option>
-                        ))}
-                    </select>
-
-                )}
-
-                <label className="block text-gray-700 font-medium mb-2">Strict Mode:</label>
-                <input
-                    type="checkbox"
-                    checked={strictMode}
-                    onChange={toggleStrictMode}
-                    className="mr-2"
-                />
-                Enable strict mode
-                <label className="block text-gray-700 font-medium mb-2">Paper Size:</label>
-                <select
-                    value={paperSize}
-                    onChange={(e) => setPaperSize(e.target.value)}
-                    disabled={editorLoaded}
-                    className="border rounded p-2 mb-4"
-                    required
-                >
-                    <option value="letter">Letter (8.5in x 11in)</option>
-                    <option value="legal">Legal (8.5in x 14in)</option>
-                    <option value="a4">A4 (8.27in x 11.69in)</option>
-                </select>
-
-                <h2 className="text-xl font-medium mb-4">Margins (in inches):</h2>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-2">Top Margin:</label>
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="top"
-                            value={margins.top}
-                            onChange={handleMarginChange}
-                            className="w-full border rounded p-2 mb-4"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-2">Bottom Margin:</label>
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="bottom"
-                            value={margins.bottom}
-                            onChange={handleMarginChange}
-                            className="w-full border rounded p-2 mb-4"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-2">Left Margin:</label>
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="left"
-                            value={margins.left}
-                            onChange={handleMarginChange}
-                            className="w-full border rounded p-2 mb-4"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-2">Right Margin:</label>
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="right"
-                            value={margins.right}
-                            onChange={handleMarginChange}
-                            className="w-full border rounded p-2 mb-4"
-                        />
-                    </div>
-                </div>
-
-                <button
-                    onClick={() => {
-                        if (!documentName || (!documentType && !customType) || !requiredRole || !paperSize) {
-                            showMessage('Please fill in all required fields before starting template creation.');
-                            return;
-                        }
-                        setEditorLoaded(true);
-                    }}
-                    disabled={editorLoaded}
-                    className={`bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 ${editorLoaded ? 'hidden' : ''
-                        }`}
-                >
-                    Begin Template Creation
-                </button>
+        {editorLoaded && (
+          <>
+            {/* Pagination Controls */}
+            <div className="mb-4 flex justify-between">
+              <button
+                disabled={currentPage === 1}
+                onClick={handlePreviousPage}
+                className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {pages.length}
+              </span>
+              <button
+                disabled={currentPage === pages.length}
+                onClick={handleNextPage}
+                className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+              >
+                Next
+              </button>
             </div>
 
+            {/* Add/Delete Buttons */}
+            <div className="mb-4 flex justify-end gap-4">
+              <button
+                onClick={handleAddPage}
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                Add Page
+              </button>
+              <button
+                onClick={handleDeletePage}
+                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
+              >
+                Delete Page
+              </button>
+            </div>
 
+            {/* Editors */}
+            {pages.map((page) => (
+              <div
+                key={page.id}
+                style={{ display: currentPage === page.id ? "block" : "none" }}
+              >
+                <Editor
+                  apiKey="nlhi2d7e29jjlh8lggzbzvaee9h7u3ba4hfywmh0v1skgixg"
+                  value={page.content}
+                  init={{
+                    height: selectedPageSize.height,
+                    menubar:
+                      "favs file edit view insert format tools table help",
+                    plugins: [
+                      "advlist",
+                      "autolink",
+                      "link",
+                      "image",
+                      "lists",
+                      "pagebreak",
+                      "charmap",
+                      "preview",
+                      "anchor",
+                      "searchreplace",
+                      "wordcount",
+                      "visualblocks",
+                      "code",
+                      "fullscreen",
+                      "insertdatetime",
+                      "media",
+                      "table",
+                      "emoticons",
+                      "help",
+                      "print",
+                    ],
+                    toolbar:
+                      "undo redo | styles | bold italic underline | fontsize fontfamily | addDraggableImage | addHeaderImage addFooterImage| markEditable removeEditable | lineheight pagebreak| " +
+                      "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | addHangingIndent removeHangingIndent | " +
+                      "link image | fullscreen | forecolor backcolor emoticons | help",
+                    object_resizing: "img",
+                    fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",
+                    line_height_formats: "1 1.1 1.15 1.2 1.3 1.5 2",
+                    font_family_formats:
+                      "Andale Mono=andale mono,times; " +
+                      "Arial=arial,helvetica,sans-serif; " +
+                      "Arial Black=arial black,avant garde; " +
+                      "Book Antiqua=book antiqua,palatino; " +
+                      "Century Gothic=Century Gothic,sans-serif; " +
+                      "Comic Sans MS=comic sans ms,sans-serif; " +
+                      "Courier New=courier new,courier; " +
+                      "Georgia=georgia,palatino; " +
+                      "Helvetica=helvetica; " +
+                      "Palatino Linotype=Palatino Linotype,serif; " +
+                      "Impact=impact,chicago; " +
+                      "Questrial=Questrial,sans-serif; " +
+                      "Symbol=symbol; " +
+                      "Tahoma=tahoma,arial,helvetica,sans-serif; " +
+                      "Terminal=terminal,monaco; " +
+                      "Times New Roman=times new roman,times; " +
+                      "Trebuchet MS=trebuchet ms,geneva; " +
+                      "Verdana=verdana,geneva; ",
+                    content_style: sharedStyles,
+                    setup: (editor) => {
+                      // editor.on('init', () => {
+                      //     const iframe = editor.getDoc(); // Access the iframe's document
+                      //     iframe.addEventListener('mousedown', (e) => {
+                      //         const target = e.target.closest('.draggable-image');
+                      //         if (!target) return;
 
+                      //         let offsetX = e.clientX - target.offsetLeft;
+                      //         let offsetY = e.clientY - target.offsetTop;
 
-            {editorLoaded && (
-                <>
-                    {/* Pagination Controls */}
-                    <div className="mb-4 flex justify-between">
-                        <button
-                            disabled={currentPage === 1}
-                            onClick={handlePreviousPage}
-                            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
-                        >
-                            Previous
-                        </button>
-                        <span>
-                            Page {currentPage} of {pages.length}
-                        </span>
-                        <button
-                            disabled={currentPage === pages.length}
-                            onClick={handleNextPage}
-                            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
-                        >
-                            Next
-                        </button>
-                    </div>
+                      //         const onMouseMove = (event) => {
+                      //             target.style.left = `${event.clientX - offsetX}px`;
+                      //             target.style.top = `${event.clientY - offsetY}px`;
+                      //         };
 
-                    {/* Add/Delete Buttons */}
-                    <div className="mb-4 flex justify-end gap-4">
-                        <button
-                            onClick={handleAddPage}
+                      //         const onMouseUp = () => {
+                      //             iframe.removeEventListener('mousemove', onMouseMove);
+                      //             iframe.removeEventListener('mouseup', onMouseUp);
+                      //             console.log(target);
+                      //         };
 
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                        >
-                            Add Page
-                        </button>
-                        <button
-                            onClick={handleDeletePage}
-                            className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-                        >
-                            Delete Page
-                        </button>
-                    </div>
+                      //         console.log(target);
 
-                    {/* Editors */}
-                    {pages.map((page) => (
-                        <div
-                            key={page.id}
-                            style={{ display: currentPage === page.id ? 'block' : 'none' }}
-                        >
-                            <Editor
-                                apiKey="nlhi2d7e29jjlh8lggzbzvaee9h7u3ba4hfywmh0v1skgixg"
-                                value={page.content}
-                                init={{
-                                    height: selectedPageSize.height,
-                                    menubar: 'favs file edit view insert format tools table help',
-                                    plugins: [
-                                        'advlist', 'autolink', 'link', 'image', 'lists', 'pagebreak', 'charmap', 'preview', 'anchor',
-                                        'searchreplace', 'wordcount', 'visualblocks', 'code', 'fullscreen', 'insertdatetime',
-                                        'media', 'table', 'emoticons', 'help', 'print',
-                                    ],
-                                    toolbar:
-                                        'undo redo | styles | bold italic underline | fontsize fontfamily | addDraggableImage | addHeaderImage addFooterImage| markEditable removeEditable | lineheight pagebreak| ' +
-                                        'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | addHangingIndent removeHangingIndent | ' +
-                                        'link image | fullscreen | forecolor backcolor emoticons | help',
-                                    object_resizing: 'img',
-                                    fontsize_formats: '8pt 10pt 12pt 14pt 18pt 24pt 36pt',
-                                    line_height_formats: '1 1.1 1.15 1.2 1.3 1.5 2',
-                                    font_family_formats:
-                                        "Andale Mono=andale mono,times; " +
-                                        "Arial=arial,helvetica,sans-serif; " +
-                                        "Arial Black=arial black,avant garde; " +
-                                        "Book Antiqua=book antiqua,palatino; " +
-                                        "Century Gothic=Century Gothic,sans-serif; " +
-                                        "Comic Sans MS=comic sans ms,sans-serif; " +
-                                        "Courier New=courier new,courier; " +
-                                        "Georgia=georgia,palatino; " +
-                                        "Helvetica=helvetica; " +
-                                        "Palatino Linotype=Palatino Linotype,serif; " +
-                                        "Impact=impact,chicago; " +
-                                        "Questrial=Questrial,sans-serif; " +
-                                        "Symbol=symbol; " +
-                                        "Tahoma=tahoma,arial,helvetica,sans-serif; " +
-                                        "Terminal=terminal,monaco; " +
-                                        "Times New Roman=times new roman,times; " +
-                                        "Trebuchet MS=trebuchet ms,geneva; " +
-                                        "Verdana=verdana,geneva; ",
-                                    content_style: sharedStyles,
-                                    setup: (editor) => {
+                      //         iframe.addEventListener('mousemove', onMouseMove);
+                      //         iframe.addEventListener('mouseup', onMouseUp);
+                      //     });
+                      // });
+                      editor.on("drop", (event) => {
+                        event.preventDefault(); // Prevent TinyMCE's default drop handling
+                        event.stopPropagation(); // Stop propagation of the event to prevent other handlers
+                      });
 
-                                        // editor.on('init', () => {
-                                        //     const iframe = editor.getDoc(); // Access the iframe's document
-                                        //     iframe.addEventListener('mousedown', (e) => {
-                                        //         const target = e.target.closest('.draggable-image');
-                                        //         if (!target) return;
+                      editor.on("init", () => {
+                        const iframeDoc = editor.getDoc(); // Access TinyMCE's iframe document
+                        const editorBody = editor.getBody();
 
-                                        //         let offsetX = e.clientX - target.offsetLeft;
-                                        //         let offsetY = e.clientY - target.offsetTop;
+                        iframeDoc.addEventListener("mousedown", (e) => {
+                          const target = e.target.closest(".draggable-image");
+                          if (!target) return;
 
-                                        //         const onMouseMove = (event) => {
-                                        //             target.style.left = `${event.clientX - offsetX}px`;
-                                        //             target.style.top = `${event.clientY - offsetY}px`;
-                                        //         };
+                          let offsetX = e.clientX - target.offsetLeft;
+                          let offsetY = e.clientY - target.offsetTop;
 
-                                        //         const onMouseUp = () => {
-                                        //             iframe.removeEventListener('mousemove', onMouseMove);
-                                        //             iframe.removeEventListener('mouseup', onMouseUp);
-                                        //             console.log(target);
-                                        //         };
+                          const onMouseMove = (event) => {
+                            target.style.left = `${event.clientX - offsetX}px`;
+                            target.style.top = `${event.clientY - offsetY}px`;
+                          };
 
-                                        //         console.log(target);
+                          const onMouseUp = () => {
+                            iframeDoc.removeEventListener(
+                              "mousemove",
+                              onMouseMove
+                            );
+                            iframeDoc.removeEventListener("mouseup", onMouseUp);
 
-                                        //         iframe.addEventListener('mousemove', onMouseMove);
-                                        //         iframe.addEventListener('mouseup', onMouseUp);
-                                        //     });
-                                        // });
-                                        editor.on('drop', (event) => {
-                                            event.preventDefault(); // Prevent TinyMCE's default drop handling
-                                            event.stopPropagation(); // Stop propagation of the event to prevent other handlers
-                                        });
+                            // Update TinyMCE's content
+                            const uniqueId = target.getAttribute("id");
+                            if (uniqueId) {
+                              const tinyTarget = editor.dom.get(uniqueId);
+                              editor.dom.setStyles(tinyTarget, {
+                                left: target.style.left,
+                                top: target.style.top,
+                              });
 
-                                        editor.on('init', () => {
-                                            const iframeDoc = editor.getDoc(); // Access TinyMCE's iframe document
-                                            const editorBody = editor.getBody();
+                              // Synchronize TinyMCE content
+                              const updatedContent = editor.getContent();
+                              editor.setContent(updatedContent);
 
-                                            iframeDoc.addEventListener('mousedown', (e) => {
-                                                const target = e.target.closest('.draggable-image');
-                                                if (!target) return;
+                              // Trigger TinyMCE's change event to ensure synchronization
+                              editor.undoManager.add();
+                              editor.fire("change");
+                              console.log(editor.getContent()); // Verify updated content
+                            } else {
+                              console.warn(
+                                "Draggable image has no ID. Ensure unique IDs are assigned."
+                              );
+                            }
+                          };
 
-                                                let offsetX = e.clientX - target.offsetLeft;
-                                                let offsetY = e.clientY - target.offsetTop;
+                          iframeDoc.addEventListener("mousemove", onMouseMove);
+                          iframeDoc.addEventListener("mouseup", onMouseUp);
+                        });
+                      });
 
-                                                const onMouseMove = (event) => {
-                                                    target.style.left = `${event.clientX - offsetX}px`;
-                                                    target.style.top = `${event.clientY - offsetY}px`;
-                                                };
+                      editor.ui.registry.addButton("addDraggableImage", {
+                        text: "Insert Image",
+                        icon: "image",
+                        onAction: () => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
+                          input.onchange = async () => {
+                            const file = input.files[0];
+                            if (file) {
+                              try {
+                                addDraggableImage(editor, file);
+                              } catch (error) {
+                                console.error(
+                                  "Error adding draggable image:",
+                                  error.message
+                                );
+                                showMessage(
+                                  "Failed to add image. Please try again."
+                                );
+                              }
+                            }
+                          };
+                          input.click();
+                        },
+                      });
 
-                                                const onMouseUp = () => {
-                                                    iframeDoc.removeEventListener('mousemove', onMouseMove);
-                                                    iframeDoc.removeEventListener('mouseup', onMouseUp);
+                      editor.on("keydown", (event) => {
+                        if (event.key === "Tab") {
+                          event.preventDefault(); // Prevent default tab behavior
+                          const selection = editor.selection;
+                          const content = selection.getContent({
+                            format: "html",
+                          });
 
-                                                    // Update TinyMCE's content
-                                                    const uniqueId = target.getAttribute('id');
-                                                    if (uniqueId) {
-                                                        const tinyTarget = editor.dom.get(uniqueId);
-                                                        editor.dom.setStyles(tinyTarget, {
-                                                            left: target.style.left,
-                                                            top: target.style.top,
-                                                        });
+                          // Insert a "tab" as multiple non-breaking spaces
+                          const tabEquivalent = "&nbsp;&nbsp;&nbsp;&nbsp;"; // 4 spaces (adjust as needed)
+                          const newContent = `${tabEquivalent}${content}`;
+                          selection.setContent(newContent);
+                        }
+                      });
 
-                                                        // Synchronize TinyMCE content
-                                                        const updatedContent = editor.getContent();
-                                                        editor.setContent(updatedContent);
+                      // ------------ Method 1: Count newlines based sa exceeding ng width
 
-                                                        // Trigger TinyMCE's change event to ensure synchronization
-                                                        editor.undoManager.add();
-                                                        editor.fire('change');
-                                                        console.log(editor.getContent()); // Verify updated content
-                                                    } else {
-                                                        console.warn('Draggable image has no ID. Ensure unique IDs are assigned.');
-                                                    }
-                                                };
+                      editor.on("keydown", (event) => {
+                        const lineHeight =
+                          parseFloat(
+                            window.getComputedStyle(editor.getBody()).lineHeight
+                          ) || 20;
+                        const pageHeightPx = selectedPageSize.height;
+                        const marginTopPx = margins.top * DPI;
+                        const marginBottomPx = margins.bottom * DPI;
+                        const availableHeight =
+                          pageHeightPx - (marginTopPx + marginBottomPx);
+                        const maxLines = Math.floor(
+                          availableHeight / lineHeight
+                        );
+                        const maxTextWidth =
+                          selectedPageSize.width -
+                          (margins.left * DPI + margins.right * DPI);
+                        const textContent = editor.getContent({
+                          format: "text",
+                        });
 
-                                                iframeDoc.addEventListener('mousemove', onMouseMove);
-                                                iframeDoc.addEventListener('mouseup', onMouseUp);
-                                            });
-                                        });
+                        let currentLines = 1; // laging start at line 1
+                        let currentLineWidth = 0;
 
+                        for (let char of textContent) {
+                          const charWidth = 13.2; // approx width per char
 
+                          if (currentLineWidth + charWidth > maxTextWidth) {
+                            // increment line count pag exceeds
+                            currentLines++;
+                            currentLineWidth = charWidth; // new line count
+                          } else {
+                            currentLineWidth += charWidth;
+                          }
+                        }
 
-                                        editor.ui.registry.addButton('addDraggableImage', {
-                                            text: 'Insert Image',
-                                            icon: 'image',
-                                            onAction: () => {
-                                                const input = document.createElement('input');
-                                                input.type = 'file';
-                                                input.accept = 'image/*';
-                                                input.onchange = async () => {
-                                                    const file = input.files[0];
-                                                    if (file) {
-                                                        try {
-                                                            addDraggableImage(editor, file);
-                                                        } catch (error) {
-                                                            console.error('Error adding draggable image:', error.message);
-                                                            showMessage('Failed to add image. Please try again.');
-                                                        }
-                                                    }
-                                                };
-                                                input.click();
-                                            },
-                                        });
+                        // Prevent typing if beyond max lines na
+                        if (
+                          currentLines >= maxLines &&
+                          (event.key === "Enter" || event.key.length === 1)
+                        ) {
+                          console.log("Typing blocked: max lines reached!");
+                          event.preventDefault(); // Stop Enter and typing beyond max lines
+                        }
+                      });
 
-                                        editor.on('keydown', (event) => {
-                                            if (event.key === 'Tab') {
-                                                event.preventDefault(); // Prevent default tab behavior
-                                                const selection = editor.selection;
-                                                const content = selection.getContent({ format: 'html' });
+                      // ------------ Method 2: Count newlines based sa number of Enters
 
-                                                // Insert a "tab" as multiple non-breaking spaces
-                                                const tabEquivalent = '&nbsp;&nbsp;&nbsp;&nbsp;'; // 4 spaces (adjust as needed)
-                                                const newContent = `${tabEquivalent}${content}`;
-                                                selection.setContent(newContent);
-                                            }
-                                        });
+                      editor.on("keydown", (event) => {
+                        const lineHeight =
+                          parseFloat(
+                            window.getComputedStyle(editor.getBody()).lineHeight
+                          ) || 20;
+                        const pageHeightPx = selectedPageSize.height;
+                        const marginTopPx = margins.top * DPI;
+                        const marginBottomPx = margins.bottom * DPI;
+                        const availableHeight =
+                          pageHeightPx -
+                          (marginTopPx + marginBottomPx) +
+                          lineHeight;
+                        const maxLines = Math.floor(
+                          availableHeight / lineHeight
+                        );
+                        const textContent = editor.getContent({
+                          format: "text",
+                        });
+                        const lines = textContent.split("\n");
+                        const currentLines = lines.length;
+                        const maxTextWidth =
+                          selectedPageSize.width -
+                          (margins.left * DPI + margins.right * DPI);
 
-                                        // ------------ Method 1: Count newlines based sa exceeding ng width
+                        // approx last line width (since walang exact from TinyMCE)
+                        const lastLine = lines[lines.length - 1] || "";
+                        const lastLineWidthPx = lastLine.length * 7;
 
-                                        editor.on('keydown', (event) => {
-                                            const lineHeight = parseFloat(window.getComputedStyle(editor.getBody()).lineHeight) || 20;
-                                            const pageHeightPx = selectedPageSize.height;
-                                            const marginTopPx = margins.top * DPI;
-                                            const marginBottomPx = margins.bottom * DPI;
-                                            const availableHeight = pageHeightPx - (marginTopPx + marginBottomPx);
-                                            const maxLines = Math.floor(availableHeight / lineHeight);
-                                            const maxTextWidth = selectedPageSize.width - (margins.left * DPI + margins.right * DPI);
-                                            const textContent = editor.getContent({ format: 'text' });
+                        // Prevent typing pag beyond max lines
+                        if (currentLines >= maxLines && event.key === "Enter") {
+                          console.log("Typing blocked: max lines reached!");
+                          event.preventDefault(); // Stop Enter key
+                        }
 
-                                            let currentLines = 1; // laging start at line 1
-                                            let currentLineWidth = 0;
+                        // Prevent typing pag beyond max width sa last line
+                        if (
+                          currentLines >= maxLines &&
+                          lastLineWidthPx >= maxTextWidth &&
+                          event.key.length === 1
+                        ) {
+                          console.log("Typing blocked: max width reached!");
+                          event.preventDefault(); // Stop adding characters beyond horizontal limit
+                        }
+                      });
 
-                                            for (let char of textContent) {
-                                                const charWidth = 13.2; // approx width per char
+                      editor.ui.registry.addButton("addHeaderImage", {
+                        text: "Add Header Image",
+                        icon: "image",
+                        onAction: () =>
+                          handleHeaderFooterUpload(editor, "header"),
+                      });
+                      editor.ui.registry.addButton("addFooterImage", {
+                        text: "Add Footer Image",
+                        icon: "image",
+                        onAction: () =>
+                          handleHeaderFooterUpload(editor, "footer"),
+                      });
 
-                                                if (currentLineWidth + charWidth > maxTextWidth) {
-                                                    // increment line count pag exceeds
-                                                    currentLines++;
-                                                    currentLineWidth = charWidth; // new line count
-                                                } else {
-                                                    currentLineWidth += charWidth;
-                                                }
-                                            }
+                      // editor.ui.registry.addButton('addImage', {
+                      //     text: 'Add Image',
+                      //     icon: 'image',
+                      //     onAction: () => handleImageUpload(editor),
+                      // });
 
-                                            // Prevent typing if beyond max lines na
-                                            if (currentLines >= maxLines && (event.key === 'Enter' || event.key.length === 1)) {
-                                                console.log("Typing blocked: max lines reached!");
-                                                event.preventDefault(); // Stop Enter and typing beyond max lines
-                                            }
-                                        });
+                      editor.ui.registry.addButton("markEditable", {
+                        text: "Mark Editable",
+                        onAction: () => {
+                          const content = editor.selection.getContent();
+                          editor.selection.setContent(
+                            `<span class="editable">${content}</span>`
+                          );
+                        },
+                      });
 
-                                        // ------------ Method 2: Count newlines based sa number of Enters
+                      editor.ui.registry.addButton("removeEditable", {
+                        text: "Remove Editable",
+                        onAction: () => {
+                          const content = editor.selection.getContent();
+                          editor.selection.setContent(
+                            content.replace(
+                              /<span class="editable">(.*?)<\/span>/g,
+                              "$1"
+                            )
+                          );
+                        },
+                      });
+                      // Add Hanging Indent Button
+                      editor.ui.registry.addButton("addHangingIndent", {
+                        text: "Hanging Indent",
+                        icon: "indent",
+                        tooltip: "Add Hanging Indent",
+                        onAction: () => {
+                          const selectedNode = editor.selection.getNode(); // Get the selected node
+                          const isParagraph = selectedNode.nodeName === "P"; // Check if it's a <p> element
 
-                                        editor.on('keydown', (event) => {
-                                            const lineHeight = parseFloat(window.getComputedStyle(editor.getBody()).lineHeight) || 20;
-                                            const pageHeightPx = selectedPageSize.height;
-                                            const marginTopPx = margins.top * DPI;
-                                            const marginBottomPx = margins.bottom * DPI;
-                                            const availableHeight = pageHeightPx - (marginTopPx + marginBottomPx) + lineHeight;
-                                            const maxLines = Math.floor(availableHeight / lineHeight);
-                                            const textContent = editor.getContent({ format: 'text' });
-                                            const lines = textContent.split('\n');
-                                            const currentLines = lines.length;
-                                            const maxTextWidth = selectedPageSize.width - (margins.left * DPI + margins.right * DPI);
+                          if (isParagraph) {
+                            // Update the style directly for <p> elements
+                            selectedNode.style.textIndent = "-40px";
+                            selectedNode.style.marginLeft = "40px";
+                          } else {
+                            // Wrap in a <p> if not already a block element
+                            const content = editor.selection.getContent({
+                              format: "html",
+                            });
+                            editor.selection.setContent(
+                              `<p style="text-indent: -40px; margin-left: 40px;">${content}</p>`
+                            );
+                          }
+                        },
+                      });
 
-                                            // approx last line width (since walang exact from TinyMCE)
-                                            const lastLine = lines[lines.length - 1] || "";
-                                            const lastLineWidthPx = lastLine.length * 7;
+                      // Remove Hanging Indent Button
+                      editor.ui.registry.addButton("removeHangingIndent", {
+                        text: "Remove Hanging Indent",
+                        icon: "outdent",
+                        tooltip: "Remove Hanging Indent",
+                        onAction: () => {
+                          const selectedNode = editor.selection.getNode(); // Get the selected node
+                          const isParagraph = selectedNode.nodeName === "P"; // Check if it's a <p> element
 
-                                            // Prevent typing pag beyond max lines
-                                            if (currentLines >= maxLines && (event.key === 'Enter')) {
-                                                console.log("Typing blocked: max lines reached!");
-                                                event.preventDefault(); // Stop Enter key
-                                            }
+                          if (isParagraph) {
+                            // Remove the hanging indent styles
+                            selectedNode.style.textIndent = "";
+                            selectedNode.style.marginLeft = "";
+                          } else {
+                            // Handle nested <p> tags (if any)
+                            const content = editor.selection.getContent({
+                              format: "html",
+                            });
+                            editor.selection.setContent(
+                              content.replace(
+                                /<p[^>]*style=["'][^"']*text-indent:\s*-40px;?\s*margin-left:\s*40px;?[^"']*["'][^>]*>(.*?)<\/p>/g,
+                                "$1"
+                              )
+                            );
+                          }
+                        },
+                      });
+                    },
+                  }}
+                  onEditorChange={(content, editor) => {
+                    handleEditorChange(content, editor, page.id);
+                  }}
+                />
+              </div>
+            ))}
 
-                                            // Prevent typing pag beyond max width sa last line
-                                            if (currentLines >= maxLines && lastLineWidthPx >= maxTextWidth && event.key.length === 1) {
-                                                console.log("Typing blocked: max width reached!");
-                                                event.preventDefault(); // Stop adding characters beyond horizontal limit
-                                            }
-                                        });
-
-
-                                        editor.ui.registry.addButton('addHeaderImage', {
-                                            text: 'Add Header Image',
-                                            icon: 'image',
-                                            onAction: () => handleHeaderFooterUpload(editor, 'header'),
-                                        });
-                                        editor.ui.registry.addButton('addFooterImage', {
-                                            text: 'Add Footer Image',
-                                            icon: 'image',
-                                            onAction: () => handleHeaderFooterUpload(editor, 'footer'),
-                                        });
-
-                                        // editor.ui.registry.addButton('addImage', {
-                                        //     text: 'Add Image',
-                                        //     icon: 'image',
-                                        //     onAction: () => handleImageUpload(editor),
-                                        // });
-
-                                        editor.ui.registry.addButton('markEditable', {
-                                            text: 'Mark Editable',
-                                            onAction: () => {
-                                                const content = editor.selection.getContent();
-                                                editor.selection.setContent(`<span class="editable">${content}</span>`);
-                                            },
-                                        });
-
-                                        editor.ui.registry.addButton('removeEditable', {
-                                            text: 'Remove Editable',
-                                            onAction: () => {
-                                                const content = editor.selection.getContent();
-                                                editor.selection.setContent(content.replace(/<span class="editable">(.*?)<\/span>/g, '$1'));
-                                            },
-                                        });
-                                        // Add Hanging Indent Button
-                                        editor.ui.registry.addButton('addHangingIndent', {
-                                            text: 'Hanging Indent',
-                                            icon: 'indent',
-                                            tooltip: 'Add Hanging Indent',
-                                            onAction: () => {
-                                                const selectedNode = editor.selection.getNode(); // Get the selected node
-                                                const isParagraph = selectedNode.nodeName === 'P'; // Check if it's a <p> element
-
-                                                if (isParagraph) {
-                                                    // Update the style directly for <p> elements
-                                                    selectedNode.style.textIndent = '-40px';
-                                                    selectedNode.style.marginLeft = '40px';
-                                                } else {
-                                                    // Wrap in a <p> if not already a block element
-                                                    const content = editor.selection.getContent({ format: 'html' });
-                                                    editor.selection.setContent(
-                                                        `<p style="text-indent: -40px; margin-left: 40px;">${content}</p>`
-                                                    );
-                                                }
-                                            },
-                                        });
-
-                                        // Remove Hanging Indent Button
-                                        editor.ui.registry.addButton('removeHangingIndent', {
-                                            text: 'Remove Hanging Indent',
-                                            icon: 'outdent',
-                                            tooltip: 'Remove Hanging Indent',
-                                            onAction: () => {
-                                                const selectedNode = editor.selection.getNode(); // Get the selected node
-                                                const isParagraph = selectedNode.nodeName === 'P'; // Check if it's a <p> element
-
-                                                if (isParagraph) {
-                                                    // Remove the hanging indent styles
-                                                    selectedNode.style.textIndent = '';
-                                                    selectedNode.style.marginLeft = '';
-                                                } else {
-                                                    // Handle nested <p> tags (if any)
-                                                    const content = editor.selection.getContent({ format: 'html' });
-                                                    editor.selection.setContent(
-                                                        content.replace(/<p[^>]*style=["'][^"']*text-indent:\s*-40px;?\s*margin-left:\s*40px;?[^"']*["'][^>]*>(.*?)<\/p>/g, '$1')
-                                                    );
-                                                }
-                                            },
-                                        });
-                                    },
-
-
-                                }}
-
-
-                                onEditorChange={(content, editor) => {
-                                    handleEditorChange(content, editor, page.id);
-                                }}
-                            />
-                        </div>
-                    ))}
-
-                    <div className="mt-4 flex gap-4">
-                        <button
-                            onClick={handleSaveOrUpdateTemplate}
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                        >
-                            {isUpdateMode ? 'Update Template' : 'Save Template'}
-                        </button>
-                        <button
-                            onClick={handlePrintDocument}
-                            className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
-                        >
-                            Print Document
-                        </button>
-                    </div>
-                </>
-            )}
-            {/* Mini Message Box (Centered) */}
-            {message && (
-                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+            <div className="mt-4 flex gap-4">
+              <button
+                onClick={handleSaveOrUpdateTemplate}
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                {isUpdateMode ? "Update Template" : "Save Template"}
+              </button>
+              <button
+                onClick={handlePrintDocument}
+                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+              >
+                Print Document
+              </button>
+            </div>
+          </>
+        )}
+        {/* Mini Message Box (Centered) */}
+        {message && (
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                     p-4 rounded shadow-lg text-white text-center w-80"
-                    style={{
-                        backgroundColor: message.type === 'success' ? '#4CAF50'
-                            : message.type === 'error' ? '#F44336'
-                                : '#FFC107'
-                    }}>
-                    {message.text}
-                </div>
-            )}
-        </div>
+            style={{
+              backgroundColor:
+                message.type === "success"
+                  ? "#4CAF50"
+                  : message.type === "error"
+                  ? "#F44336"
+                  : "#FFC107",
+            }}
+          >
+            {message.text}
+          </div>
+        )}
+      </div>
     );
 };
 

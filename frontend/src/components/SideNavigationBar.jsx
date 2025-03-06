@@ -36,62 +36,68 @@ const SideNavigationBar = () => {
     }
 
     return (
-        <nav className="flex flex-col h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-400 text-white p-4 rounded-r-lg shadow-lg">
-            {/* Top Section: Icon and User Info */}
-            <div className="flex items-start mb-6 bg-white bg-opacity-20 p-3 rounded-lg">
-                <img
-                    src={ic_system || "/placeholder.svg"}
-                    alt="System Icon"
-                    className="w-10 h-10 mr-3 rounded-full bg-white p-1 flex-shrink-0"
-                />
-                <div className="overflow-hidden">
-                    <p className="text-sm font-bold truncate">
-                        {user?.firstname} {user?.lastname}
-                    </p>
-                    <p className="text-xs opacity-80 truncate">
-                        {user?.organization ? `(${user.organization.name})` : ""}
-                    </p>
-                    <p className="text-xs opacity-80 truncate">{user?.email}</p>
-                </div>
-            </div>
+      <nav className="flex flex-col h-full bg-gradient-to-b from-[#38b6ff] via-[#1e9ee0] to-[#0d87c1] text-white font-bold p-4 rounded-r-lg shadow-lg">
+        {/* Top Section: Icon and User Info */}
+        <div className="flex items-start mb-6 bg-white bg-opacity-20 p-3 rounded-lg">
+          <img
+            src={ic_system || "/placeholder.svg"}
+            alt="System Icon"
+            className="w-10 h-10 mr-3 rounded-full bg-white p-1 flex-shrink-0"
+          />
+          <div className="overflow-hidden">
+            <p className="text-sm font-bold truncate">
+              {user?.firstname} {user?.lastname}
+            </p>
+            <p className="text-xs opacity-80 truncate">
+              {user?.organization ? `(${user.organization.name})` : ""}
+            </p>
+            <p className="text-xs opacity-80 truncate">{user?.email}</p>
+          </div>
+        </div>
 
-            {/* Navigation Items */}
-            <ul className="mb-auto space-y-2 overflow-y-auto">
-                {items.map((item) => (
-                    <li key={item.path}>
-                        <NavLink
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `block p-2 rounded-lg transition-all duration-200 truncate ${isActive ? "bg-white text-blue-600 shadow-md" : "text-white hover:bg-white hover:bg-opacity-20"
-                                }`
-                            }
-                        >
-                            {item.name}
-                        </NavLink>
-                    </li>
-                ))}
-            </ul>
-
-            {/* Change Password Link */}
-            <NavLink
-                to="/change-password"
+        {/* Navigation Items */}
+        <ul className="mb-auto space-y-2 overflow-y-auto">
+          {items.map((item) => (
+            <li key={item.path}>
+              <NavLink
+                to={item.path}
                 className={({ isActive }) =>
-                    `block p-2 mb-2 text-center rounded-lg transition-all duration-200 truncate ${isActive ? "bg-green-300 text-blue-600 shadow-md" : "bg-green-500 hover:bg-green-600"
-                    }`
+                  `block p-2 rounded-lg transition-all duration-200 truncate ${
+                    isActive
+                      ? "bg-white text-[#38b6ff] shadow-md"
+                      : "text-white hover:bg-white hover:bg-opacity-20"
+                  }`
                 }
-            >
-                Change Password
-            </NavLink>
+              >
+                {item.name}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
 
-            {/* Logout Button */}
-            <button
-                onClick={handleLogout}
-                className="block w-full p-2 text-center bg-red-500 hover:bg-red-600 rounded-lg transition-all duration-200"
-            >
-                Logout
-            </button>
-        </nav>
-    )
+        {/* Change Password Link */}
+        <NavLink
+          to="/change-password"
+          className={({ isActive }) =>
+            `block p-2 mb-2 text-center rounded-lg transition-all duration-200 truncate ${
+              isActive
+                ? "bg-[#ffde59] hover:bg-[#d3b747]"
+                : "bg-[#ffde59] hover:bg-[#d3b747]"
+            }`
+          }
+        >
+          Change Password
+        </NavLink>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="block w-full p-2 text-center bg-red-500 hover:bg-red-600 rounded-lg transition-all duration-200"
+        >
+          Logout
+        </button>
+      </nav>
+    );
 }
 
 export default SideNavigationBar

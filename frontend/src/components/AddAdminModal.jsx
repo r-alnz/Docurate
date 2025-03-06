@@ -72,110 +72,127 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded shadow-lg w-1/3">
-                <h2 className="text-xl font-bold mb-4">Add Admin</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">First Name</label>
-                        <input
-                            type="text"
-                            value={firstname}
-                            onChange={(e) => setFirstname(e.target.value)}
-                            className="border rounded p-2 w-full"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Last Name</label>
-                        <input
-                            type="text"
-                            value={lastname}
-                            onChange={(e) => setLastname(e.target.value)}
-                            className="border rounded p-2 w-full"
-                            required
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
-                        <input
-                            type="date"
-                            value={birthdate}
-                            onChange={(e) => setBirthdate(e.target.value)}
-                            className="border rounded p-2 w-full"
-                            required
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="border rounded p-2 w-full"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="border rounded p-2 w-full"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Position</label>
-                        <input
-                            type="text"
-                            value={position}
-                            onChange={(e) => setPosition(e.target.value)}
-                            className="border rounded p-2 w-full"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2">Organization</label>
-                        {loading ? (
-                            <p>Loading organizations...</p>
-                        ) : (
-                            <select
-                                value={organization}
-                                onChange={(e) => setOrganization(e.target.value)}
-                                className="border rounded p-2 w-full"
-                                required
-                            >
-                                <option value="">Select an organization</option>
-                                {organizations.map((org) => (
-                                    <option key={org._id} value={org._id}>
-                                        {org.name}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-                    <div className="flex justify-end">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="bg-gray-300 text-gray-700 py-2 px-4 rounded mr-2 hover:bg-gray-400"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                            disabled={loading}
-                        >
-                            Add
-                        </button>
-                    </div>
-                </form>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+       <div className="bg-white p-4 md:p-6 rounded shadow-lg max-w-lg w-full h-auto max-h-[80vh] overflow-y-auto">
+          <h2 className="text-xl font-bold mb-4">Add Admin</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Organization
+              </label>
+              {loading ? (
+                <p>Loading organizations...</p>
+              ) : (
+                <select
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  className="border rounded p-2 w-full"
+                  required
+                >
+                  <option value="">Select an organization</option>
+                  {organizations.map((org) => (
+                    <option key={org._id} value={org._id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Position
+              </label>
+              <input
+                type="text"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+                className="border rounded p-2 w-full"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                First Name
+              </label>
+              <input
+                type="text"
+                value={firstname}
+                onChange={(e) => setFirstname(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Birthdate
+              </label>
+              <input
+                type="date"
+                value={birthdate}
+                onChange={(e) => setBirthdate(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-gray-300 text-gray-700 py-2 px-4 rounded mr-2 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+                disabled={loading}
+              >
+                Add
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     );
 };
 
