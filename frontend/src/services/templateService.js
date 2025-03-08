@@ -133,4 +133,21 @@ const recoverTemplate = async (templateId, token) => {
     }
 };
 
-export { createTemplate, fetchTemplates, fetchActiveTemplates, getTemplateById, updateTemplate, fetchDecisionTree, getTemplateHeaderById, deleteTemplate, recoverTemplate };
+const eraseTemplate = async (templateId, token) => {
+    try {
+        const response = await axios.delete(
+            `${API_URL}/erase/${templateId}`, // Use DELETE method
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include auth token
+                },
+            }
+        );
+        return response.data; // Return success message or status
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Error erasing template');
+    }
+};
+
+
+export { createTemplate, fetchTemplates, fetchActiveTemplates, getTemplateById, updateTemplate, fetchDecisionTree, getTemplateHeaderById, deleteTemplate, recoverTemplate, eraseTemplate };

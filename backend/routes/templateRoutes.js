@@ -9,6 +9,7 @@ import {
     recoverTemplate,
     fetchDecisionTree,
     getTemplateHeaderById,
+    eraseTemplate,
 } from '../controllers/templateController.js';
 import { authToken, requireAdmin } from '../middleware/auth.js';
 
@@ -25,6 +26,7 @@ router.post('/', authToken, requireAdmin, createTemplate); // Create template
 router.put('/:id', authToken, requireAdmin, updateTemplate); // Update template
 router.delete('/:id', authToken, requireAdmin, deleteTemplate); // Delete template
 router.put('/recover/:id', authToken, requireAdmin, recoverTemplate); // Recover deleted template
+router.delete('/erase/:id', authToken, requireAdmin, eraseTemplate); // Erase template permanently
 // router.get('/', authToken, requireAdmin, getTemplates); // Fetch templates based on role and organizatioand
     // > this causes a glitch when a student opens the template list,
     // i.e., returns error when loaded but shows it finally when reloaded

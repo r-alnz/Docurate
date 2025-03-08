@@ -143,7 +143,13 @@ userSchema.statics.signup = async function (
     }
 };
 
-
+// hash password
+/*
+userSchema.statics.hashPassword = async function (password) {
+  const salt = await bcrypt.genSalt(12);
+  return bcrypt.hash(password, salt);
+};
+*/
 
 // Static method to login user
 userSchema.statics.login = async function (email, password) {

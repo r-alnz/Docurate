@@ -256,6 +256,23 @@ const recoverTemplate = async (req, res) => {
     }
 };
 
+// Erase Template
+const eraseTemplate = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const template = await Template.findById(id);
+
+        if (!template) {
+            return res.status(404).json({ message: 'Template not found.' });
+        }
+
+        await template.deleteOne(); // Permanently delete the template
+        res.json({ message: 'Template deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete template.' });
+    }
+};
+
 
 const fetchDecisionTree = async (req, res) => {
     try {
@@ -317,4 +334,4 @@ const fetchDecisionTree = async (req, res) => {
 
 
 
-export { getTemplates, getActiveTemplates, getTemplateById, getTemplateHeaderById, createTemplate, updateTemplate, deleteTemplate, recoverTemplate, fetchDecisionTree };
+export { getTemplates, getActiveTemplates, getTemplateById, getTemplateHeaderById, createTemplate, updateTemplate, deleteTemplate, recoverTemplate, eraseTemplate, fetchDecisionTree };
