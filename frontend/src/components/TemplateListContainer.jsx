@@ -27,7 +27,7 @@ const TemplateListContainer = () => {
   const [visible, setVisible] = useState(false);
   
   useEffect(() => {
-    setTimeout(() => setVisible(true), 500);
+    setTimeout(() => setVisible(true), 100);
   }, []);
   
   const showMessage = (text, type = 'success') => {
@@ -50,7 +50,7 @@ const TemplateListContainer = () => {
           dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
           dispatch({ type: 'SET_LOADING', payload: false });
           setDelayedLoading(false);
-        }, 1300); // Adjust timeout duration if needed
+        }, 1400); // Adjust timeout duration if needed
       } catch (err) {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to fetch templates.' });
         setDelayedLoading(false);
@@ -66,14 +66,9 @@ const TemplateListContainer = () => {
     <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
        <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
           size="large" text="Docurate!" />
-        {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
       </div>
-  //     <div className="flex items-center justify-center h-screen">
-  //       <Mosaic color="#38B6FF" size="medium" text="" textColor="" />
     );
   }
-
-
 
   const handleOpenModal = (template) => {
     setTemplateToDelete(template);
@@ -122,12 +117,29 @@ const TemplateListContainer = () => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.type.toLowerCase().includes(searchQuery.toLowerCase());
-    
+  
     const matchesRole = roleFilter === 'All' || template.requiredRole === roleFilter;
     const matchesStatus = statusFilter === 'All' || template.status === statusFilter.toLowerCase();
+  
+    if (user.role === "organization") {
+      const isSubOrgMatch = template.suborganizations?.some(
+        (suborg) => String(suborg) === String(user._id)
+      );
+      const isOrgMatch = String(template.organization) === String(user.organization._id);
+  
+      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus;
+    }
+  
     return matchesSearch && matchesRole && matchesStatus;
   });
-
+  
+  // Debugging logs
+  console.log("User role:", user.role);
+  console.log("User organization:", user.organization);
+  console.log("User ID:", user._id);
+  console.log("Templates before filtering:", templates);
+  console.log("Templates after filtering:", filteredTemplates);
+  
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
     switch (sortOption) {
       case 'name-asc': return a.name.localeCompare(b.name);
@@ -149,11 +161,6 @@ const TemplateListContainer = () => {
         {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
       </div>
     )}
-      {/* {loading && (
-        <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
-        </div>
-      )} */}
 
       <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
