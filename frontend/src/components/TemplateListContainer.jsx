@@ -2,60 +2,65 @@ import { useEffect, useState } from 'react';
 import { useTemplateContext } from '../hooks/useTemplateContext';
 import { fetchTemplates, fetchActiveTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from '../services/templateService';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { getToken } from '../utils/authUtil';
 import { useAuthContext } from '../hooks/useAuthContext';
 import DeleteTemplateModal from './DeleteTemplateModal';
 
+import React from "react";
+
 const TemplateListContainer = () => {
-  const { templates, loading, error, dispatch } = useTemplateContext();
+  const { templates, dispatch } = useTemplateContext();
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  const [delayedLoading, setDelayedLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('All'); // Dropdown state
-  const [sortOption, setSortOption] = useState('date-desc'); // Sorting state
-  const [statusFilter, setStatusFilter] = useState('active'); // Dropdown state for status
+  const [roleFilter, setRoleFilter] = useState('All');
+  const [sortOption, setSortOption] = useState('date-desc');
+  const [statusFilter, setStatusFilter] = useState('active');
   const [message, setMessage] = useState(null);
-
+  
   const showMessage = (text, type = 'success') => {
     setMessage({ text, type });
-    setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    setTimeout(() => setMessage(null), 3000);
   };
 
-
   useEffect(() => {
+    if (!user || !user.organization) return;
+
     const loadTemplates = async () => {
       dispatch({ type: 'SET_LOADING', payload: true });
+
       try {
         const token = getToken();
-        const organizationId = user.organization; // Ensure user has this property
-        // const suborganizationIds = user.suborganizations || [];
-        const suborganizationIds = Array.isArray(user.suborganizations) ? user.suborganizations : [];
-
-        // console.log("Fssetching templates for organization & suborganizations:", {
-        //     organization: user.organization,
-        //     suborganizations: suborganizationIds
-        //   });
-
-        // const fetchedTemplates = await fetchTemplates(token, organizationId, suborganizationIds);
         const fetchedTemplates = await fetchTemplates(token);
-        console.log("Fetched templates from API:", fetchedTemplates);
-        dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
+
+        // Delay setting the templates to prevent UI flickering
+        setTimeout(() => {
+          dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
+          dispatch({ type: 'SET_LOADING', payload: false });
+          setDelayedLoading(false);
+        }, 300); // Adjust timeout duration if needed
       } catch (err) {
-        // console.error(err);
-        dispatch({
-          type: 'SET_ERROR',
-          payload: 'Failed to fetch templates. (Or there might be no templates yet!)',
-        });
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to fetch templates.' });
+        setDelayedLoading(false);
       }
     };
 
+    dispatch({ type: 'SET_TEMPLATES', payload: [] }); // Prevents stale data from showing
     loadTemplates();
-  }, [dispatch, user.role, user.organization]);
+  }, [dispatch, user]);
+
+  if (delayedLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg font-semibold">Loading templates...</p>
+      </div>
+    );
+  }
 
   const handleOpenModal = (template) => {
     setTemplateToDelete(template);
@@ -72,101 +77,53 @@ const TemplateListContainer = () => {
       const token = getToken();
       await deleteTemplate(templateId, token);
       dispatch({ type: 'DELETE_TEMPLATE', payload: templateId });
-      showMessage('Template archive successfully!');
+      showMessage('Template archived successfully!');
     } catch (err) {
-      console.error('Failed to delete template:', err.message);
-      showMessage(err.message || 'Failed to delete template. Please try again.');
+      showMessage('Failed to delete template. Please try again.');
     }
   };
 
   const handleRecoverTemplate = async (templateId) => {
-    const token = getToken(); // Replace with your token retrieval logic
     try {
+      const token = getToken();
       const response = await recoverTemplate(templateId, token);
-      console.log('Template recovered:', response.template);
-      showMessage('Template recovered successfully!');
-      // Optionally dispatch an action to update the state
       dispatch({ type: 'RECOVER_TEMPLATE', payload: response.template });
+      showMessage('Template recovered successfully!');
     } catch (error) {
-      console.error(error.message);
       showMessage('Failed to recover the template. Please try again.');
     }
   };
 
   const handleEraseTemplate = async (templateId) => {
-    const token = getToken(); // Replace with your token retrieval logic
     try {
-      const response = await eraseTemplate(templateId, token); // Call the eraseTemplate function
-      console.log('Template erased:', response.message);
-      showMessage('Template erased successfully!');
-      // Optionally dispatch an action to update the state
+      const token = getToken();
+      await eraseTemplate(templateId, token);
       dispatch({ type: 'ERASE_TEMPLATE', payload: templateId });
+      showMessage('Template erased successfully!');
     } catch (error) {
-      console.error(error.message);
       showMessage('Failed to erase the template. Please try again.');
     }
   };
 
-
-  // Filter templates by search query and role
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (template.subtype && template.subtype.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    var matchesRole =
-      roleFilter === 'All' || template.requiredRole === roleFilter;
-
-    // 🛠️ Debugging Log
-    // console.log(`Checking template: ${template.name}`);
-    // console.log(`- Template Required Role: ${template.requiredRole}`);
-    // console.log(`- User Role: ${user.role}`);
-    // console.log(`- User Organization: ${JSON.stringify(user.organization)}`);
-    // console.log(`- User Suborganizations: ${JSON.stringify(user.suborganizations)}`);
-
-    // console.log(`Checking role condition for template: ${template.name}`);
-    // console.log(`- User Role: ${user.role}`);
-    // console.log(`- Template Required Role: ${template.requiredRole}`);
-
-
-
-    // Allow students to see organization templates if they belong to suborganizations
-    if (user.role === 'student' && template.requiredRole === 'organization') {
-      const belongsToSubOrg = user.suborganizations?.includes(template.organization); // Fix condition
-      // console.log(`- Template Organization: ${template.organization}`);
-      // console.log(`- Matches Student's Suborganization: ${belongsToSubOrg}`);
-
-      if (belongsToSubOrg) {
-        matchesRole = true;
-      }
-    }
-
-    const matchesStatus =
-      statusFilter === 'All' || template.status === statusFilter.toLowerCase();
-
+      template.type.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesRole = roleFilter === 'All' || template.requiredRole === roleFilter;
+    const matchesStatus = statusFilter === 'All' || template.status === statusFilter.toLowerCase();
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-
-  // Sort templates based on selected option
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
     switch (sortOption) {
-      case 'name-asc':
-        return a.name.localeCompare(b.name);
-      case 'name-desc':
-        return b.name.localeCompare(a.name);
-      case 'date-asc':
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      case 'date-desc':
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      default:
-        return 0;
+      case 'name-asc': return a.name.localeCompare(b.name);
+      case 'name-desc': return b.name.localeCompare(a.name);
+      case 'date-asc': return new Date(a.createdAt) - new Date(b.createdAt);
+      case 'date-desc': return new Date(b.createdAt) - new Date(a.createdAt);
+      default: return 0;
     }
   });
-
-  if (loading) return <p>Loading templates...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
 
 
   return (
@@ -243,17 +200,15 @@ const TemplateListContainer = () => {
 
               <div className="flex justify-end gap-2 mb-2">
                 {template.suborganizations &&
-                  template.suborganizations.length > 0 ? (
-                  template.suborganizations.map((suborg) => (
-                    <>
-                      <span
-                        key={suborg._id}
-                        className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
-                      >
-                        Special for: {suborg.firstname}
-                      </span>
-                    </>
-                  ))
+                template.suborganizations.length > 0 ? (
+                  template.suborganizations.map((suborg, index) => (
+                  <span
+                    key={suborg._id ? String(suborg._id) : `suborg-${index}`}
+                    className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
+                  >
+                    Special for: {suborg.firstname}
+                  </span>
+                ))
                 ) : (
                   <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
                     General for: {user.organization.name}
