@@ -7,6 +7,8 @@ import { getToken } from '../utils/authUtil';
 import { useAuthContext } from '../hooks/useAuthContext';
 import DeleteTemplateModal from './DeleteTemplateModal';
 
+import { Mosaic } from 'react-loading-indicators';
+
 import React from "react";
 
 const TemplateListContainer = () => {
@@ -22,6 +24,11 @@ const TemplateListContainer = () => {
   const [sortOption, setSortOption] = useState('date-desc');
   const [statusFilter, setStatusFilter] = useState('active');
   const [message, setMessage] = useState(null);
+  const [visible, setVisible] = useState(false);
+  
+  useEffect(() => {
+    setTimeout(() => setVisible(true), 500);
+  }, []);
   
   const showMessage = (text, type = 'success') => {
     setMessage({ text, type });
@@ -43,7 +50,7 @@ const TemplateListContainer = () => {
           dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
           dispatch({ type: 'SET_LOADING', payload: false });
           setDelayedLoading(false);
-        }, 300); // Adjust timeout duration if needed
+        }, 1300); // Adjust timeout duration if needed
       } catch (err) {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to fetch templates.' });
         setDelayedLoading(false);
@@ -56,11 +63,17 @@ const TemplateListContainer = () => {
 
   if (delayedLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-semibold">Loading templates...</p>
+    <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
+       <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+          size="large" text="Docurate!" />
+        {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
       </div>
+  //     <div className="flex items-center justify-center h-screen">
+  //       <Mosaic color="#38B6FF" size="medium" text="" textColor="" />
     );
   }
+
+
 
   const handleOpenModal = (template) => {
     setTemplateToDelete(template);
@@ -127,10 +140,32 @@ const TemplateListContainer = () => {
 
 
   return (
-    <div className="p-4">
+
+      <div className={`p-4 relative transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+              {delayedLoading && (
+  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
+       <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+          size="large" text="Docurate!" />
+        {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
+      </div>
+    )}
+      {/* {loading && (
+        <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+        </div>
+      )} */}
+
       <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
       <div className="mb-4 flex gap-4">
+      {delayedLoading && (
+  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
+       <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+          size="large" text="Docurate!" />
+        {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
+      </div>
+    )}
+
         <input
           type="text"
           placeholder="Search templates by name, type, or subtype..."
