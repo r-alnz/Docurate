@@ -44,32 +44,34 @@ const BulkImportPage = () => {
             alert("No data to import. Please upload a file first.");
             return;
         }
-
+    
         const confirmUpload = window.confirm("Are you sure you want to upload this data?");
         if (!confirmUpload) return;
-
+    
         setLoading(true);
         setMessage(null);
-
+    
         try {
             const token = localStorage.getItem("authToken");
             console.log("Retrieved Token:", token);
-
+    
             if (!token) {
                 alert("No authentication token found. Please log in again.");
                 return;
             }
-
+    
+            const formData = new FormData();
+            formData.append("file", document.querySelector('input[type="file"]').files[0]);
+    
             const response = await fetch("http://localhost:8000/api/import/bulk-import", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
                 },
-                body: JSON.stringify(data),
+                body: formData,
                 credentials: "include",
             });
-
+    
             const result = await response.json();
             console.log("Server Response:", result);
 
