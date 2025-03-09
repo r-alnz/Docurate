@@ -42,7 +42,14 @@ const templateReducer = (state, action) => {
                         : template
                 ),
             };
-                     
+        case 'ERASE_TEMPLATE':
+            return {
+                ...state,
+                templates: state.templates.filter(
+                    (template) => template._id !== action.payload // Remove the template from the list
+                ),
+            };
+
         case 'SET_LOADING':
             return { ...state, loading: action.payload };
         case 'SET_ERROR':
@@ -80,11 +87,11 @@ const TemplateProvider = ({ children }) => {
                 try {
                     const token = getToken(); // Get the token from your auth utility
                     var templates = [];
-                    if(user.role === 'admin') {
+                    if (user.role === 'admin') {
                         templates = await fetchTemplates(token);
                     } else {
                         templates = await fetchActiveTemplates(token);
-                    }                   
+                    }
                     dispatch({ type: 'SET_TEMPLATES', payload: templates });
                 } catch (error) {
                     dispatch({ type: 'SET_ERROR', payload: error.message });

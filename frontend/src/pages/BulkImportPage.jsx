@@ -1,10 +1,23 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import { fetchUserAccounts } from "../services/adminService"
+import { useUserContext } from "../hooks/useUserContext";
+import { getToken } from "../utils/authUtil";
 
 const BulkImportPage = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
+    const { dispatch } = useUserContext();
+
+    const loadUsers = async () => {
+        try {
+            const data = await fetchUserAccounts(getToken());
+            dispatch({ type: 'SET_USERS', payload: data.users });
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        }
+    };
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
@@ -31,7 +44,6 @@ const BulkImportPage = () => {
                     validKeys.forEach(key => newRow[key] = row[key]);
                     return newRow;
                 });
-
                 setData(filteredData);
             } else {
                 setData([]);
@@ -77,36 +89,36 @@ const BulkImportPage = () => {
 
             if (!response.ok) {
                 if (response.status === 409 && result.conflicts) {
-                  // 🚨 Handle duplicate users
-                  const userChoice = window.confirm(
-                    `Some users already exist:\n${result.conflicts
-                      .map((user) => `\n${user.email} (${user.name})`)
-                      .join(", ")}\n\nDo you want to skip these and upload the rest?`
+                    // 🚨 Handle duplicate users
+                    const userChoice = window.confirm(
+                        `Some users already exist:\n${result.conflicts
+                            .map((user) => `\n${user.email} (${user.name})`)
+                            .join(", ")}\n\nDo you want to skip these and upload the rest?`
                     );
 
                     if (userChoice && result.nonDuplicates.length > 0) {
-                      // User chose to skip duplicates; re-upload only non-duplicates
-                      const retryResponse = await fetch("http://localhost:8000/api/import/bulk-import", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`,
-                        },
-                        body: JSON.stringify(result.nonDuplicates),
-                        credentials: "include",
-                      });
-    
+                        // User chose to skip duplicates; re-upload only non-duplicates
+                        const retryResponse = await fetch("http://localhost:8000/api/import/bulk-import", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(result.nonDuplicates),
+                            credentials: "include",
+                        });
+
                         const retryResult = await retryResponse.json();
-    
+
                         if (!retryResponse.ok) {
                             throw new Error(retryResult.error || "Failed to import non-duplicate users");
                         }
-    
+
                         setMessage({ type: "success", text: "Non-duplicate users imported successfully!" });
                         setData([]); // Clear table after successful upload
                         return;
                     }
-    
+
                     setMessage({ type: "error", text: "Import aborted due to duplicate users." });
                     return;
                 }
@@ -121,10 +133,10 @@ const BulkImportPage = () => {
                     });
                     return;
                 }
-    
+
                 throw new Error(result.error || "Failed to import data");
             }
-    
+            loadUsers();
             setMessage({ type: "success", text: "Users imported successfully!" });
             setData([]); // Clear table after successful upload
         } catch (error) {
@@ -133,7 +145,7 @@ const BulkImportPage = () => {
         } finally {
             setLoading(false);
         }
-    };  
+    };
 
     return (
         <div className="p-4">
