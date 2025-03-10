@@ -19,17 +19,19 @@ const TemplateListContainer = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
+  const [isEraseModalOpen, setIsEraseModalOpen] = useState(false);
+  const [templateToErase, setTemplateToErase] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [sortOption, setSortOption] = useState('date-desc');
   const [statusFilter, setStatusFilter] = useState('active');
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
-  
+
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
   }, []);
-  
+
   const showMessage = (text, type = 'success') => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 3000);
@@ -63,8 +65,8 @@ const TemplateListContainer = () => {
 
   if (delayedLoading) {
     return (
-    <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
-       <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+      <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
+        <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
           size="large" text="Docurate!" />
       </div>
     );
@@ -79,6 +81,34 @@ const TemplateListContainer = () => {
     setTemplateToDelete(null);
     setIsModalOpen(false);
   };
+
+  const handleEraseClick = (template) => {
+    setTemplateToErase(template);
+    setIsEraseModalOpen(true);
+  };
+
+  const cancelEraseTemplate = () => {
+    setIsEraseModalOpen(false);
+    setTemplateToErase(null);
+  };
+
+
+  const confirmEraseTemplate = async () => {
+    if (!templateToErase) return; // Prevent accidental execution
+
+    try {
+      const token = getToken();
+      await eraseTemplate(templateToErase._id, token);
+      dispatch({ type: "ERASE_TEMPLATE", payload: templateToErase._id });
+      showMessage("Template erased successfully!");
+    } catch (error) {
+      showMessage("Failed to erase the template. Please try again.");
+    }
+
+    setIsEraseModalOpen(false);
+    setTemplateToErase(null);
+  };
+
 
   const handleDeleteTemplate = async (templateId) => {
     try {
@@ -103,43 +133,48 @@ const TemplateListContainer = () => {
   };
 
   const handleEraseTemplate = async (templateId) => {
+    const confirmDelete = window.confirm("Are you sure you want to erase this template? This action cannot be undone.");
+
+    if (!confirmDelete) return; // Stop if the user cancels
+
     try {
       const token = getToken();
       await eraseTemplate(templateId, token);
-      dispatch({ type: 'ERASE_TEMPLATE', payload: templateId });
-      showMessage('Template erased successfully!');
+      dispatch({ type: "ERASE_TEMPLATE", payload: templateId });
+      showMessage("Template erased successfully!");
     } catch (error) {
-      showMessage('Failed to erase the template. Please try again.');
+      showMessage("Failed to erase the template. Please try again.");
     }
   };
+
 
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.type.toLowerCase().includes(searchQuery.toLowerCase());
-  
+
     const matchesRole = roleFilter === 'All' || template.requiredRole === roleFilter;
     const matchesStatus = statusFilter === 'All' || template.status === statusFilter.toLowerCase();
-  
+
     if (user.role === "organization") {
       const isSubOrgMatch = template.suborganizations?.some(
         (suborg) => String(suborg) === String(user._id)
       );
       const isOrgMatch = String(template.organization) === String(user.organization._id);
-  
+
       return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus;
     }
-  
+
     return matchesSearch && matchesRole && matchesStatus;
   });
-  
+
   // Debugging logs
   console.log("User role:", user.role);
   console.log("User organization:", user.organization);
   console.log("User ID:", user._id);
   console.log("Templates before filtering:", templates);
   console.log("Templates after filtering:", filteredTemplates);
-  
+
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
     switch (sortOption) {
       case 'name-asc': return a.name.localeCompare(b.name);
@@ -153,25 +188,25 @@ const TemplateListContainer = () => {
 
   return (
 
-      <div className={`p-4 relative transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-              {delayedLoading && (
-  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-       <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
-          size="large" text="Docurate!" />
-        {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
-      </div>
-    )}
+    <div className={`p-4 relative transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      {delayedLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
+          <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+            size="large" text="Docurate!" />
+          {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
+        </div>
+      )}
 
       <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
       <div className="mb-4 flex gap-4">
-      {delayedLoading && (
-  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-       <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
-          size="large" text="Docurate!" />
-        {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
-      </div>
-    )}
+        {delayedLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
+            <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+              size="large" text="Docurate!" />
+            {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
+          </div>
+        )}
 
         <input
           type="text"
@@ -242,15 +277,15 @@ const TemplateListContainer = () => {
 
               <div className="flex justify-end gap-2 mb-2">
                 {template.suborganizations &&
-                template.suborganizations.length > 0 ? (
+                  template.suborganizations.length > 0 ? (
                   template.suborganizations.map((suborg, index) => (
-                  <span
-                    key={suborg._id ? String(suborg._id) : `suborg-${index}`}
-                    className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
-                  >
-                    Special for: {suborg.firstname}
-                  </span>
-                ))
+                    <span
+                      key={suborg._id ? String(suborg._id) : `suborg-${index}`}
+                      className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
+                    >
+                      Special for: {suborg.firstname}
+                    </span>
+                  ))
                 ) : (
                   <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
                     General for: {user.organization.name}
@@ -280,7 +315,7 @@ const TemplateListContainer = () => {
                     {user.role === "admin" && (
                       <button
                         className="bg-red-700 text-white py-2 px-4 rounded hover:bg-red-900"
-                        onClick={() => handleEraseTemplate(template._id)}
+                        onClick={() => handleEraseClick(template)}
                       >
                         Erase
                       </button>
@@ -325,6 +360,29 @@ const TemplateListContainer = () => {
           onDelete={handleDeleteTemplate}
         />
       )}
+      {isEraseModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-lg font-semibold">Are you sure you want to erase this template?</p>
+            <p className="text-sm text-red-600 mt-1">This action cannot be undone.</p>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={cancelEraseTemplate}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmEraseTemplate}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Erase
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Mini Message Box (Centered) */}
       {message && (
