@@ -47,13 +47,26 @@ const getTemplates = async (req, res) => {
         // Add role-specific conditions dynamically
         if (req.user.role === "student") {
             console.warn("studet acc")
+            console.log("subor:", suborganizations)
+            console.log("req user:", req.user)
             query.$and.push({requiredRole: req.user.role})
             query.$or.push({ suborganizations: { $in: suborganizations } });
         } else if (req.user.role === "organization") {
             console.warn("org acc")
-            query.$and.push({requiredRole: req.user.role})
+            // query.$and.push({requiredRole: req.user.role})
             query.$or.push({ suborganizations: req.user._id }); // Match org itself
         }
+
+        // else if (req.user.role === "organization") {
+        //     console.warn("org accy")
+        //     console.log("req.user._id:", req.user._id);
+        //     console.log("subor:", suborganizations)
+        //     console.log("req user:", req.user)
+        //     query.$or.push(
+        //         { suborganizations: req.user._id.toString() }, 
+        //         { organization: req.user.organization } // Include org-level templates
+        //     );
+        // }
         
         // // Future expansion: Easily add more roles!
         if (req.user.role === "admin") {
@@ -62,7 +75,7 @@ const getTemplates = async (req, res) => {
         //     delete query.organization; // Example: Superadmins can see all templates, regardless of org
         }
         
-        // console.log("Final Query:", JSON.stringify(query, null, 2));       
+        console.log("Final Query:", JSON.stringify(query, null, 2));       
 
         // console.log("Applied filters:", JSON.stringify(query, null, 2));
 

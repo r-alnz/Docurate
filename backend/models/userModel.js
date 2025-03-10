@@ -103,7 +103,7 @@ userSchema.statics.signup = async function (
             throw new Error('Organization ID is required for an organization role');
         }
 
-        console.log('Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
+        // console.log('Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
 
         const exists = await this.findOne({ email });
         if (exists) {
@@ -135,7 +135,7 @@ userSchema.statics.signup = async function (
 
         console.log('Creating user:', { firstname, lastname, birthdate, email, role, organization, position });
 
-        res.status(201).json(user);
+        // res.status(201).json(user);
         return user;
     } catch (error) {
         console.error('❌ Error signing up user:', error); // Log the full error

@@ -16,6 +16,10 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const { user: currentUser } = useAuthContext();
     const [filteredUsers, setFilteredUsers] = useState(users);
     const [filterRole, setFilterRole] = useState("all");
+    const [filterCollege, setFilterCollege] = useState("all");
+    // ✅ Get unique colleges from users
+    const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
+
 
     useEffect(() => {
         let updatedUsers = users;
@@ -30,8 +34,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         } else if (filterRole === "all") {
             updatedUsers = users;
         }
+
+        // College-based filtering (Only filter if a specific college is selected)
+        if (filterCollege && filterCollege !== "all") {
+            updatedUsers = updatedUsers.filter(user => user.college === filterCollege);
+        }
+
         setFilteredUsers(updatedUsers);
-    }, [users, filterRole]);
+    }, [users, filterRole, filterCollege]);
 
     const handleEditClick = (user) => {
         console.log("Edit button clicked!")
@@ -50,28 +60,39 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setIsResetModalOpen(true)
     }
 
+
     return (
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
             {currentUser?.role === "admin" && (
 
                 // Filters
-                <div className="mb-4 flex justify-end gap-2">
-                    <button onClick={() => setFilterRole("all")} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                        All Users
-                    </button>
-                    <button onClick={() => setFilterRole("students")} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                        Students
-                    </button>
-                    <button onClick={() => setFilterRole("studentsUnderOrgs")} className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
-                        Students (Under Orgs)
-                    </button>
-                    <button onClick={() => setFilterRole("studentsNotUnderOrgs")} className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
-                        Students (Not Under Orgs)
-                    </button>
-                    <button onClick={() => setFilterRole("organizations")} className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                        Organizations
-                    </button>
+                <div className="mb-4 flex justify-end">
+                    <select
+                        onChange={(e) => setFilterRole(e.target.value)}
+                        className="px-4 py-2 bg-gradient-to-r from-blue-300 to-blue-400 text-white font-semibold rounded-lg shadow-md cursor-pointer transition duration-300 hover:from-blue-600 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                        <option value="all" className="text-gray-800">🌎 All Users</option>
+                        <option value="students" className="text-gray-800">🎓 Students</option>
+                        <option value="studentsUnderOrgs" className="text-gray-800">🏛️ Students (Under Orgs)</option>
+                        <option value="studentsNotUnderOrgs" className="text-gray-800">📚 Students (Not Under Orgs)</option>
+                        <option value="organizations" className="text-gray-800">🏢 Organizations</option>
+                    </select>
+
+
+                    {/* College Filter */}
+                    <select
+                        onChange={(e) => setFilterCollege(e.target.value)}
+                        className="p-2 bg-green-500 text-white rounded-md ml-4"
+                    >
+                        <option value="all">All Colleges</option>
+                        {uniqueColleges.map((college, index) => (
+                            <option key={index} value={college}>{college}</option>
+                        ))}
+                    </select>
+
                 </div>
+
+
             )}
 
             {/* --------------- */}
@@ -99,6 +120,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                             </th>
                             {currentUser?.role === "admin" && filterRole !== "organizations" && (
                                 <th scope="col" className="px-6 py-3">Student ID</th>
+                            )}
+
+                            {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                                <>
+                                    <th scope="col" className="px-6 py-3">College</th>
+                                    <th scope="col" className="px-6 py-3">Course</th>
+                                </>
                             )}
 
                             {/* pag superadmins, show org.
@@ -146,6 +174,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                     {currentUser?.role === "admin" && filterRole !== "organizations" && (
                                         <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
                                     )}
+
+                                    {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                                        <>
+                                            <td className="px-6 py-4">{user.role === "student" ? user.college || "N/A" : ""}</td>
+                                            <td className="px-6 py-4">{user.role === "student" ? user.course || "N/A" : ""}</td>
+                                        </>
+                                    )}
+
 
                                     {currentUser?.role === "superadmin" ? (
                                         <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>

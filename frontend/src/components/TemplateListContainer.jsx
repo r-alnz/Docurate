@@ -2,60 +2,75 @@ import { useEffect, useState } from 'react';
 import { useTemplateContext } from '../hooks/useTemplateContext';
 import { fetchTemplates, fetchActiveTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from '../services/templateService';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { getToken } from '../utils/authUtil';
 import { useAuthContext } from '../hooks/useAuthContext';
 import DeleteTemplateModal from './DeleteTemplateModal';
 
+import { Mosaic } from 'react-loading-indicators';
+
+import React from "react";
+
 const TemplateListContainer = () => {
-  const { templates, loading, error, dispatch } = useTemplateContext();
+  const { templates, dispatch } = useTemplateContext();
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  const [delayedLoading, setDelayedLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
+  const [isEraseModalOpen, setIsEraseModalOpen] = useState(false);
+  const [templateToErase, setTemplateToErase] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('All'); // Dropdown state
-  const [sortOption, setSortOption] = useState('date-desc'); // Sorting state
-  const [statusFilter, setStatusFilter] = useState('active'); // Dropdown state for status
+  const [roleFilter, setRoleFilter] = useState('All');
+  const [sortOption, setSortOption] = useState('date-desc');
+  const [statusFilter, setStatusFilter] = useState('active');
   const [message, setMessage] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setVisible(true), 100);
+  }, []);
 
   const showMessage = (text, type = 'success') => {
     setMessage({ text, type });
-    setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    setTimeout(() => setMessage(null), 3000);
   };
 
-
   useEffect(() => {
+    if (!user || !user.organization) return;
+
     const loadTemplates = async () => {
       dispatch({ type: 'SET_LOADING', payload: true });
+
       try {
         const token = getToken();
-        const organizationId = user.organization; // Ensure user has this property
-        // const suborganizationIds = user.suborganizations || [];
-        const suborganizationIds = Array.isArray(user.suborganizations) ? user.suborganizations : [];
-
-        // console.log("Fssetching templates for organization & suborganizations:", {
-        //     organization: user.organization,
-        //     suborganizations: suborganizationIds
-        //   });
-
-        // const fetchedTemplates = await fetchTemplates(token, organizationId, suborganizationIds);
         const fetchedTemplates = await fetchTemplates(token);
-        console.log("Fetched templates from API:", fetchedTemplates);
-        dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
+
+        // Delay setting the templates to prevent UI flickering
+        setTimeout(() => {
+          dispatch({ type: 'SET_TEMPLATES', payload: fetchedTemplates });
+          dispatch({ type: 'SET_LOADING', payload: false });
+          setDelayedLoading(false);
+        }, 1400); // Adjust timeout duration if needed
       } catch (err) {
-        // console.error(err);
-        dispatch({
-          type: 'SET_ERROR',
-          payload: 'Failed to fetch templates. (Or there might be no templates yet!)',
-        });
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to fetch templates.' });
+        setDelayedLoading(false);
       }
     };
 
+    dispatch({ type: 'SET_TEMPLATES', payload: [] }); // Prevents stale data from showing
     loadTemplates();
-  }, [dispatch, user.role, user.organization]);
+  }, [dispatch, user]);
+
+  if (delayedLoading) {
+    return (
+      <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
+        <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+          size="large" text="Docurate!" />
+      </div>
+    );
+  }
 
   const handleOpenModal = (template) => {
     setTemplateToDelete(template);
@@ -67,113 +82,132 @@ const TemplateListContainer = () => {
     setIsModalOpen(false);
   };
 
+  const handleEraseClick = (template) => {
+    setTemplateToErase(template);
+    setIsEraseModalOpen(true);
+  };
+
+  const cancelEraseTemplate = () => {
+    setIsEraseModalOpen(false);
+    setTemplateToErase(null);
+  };
+
+
+  const confirmEraseTemplate = async () => {
+    if (!templateToErase) return; // Prevent accidental execution
+
+    try {
+      const token = getToken();
+      await eraseTemplate(templateToErase._id, token);
+      dispatch({ type: "ERASE_TEMPLATE", payload: templateToErase._id });
+      showMessage("Template erased successfully!");
+    } catch (error) {
+      showMessage("Failed to erase the template. Please try again.");
+    }
+
+    setIsEraseModalOpen(false);
+    setTemplateToErase(null);
+  };
+
+
   const handleDeleteTemplate = async (templateId) => {
     try {
       const token = getToken();
       await deleteTemplate(templateId, token);
       dispatch({ type: 'DELETE_TEMPLATE', payload: templateId });
-      showMessage('Template archive successfully!');
+      showMessage('Template archived successfully!');
     } catch (err) {
-      console.error('Failed to delete template:', err.message);
-      showMessage(err.message || 'Failed to delete template. Please try again.');
+      showMessage('Failed to delete template. Please try again.');
     }
   };
 
   const handleRecoverTemplate = async (templateId) => {
-    const token = getToken(); // Replace with your token retrieval logic
     try {
+      const token = getToken();
       const response = await recoverTemplate(templateId, token);
-      console.log('Template recovered:', response.template);
-      showMessage('Template recovered successfully!');
-      // Optionally dispatch an action to update the state
       dispatch({ type: 'RECOVER_TEMPLATE', payload: response.template });
+      showMessage('Template recovered successfully!');
     } catch (error) {
-      console.error(error.message);
       showMessage('Failed to recover the template. Please try again.');
     }
   };
 
   const handleEraseTemplate = async (templateId) => {
-    const token = getToken(); // Replace with your token retrieval logic
+    const confirmDelete = window.confirm("Are you sure you want to erase this template? This action cannot be undone.");
+
+    if (!confirmDelete) return; // Stop if the user cancels
+
     try {
-      const response = await eraseTemplate(templateId, token); // Call the eraseTemplate function
-      console.log('Template erased:', response.message);
-      showMessage('Template erased successfully!');
-      // Optionally dispatch an action to update the state
-      dispatch({ type: 'ERASE_TEMPLATE', payload: templateId });
+      const token = getToken();
+      await eraseTemplate(templateId, token);
+      dispatch({ type: "ERASE_TEMPLATE", payload: templateId });
+      showMessage("Template erased successfully!");
     } catch (error) {
-      console.error(error.message);
-      showMessage('Failed to erase the template. Please try again.');
+      showMessage("Failed to erase the template. Please try again.");
     }
   };
 
 
-  // Filter templates by search query and role
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (template.subtype && template.subtype.toLowerCase().includes(searchQuery.toLowerCase()));
+      template.type.toLowerCase().includes(searchQuery.toLowerCase());
 
-    var matchesRole =
-      roleFilter === 'All' || template.requiredRole === roleFilter;
+    const matchesRole = roleFilter === 'All' || template.requiredRole === roleFilter;
+    const matchesStatus = statusFilter === 'All' || template.status === statusFilter.toLowerCase();
 
-    // 🛠️ Debugging Log
-    // console.log(`Checking template: ${template.name}`);
-    // console.log(`- Template Required Role: ${template.requiredRole}`);
-    // console.log(`- User Role: ${user.role}`);
-    // console.log(`- User Organization: ${JSON.stringify(user.organization)}`);
-    // console.log(`- User Suborganizations: ${JSON.stringify(user.suborganizations)}`);
+    if (user.role === "organization") {
+      const isSubOrgMatch = template.suborganizations?.some(
+        (suborg) => String(suborg) === String(user._id)
+      );
+      const isOrgMatch = String(template.organization) === String(user.organization._id);
 
-    // console.log(`Checking role condition for template: ${template.name}`);
-    // console.log(`- User Role: ${user.role}`);
-    // console.log(`- Template Required Role: ${template.requiredRole}`);
-
-
-
-    // Allow students to see organization templates if they belong to suborganizations
-    if (user.role === 'student' && template.requiredRole === 'organization') {
-      const belongsToSubOrg = user.suborganizations?.includes(template.organization); // Fix condition
-      // console.log(`- Template Organization: ${template.organization}`);
-      // console.log(`- Matches Student's Suborganization: ${belongsToSubOrg}`);
-
-      if (belongsToSubOrg) {
-        matchesRole = true;
-      }
+      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus;
     }
-
-    const matchesStatus =
-      statusFilter === 'All' || template.status === statusFilter.toLowerCase();
 
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Debugging logs
+  console.log("User role:", user.role);
+  console.log("User organization:", user.organization);
+  console.log("User ID:", user._id);
+  console.log("Templates before filtering:", templates);
+  console.log("Templates after filtering:", filteredTemplates);
 
-  // Sort templates based on selected option
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
     switch (sortOption) {
-      case 'name-asc':
-        return a.name.localeCompare(b.name);
-      case 'name-desc':
-        return b.name.localeCompare(a.name);
-      case 'date-asc':
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      case 'date-desc':
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      default:
-        return 0;
+      case 'name-asc': return a.name.localeCompare(b.name);
+      case 'name-desc': return b.name.localeCompare(a.name);
+      case 'date-asc': return new Date(a.createdAt) - new Date(b.createdAt);
+      case 'date-desc': return new Date(b.createdAt) - new Date(a.createdAt);
+      default: return 0;
     }
   });
 
-  if (loading) return <p>Loading templates...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
 
   return (
-    <div className="p-4">
+
+    <div className={`p-4 relative transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      {delayedLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
+          <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+            size="large" text="Docurate!" />
+          {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
+        </div>
+      )}
+
       <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
       <div className="mb-4 flex gap-4">
+        {delayedLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
+            <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+              size="large" text="Docurate!" />
+            {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Search templates by name, type, or subtype..."
@@ -244,15 +278,13 @@ const TemplateListContainer = () => {
               <div className="flex justify-end gap-2 mb-2">
                 {template.suborganizations &&
                   template.suborganizations.length > 0 ? (
-                  template.suborganizations.map((suborg) => (
-                    <>
-                      <span
-                        key={suborg._id}
-                        className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
-                      >
-                        Special for: {suborg.firstname}
-                      </span>
-                    </>
+                  template.suborganizations.map((suborg, index) => (
+                    <span
+                      key={suborg._id ? String(suborg._id) : `suborg-${index}`}
+                      className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
+                    >
+                      Special for: {suborg.firstname}
+                    </span>
                   ))
                 ) : (
                   <span className="bg-gray-200 text-blue-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
@@ -283,7 +315,7 @@ const TemplateListContainer = () => {
                     {user.role === "admin" && (
                       <button
                         className="bg-red-700 text-white py-2 px-4 rounded hover:bg-red-900"
-                        onClick={() => handleEraseTemplate(template._id)}
+                        onClick={() => handleEraseClick(template)}
                       >
                         Erase
                       </button>
@@ -328,6 +360,29 @@ const TemplateListContainer = () => {
           onDelete={handleDeleteTemplate}
         />
       )}
+      {isEraseModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-lg font-semibold">Are you sure you want to erase this template?</p>
+            <p className="text-sm text-red-600 mt-1">This action cannot be undone.</p>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={cancelEraseTemplate}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmEraseTemplate}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Erase
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Mini Message Box (Centered) */}
       {message && (
