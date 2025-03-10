@@ -76,123 +76,125 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
 
             {/* --------------- */}
             {/* for simple animation */}
-            <motion.div 
-                key={filterRole} 
-                initial={{ opacity: 0, y: -10 }} 
-                animate={{ opacity: 1, y: 0 }} 
+            <motion.div
+                key={filterRole}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
             >
 
-            {/* actual table */}
-            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">#</th>
-                        <th scope="col" className="px-6 py-3">Full Name</th>
-                        <th scope="col" className="px-6 py-3">Email</th>
-                        {filterRole !== "organizations" &&
-                            <th scope="col" className="px-6 py-3">Birthdate</th>
-                        }
-                        
-                        <th scope="col" className="px-6 py-3">
-                            {currentUser?.role === "superadmin" ? "Position" : "Role"}
-                        </th>
-                        {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                            <th scope="col" className="px-6 py-3">Student ID</th>
-                        )}
+                {/* actual table */}
+                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" className="px-6 py-3">#</th>
+                            <th scope="col" className="px-6 py-3">Full Name</th>
+                            <th scope="col" className="px-6 py-3">Email</th>
+                            {filterRole !== "organizations" &&
+                                <th scope="col" className="px-6 py-3">Birthdate</th>
+                            }
 
-                        {/* pag superadmins, show org.
+                            <th scope="col" className="px-6 py-3">
+                                {currentUser?.role === "superadmin" ? "Position" : "Role"}
+                            </th>
+                            {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                                <th scope="col" className="px-6 py-3">Student ID</th>
+                            )}
+
+                            {/* pag superadmins, show org.
                         else, show suborganizations*/}
-                        <th scope="col" className="px-6 py-3">
-                            {currentUser?.role === "superadmin" ? "Organization" : "Suborganizations"}
-                        </th>
+                            {currentUser?.role !== "organization" && (
+                                <th scope="col" className="px-6 py-3">
+                                    {currentUser?.role === "superadmin" ? "Organization" : "Suborganizations"}
+                                </th>
+                            )}
 
-                        <th scope="col" className="px-6 py-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredUsers.length > 0 ? (
-                        filteredUsers.map((user, index) => (
-                            <tr
-                                key={user._id}
-                                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                            >
-                                <td className="px-6 py-4">{index + 1}</td>
-                                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {user.firstname} {user.lastname}
-                                </td>
-                                <td className="px-6 py-4">{user.email}</td>
-                                
-                                {filterRole !== "organizations" && (
-                                    <td className="px-6 py-4">
-                                        {user.birthdate
-                                        ? new Date(user.birthdate).toLocaleDateString("en-US", {
-                                            year: "numeric",
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                        })
-                                        : "N/A"}
+                            <th scope="col" className="px-6 py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredUsers.length > 0 ? (
+                            filteredUsers.map((user, index) => (
+                                <tr
+                                    key={user._id}
+                                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                >
+                                    <td className="px-6 py-4">{index + 1}</td>
+                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        {user.firstname} {user.lastname}
                                     </td>
-                                )}
+                                    <td className="px-6 py-4">{user.email}</td>
 
-                                {currentUser?.role === "admin" ? (
-                                    <td className="px-6 py-4">{user.role}</td>
-                                ) : currentUser?.role === "superadmin" ? (
-                                    <td className="px-6 py-4">{user.position || "N/A"}</td>
-                                ) : (null) }
-                                
-                                {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                                    <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
-                                )}
+                                    {filterRole !== "organizations" && (
+                                        <td className="px-6 py-4">
+                                            {user.birthdate
+                                                ? new Date(user.birthdate).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                })
+                                                : "N/A"}
+                                        </td>
+                                    )}
 
-                                {currentUser?.role === "superadmin" ? (
-                                    <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
-                                ) : (
+                                    {currentUser?.role === "admin" ? (
+                                        <td className="px-6 py-4">{user.role}</td>
+                                    ) : currentUser?.role === "superadmin" ? (
+                                        <td className="px-6 py-4">{user.position || "N/A"}</td>
+                                    ) : (null)}
+
+                                    {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                                        <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
+                                    )}
+
+                                    {currentUser?.role === "superadmin" ? (
+                                        <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
+                                    ) : (
+                                        <td className="px-6 py-4">
+                                            {user.suborganizations?.length > 0
+                                                ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
+                                                : "N/A"}
+                                        </td>
+                                    )}
+
                                     <td className="px-6 py-4">
-                                        {user.suborganizations?.length > 0
-                                            ? user.suborganizations.map(suborgs => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
-                                            : "N/A"}
-                                    </td>
-                                )}
-
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-5">
-                                        {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                                        <div className="flex gap-5">
+                                            {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                                                <button
+                                                    className="font-medium text-yellow-600 dark:text-yellow-500 hover:underline"
+                                                    onClick={() => handleResetPasswordClick(user, user.role)}
+                                                >
+                                                    Reset Password
+                                                </button>
+                                            )}
                                             <button
-                                                className="font-medium text-yellow-600 dark:text-yellow-500 hover:underline"
-                                                onClick={() => handleResetPasswordClick(user, user.role)}
+                                                className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                onClick={() => handleEditClick(user)}
                                             >
-                                                Reset Password
+                                                Edit
                                             </button>
-                                        )}
-                                        <button
-                                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                            onClick={() => handleEditClick(user)}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="font-medium text-red-600 dark:text-red-500 hover:underline"
-                                            onClick={() => handleDeleteClick(user)}
-                                        >
-                                            Inactive
-                                        </button>
-                                        {/* <button className="font-medium text-green-600 dark:text-green-500 hover:underline">
+                                            <button
+                                                className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                onClick={() => handleDeleteClick(user)}
+                                            >
+                                                Inactive
+                                            </button>
+                                            {/* <button className="font-medium text-green-600 dark:text-green-500 hover:underline">
                                             Send Email
                                         </button> */}
-                                    </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                                    No users found.
                                 </td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                                No users found.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
 
             </motion.div>
             {/* --------------- */}
