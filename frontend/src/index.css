@@ -1,3 +1,75 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.peek-box {
+  position: relative;
+  overflow: hidden;
+  background-color: #e9f3ff;
+  border-radius: 5%;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.peek-box:hover {
+  background-color: #ffffff;
+}
+
+.donut-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.donut {
+  position: absolute;
+  bottom: -200px;
+  right: -200px;
+  width: 500px;
+  height: 500px;
+  margin-bottom: -50px;
+  margin-right: -70px;
+  border: 80px solid #ffde59;
+  border-radius: 50%;
+  transition: transform 0.5s ease-in-out;
+  transform: translate(100%, 100%);
+  z-index: 0;
+}
+
+.peek-box:hover .donut {
+  transform: translate(0, 0);
+}
+
+.login-button {
+  color: white;
+  background-color: #3cafed;
+  z-index: 10;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.login-button:hover {
+  background-color: #0c6595 !important;
+}
+
+.peek-box:hover .login-button {
+  color: white;
+  background-color: #3b82f6;
+}
+
+input {
+  position: relative;
+  z-index: 10;
+  background-color: white;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-bg {
+  background: linear-gradient(45deg, #fffeff, #50d0b0, #58bdf4);
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+}
