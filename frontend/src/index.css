@@ -73,3 +73,17 @@ input {
   background-size: 300% 300%;
   animation: gradientShift 6s ease infinite;
 }
+
+.role-badge {
+  padding: 3px 10px 3px 10px;
+  border-radius: 10px;
+  color: white;
+}
+
+.role-badge.student {
+  background-color: #1ca784;
+}
+
+.role-badge.organization {
+  background-color: #3986b0;
+}
