@@ -1,0 +1,25 @@
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 0;
+  padding-left: 2rem; /* Ensure proper indentation */
+}
+
+.ProseMirror li {
+  margin-bottom: 0.25rem; /* Adds spacing between list items */
+}
+
+.ProseMirror ul {
+  list-style-type: disc; /* Bullet style */
+}
+
+.ProseMirror ol {
+  list-style-type: decimal; /* Numbered style */
+}
+
+.ProseMirror ul ul {
+  list-style-type: circle; /* Nested bullet list */
+}
+
+.ProseMirror ol ol {
+  list-style-type: lower-alpha; /* Nested ordered list */
+}
