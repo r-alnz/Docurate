@@ -63,6 +63,29 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setIsResetModalOpen(true)
     }
 
+    const handleSendEmail = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/email/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({}) // No email needed since it's hardcoded in backend
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                alert(`✅ Email sent successfully!`);
+            } else {
+                alert(`❌ Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Error sending email:", error);
+            alert("❌ Failed to send email.");
+        }
+    };
+    
 
     return (
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
@@ -225,9 +248,10 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                             >
                                                 Inactive
                                             </button>
-                                            {/* <button className="font-medium text-green-600 dark:text-green-500 hover:underline">
+                                            <button className="font-medium text-green-600 dark:text-green-500 hover:underline"
+                                            onClick={() => handleSendEmail(user)}>
                                             Send Email
-                                        </button> */}
+                                        </button>
                                         </div>
                                     </td>
                                 </tr>
