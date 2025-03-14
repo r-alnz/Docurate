@@ -63,20 +63,41 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setIsResetModalOpen(true)
     }
 
-    const handleSendEmail = async () => {
+    const handleSendEmail = async (user) => {
+
+        const emailData = {
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            password: user.password || "Cannot decrypt password.", // Ensure password is present
+        };
+    
+        console.log("📩 Sending email request:", emailData); // Debugging
+
+        if (!user || !user.email) {
+            alert("❌ No email found for this user.");
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:8000/api/email/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({}) // No email needed since it's hardcoded in backend
+                // body: JSON.stringify({}) // No email needed since it's hardcoded in backend
+                body: JSON.stringify({
+                    email: user.email,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    password: user.password
+                })
             });
     
             const data = await response.json();
     
             if (response.ok) {
-                alert(`✅ Email sent successfully!`);
+                alert(`✅ Email sent to ${user.email}`);
             } else {
                 alert(`❌ Error: ${data.error}`);
             }
