@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import templateRoutes from './routes/templateRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import importRoutes from "./routes/importRoutes.js";
+import emailRoutes from "./routes/emailRoutes.js"
 
 dotenv.config()
 
@@ -35,6 +36,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/documents', documentRoutes);
 app.use("/api/import", importRoutes);
+app.use("/api/email", emailRoutes);
 
 connectDB()
     .then(async () => {

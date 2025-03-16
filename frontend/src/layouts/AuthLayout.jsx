@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom"
+import "../index.css"
 
 const AuthLayout = () => {
     return (
@@ -22,7 +23,7 @@ const AuthLayout = () => {
         <div className="w-1/2 flex items-center justify-center p-8 relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#5ccfff] to-[#38b6ff] rounded-bl-full"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#76d4ff] to-[#c2e9ff] rounded-tr-full"></div>
-          <div className="w-full max-w-md bg-white bg-opacity-90 backdrop-blur-lg shadow-lg rounded-lg p-8 relative z-10">
+          <div className="animated-bg w-full max-w-md backdrop-blur-lg shadow-lg p-3 pt-6 relative z-10 rounded-3xl">
             <Outlet />
           </div>
         </div>

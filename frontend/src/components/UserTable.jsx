@@ -7,6 +7,9 @@ import EditAdminModal from "./EditAdminModal";
 import ResetPasswordModal from "./ResetPasswordModal";
 import { resetUserPassword, resetAdminPassword } from "../services/authService";
 
+import "../index.css"
+import { Mail } from "lucide-react";
+
 const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -60,6 +63,50 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setIsResetModalOpen(true)
     }
 
+    const handleSendEmail = async (user) => {
+
+        const emailData = {
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            password: user.password || "Cannot decrypt password.", // Ensure password is present
+        };
+    
+        console.log("📩 Sending email request:", emailData); // Debugging
+
+        if (!user || !user.email) {
+            alert("❌ No email found for this user.");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8000/api/email/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // body: JSON.stringify({}) // No email needed since it's hardcoded in backend
+                body: JSON.stringify({
+                    email: user.email,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    password: user.password
+                })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                alert(`✅ Email sent to ${user.email}`);
+            } else {
+                alert(`❌ Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Error sending email:", error);
+            alert("❌ Failed to send email.");
+        }
+    };
+    
 
     return (
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
@@ -148,8 +195,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                     className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 >
                                     <td className="px-6 py-4">{index + 1}</td>
-                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {user.firstname} {user.lastname}
+                                    <td className="px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
+                                    <div className="flex gap-x-6 justify-between items-center">
+                                    	<div className="font-semibold ">{user.firstname} {user.lastname}</div>
+                                        <div className="flex items-center gap-x-1">
+                                        	<div className={`role-badge ${user.role}`}>{user.role}</div>
+																					<Mail className="w-5 h-4 " />
+                                        </div>
+                                        
+                                    </div>
                                     </td>
                                     <td className="px-6 py-4">{user.email}</td>
 
@@ -215,9 +269,10 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                             >
                                                 Inactive
                                             </button>
-                                            {/* <button className="font-medium text-green-600 dark:text-green-500 hover:underline">
+                                            <button className="font-medium text-green-600 dark:text-green-500 hover:underline"
+                                            onClick={() => handleSendEmail(user)}>
                                             Send Email
-                                        </button> */}
+                                        </button>
                                         </div>
                                     </td>
                                 </tr>

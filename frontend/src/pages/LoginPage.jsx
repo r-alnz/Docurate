@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getToken } from '../utils/authUtil';
 import { getUserDetails } from '../services/authService';
 import { useAuthContext } from '../hooks/useAuthContext';
-import Loader from '../components/Loader';
+import '../index.css';
+// import Loader from '../components/Loader';
 
 const LoginPage = () => {
     const { user, dispatch } = useAuthContext();
@@ -32,9 +33,9 @@ const LoginPage = () => {
         }
     }, [user, dispatch, navigate]);
 
-    if(loading) {
-        return <Loader />;
-    }
+    // if(loading) {
+    //     return <Loader />;
+    // }
 
     const getRedirectPath = (role) => {
         switch (role) {
@@ -44,7 +45,7 @@ const LoginPage = () => {
                 return '/users';
             case 'student':
             case 'organization':
-                return '/documents';
+                return '/user-templates';
             default:
                 return '/';
         }
@@ -63,8 +64,14 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <h2 className="text-2xl font-bold mb-6">Login</h2>
+        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 peek-box">
+
+            <div className="donut-container">
+                <div className="donut"></div>
+            </div>
+
+                {/* <h2 className="text-2xl font-bold mb-6 relative z-10">Let's get started</h2> */}
+    
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
@@ -99,7 +106,7 @@ const LoginPage = () => {
                 <div className="flex items-center justify-between">
                     <button
                         type="submit"
-                        className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+                        className={`login-button font-bold py-2 px-4 rounded ${
                             loading ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                         disabled={loading}
@@ -109,7 +116,7 @@ const LoginPage = () => {
                 </div>
             </form>
         </div>
-    );
+    );    
 };
 
 export default LoginPage;
