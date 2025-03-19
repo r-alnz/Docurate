@@ -72,6 +72,12 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
             return;
         }
 
+        // Confirm dialog before saving changes
+        const isConfirmed = window.confirm("Are you sure you want to save these changes?");
+        if (!isConfirmed) {
+            return; // Exit if the user cancels
+        }
+
         const updatedUser = {
             ...formData,
             suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
@@ -87,6 +93,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         try {
             await onEdit(user._id, updatedUser);
             alert("✅ Edit successful!");
+            onClose();
         } catch (error) {
             console.error("❌ Edit failed:", error);
             alert("❌ Edit failed. Please try again.");
@@ -206,23 +213,23 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
                     {user.role === 'admin' && (
                         <>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Position</label>
-                            <input
-                                type="text"
-                                name="position"
-                                value={formData.position}
-                                onChange={handleInputChange}
-                                className="w-full border p-2 rounded"
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Organization</label>
-                            <div className="w-full border p-2 rounded">
-                                    {user.organization.name}
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Position</label>
+                                <input
+                                    type="text"
+                                    name="position"
+                                    value={formData.position}
+                                    onChange={handleInputChange}
+                                    className="w-full border p-2 rounded"
+                                />
                             </div>
-                        </div>
+
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Organization</label>
+                                <div className="w-full border p-2 rounded">
+                                    {user.organization.name}
+                                </div>
+                            </div>
                         </>
                     )}
 
