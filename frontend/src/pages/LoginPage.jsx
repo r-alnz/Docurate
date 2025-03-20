@@ -5,17 +5,17 @@ import { getToken } from '../utils/authUtil';
 import { getUserDetails } from '../services/authService';
 import { useAuthContext } from '../hooks/useAuthContext';
 import '../index.css';
-// import Loader from '../components/Loader';
 
 const LoginPage = () => {
     const { user, dispatch } = useAuthContext();
     const { login, loading, error } = useLogin();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    const [message, setMessage] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // If the user is already logged in, redirect to the appropriate route
         const token = getToken();
 
         if (token) {
@@ -25,17 +25,13 @@ const LoginPage = () => {
                         type: 'LOGIN',
                         payload: { user: userDetails, token },
                     });
-                    navigate(getRedirectPath(userDetails.role)); // Redirect based on role
+                    navigate(getRedirectPath(userDetails.role));
                 })
                 .catch((err) => {
                     console.error('Failed to fetch user details:', err);
                 });
         }
     }, [user, dispatch, navigate]);
-
-    // if(loading) {
-    //     return <Loader />;
-    // }
 
     const getRedirectPath = (role) => {
         switch (role) {
@@ -53,6 +49,20 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const nextAttempts = failedAttempts + 1;
+
+        if (nextAttempts >= 5) {
+            setMessage('Please contact your school admin to reset your password.');
+            setFailedAttempts(0); // Reset attempts after showing the message
+
+            // Clear message after 5 seconds
+            setTimeout(() => setMessage(null), 5000);
+            return; // Prevent further execution
+        }
+
+        setFailedAttempts(nextAttempts); // Update state after checking
+
         try {
             await login(email, password);
             if (user) {
@@ -60,18 +70,26 @@ const LoginPage = () => {
             }
         } catch (err) {
             console.error('Login failed:', err);
+            setMessage('Invalid email or password. Please try again.');
+
+            // Clear message after 5 seconds
+            setTimeout(() => setMessage(null), 5000);
         }
     };
 
     return (
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 peek-box">
-
             <div className="donut-container">
                 <div className="donut"></div>
             </div>
 
-                {/* <h2 className="text-2xl font-bold mb-6 relative z-10">Let's get started</h2> */}
-    
+            {/* Display message */}
+            {message && (
+                <div className="mb-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+                    {message}
+                </div>
+            )}
+
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
@@ -106,9 +124,7 @@ const LoginPage = () => {
                 <div className="flex items-center justify-between">
                     <button
                         type="submit"
-                        className={`login-button font-bold py-2 px-4 rounded ${
-                            loading ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`login-button font-bold py-2 px-4 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={loading}
                     >
                         {loading ? 'Logging in...' : 'Login'}
@@ -116,7 +132,7 @@ const LoginPage = () => {
                 </div>
             </form>
         </div>
-    );    
+    );
 };
 
 export default LoginPage;
