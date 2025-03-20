@@ -14,7 +14,7 @@ const AdminUsersPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const suborgAlready = [user]; // the logged-in user
-    
+
     const suborganizations = users.filter(user => user.role === "organization");
 
     const loadUsers = async () => {
@@ -32,7 +32,7 @@ const AdminUsersPage = () => {
             loadUsers();
         }
     }, [token, dispatch, users.length]);
-    
+
     // Update filtered users when the context changes
     useEffect(() => {
         setFilteredUsers(users);
@@ -45,7 +45,7 @@ const AdminUsersPage = () => {
         const filtered = users.filter((user) =>
             `${user.firstname} ${user.lastname}`.toLowerCase().includes(query) ||
             `${user.role}`.toLowerCase().includes(query) ||
-            (user.organization?.name || '').toLowerCase().includes(query) || 
+            (user.organization?.name || '').toLowerCase().includes(query) ||
             `${user.studentId}`.toLowerCase().includes(query)
         );
         setFilteredUsers(filtered);
@@ -67,7 +67,7 @@ const AdminUsersPage = () => {
             console.error("❌ Error: Missing user ID or form data");
             return;
         }
-    
+
         // Ensure suborganizations is always a valid array
         const sanitizedData = {
             ...updatedData,
@@ -75,72 +75,72 @@ const AdminUsersPage = () => {
                 ? updatedData.suborganizations.filter(id => id) // Remove undefined/null
                 : [],
         };
-    
+
         console.log("🔹 Sending update request for user:", userId);
         console.log("📤 Payload:", JSON.stringify(sanitizedData, null, 2));
-    
+
         try {
             await editUserAccount(token, userId, sanitizedData);
             await loadUsers(); // Fetch latest users from backend after editing ✅
-    
+
         } catch (error) {
             console.error("❌ Failed to update user:", error);
         }
     };
-    
-    
-        
+
+
+
     const handleDeleteUser = async (userId) => {
         try {
             await deleteUserAccount(token, userId);
             dispatch({
                 type: 'SET_USERS',
                 payload: users.filter((user) => user._id !== userId),
-            });            
+            });
         } catch (error) {
             console.error('Failed to delete user:', error);
         }
     };
-    
+
 
     return (
-      <div className="p-4">
-        <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
+        <div className="p-4">
+            <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
 
-        {/* Search Bar and Add User Button */}
-        <div className="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="border p-2 rounded w-1/3"
-          />
-          <button
-            onClick={() => setIsAddUserModalOpen(true)}
-            className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
-          >
-            Add User
-          </button>
+            {/* Search Bar and Add User Button */}
+            <div className=" relative z-0 flex justify-between items-center mb-4">
+                <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="border p-2 rounded w-1/3"
+                />
+                <button
+                    onClick={() => setIsAddUserModalOpen(true)}
+                    className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
+                >
+                    Add User
+                </button>
+            </div>
+
+            {/* User Table */}
+            <UserTable
+                users={filteredUsers}
+                onEdit={handleEditUser}
+                onDelete={handleDeleteUser}
+                suborganizations={suborganizations}
+            />
+
+            {/* Add User Modal */}
+            <AddUserModal
+                isOpen={isAddUserModalOpen}
+                onClose={() => setIsAddUserModalOpen(false)}
+                onSubmit={handleAddUser}
+                suborganizations={suborganizations} // Pass sub-orgs as prop
+                suborgAlready={suborgAlready}
+            />
         </div>
-
-        {/* User Table */}
-        <UserTable
-          users={filteredUsers}
-          onEdit={handleEditUser}
-          onDelete={handleDeleteUser}
-          suborganizations={suborganizations}
-        />
-
-        {/* Add User Modal */}
-        <AddUserModal
-          isOpen={isAddUserModalOpen}
-          onClose={() => setIsAddUserModalOpen(false)}
-          onSubmit={handleAddUser}
-          suborganizations={suborganizations} // Pass sub-orgs as prop
-          suborgAlready={suborgAlready}
-        />
-      </div>
     );
 };
 
