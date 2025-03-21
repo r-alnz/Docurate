@@ -19,7 +19,7 @@ const AddDocumentModal = ({ onClose }) => {
         if (templates.length === 0) {
             dispatch({ type: 'SET_LOADING', payload: true });
         } else {
-            const buildDecisionTree = async() => {
+            const buildDecisionTree = async () => {
                 // const tree = {};
                 const token = getToken();
                 const tree = await fetchDecisionTree(token);
@@ -51,7 +51,7 @@ const AddDocumentModal = ({ onClose }) => {
         }
     }, [templates, dispatch]);
     // console.log(decisionTree);
-    
+
 
     const handleUseTemplate = () => {
         if (selectedTemplate) {
@@ -63,7 +63,7 @@ const AddDocumentModal = ({ onClose }) => {
     if (contextError) return <p className="text-red-500">{contextError}</p>;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl">
                 <h2 className="text-xl font-bold mb-4">Create New Document</h2>
                 <label className="block text-gray-700 mb-2">
