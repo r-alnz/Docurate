@@ -14,11 +14,16 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
   // const [isStudentOrgMember, setIsStudentOrgMember] = useState(false);
   const [isStudentOrgMember, setIsStudentOrgMember] = useState(true);
   const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
-  const [birthdate, setBirthdate] = useState('');
   const [college, setCollege] = useState('');
   const [course, setCourse] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const [birthdate, setBirthdate] = useState('');
+  const today = new Date();
+  // Birthdate restriction
+  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
 
   // Password validation
   const validatePassword = (value) => {
@@ -209,6 +214,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               onChange={(e) => setBirthdate(e.target.value)}
               className="border rounded p-2 w-full"
               required
+              max={maxDate} // Restrict to at least 18 years old
             />
           </div>
 

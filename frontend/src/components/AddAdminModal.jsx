@@ -20,6 +20,10 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const [organizations, setOrganizations] = useState([]);
   const [position, setPosition] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const today = new Date();
+  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -176,9 +180,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
               onChange={(e) => setBirthdate(e.target.value)}
               className="border rounded p-2 w-full"
               required
+              max={maxDate} // Restrict to at least 18 years old
             />
           </div>
-
           {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">
