@@ -71,7 +71,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             lastname: user.lastname,
             password: user.password || "Cannot decrypt password.", // Ensure password is present
         };
-    
+
         console.log("📩 Sending email request:", emailData); // Debugging
 
         if (!user || !user.email) {
@@ -93,9 +93,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     password: user.password
                 })
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 alert(`✅ Email sent to ${user.email}`);
             } else {
@@ -106,7 +106,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             alert("❌ Failed to send email.");
         }
     };
-    
+
 
     return (
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
@@ -172,7 +172,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                             {currentUser?.role === "admin" && filterRole !== "organizations" && (
                                 <>
                                     <th scope="col" className="px-6 py-3">College</th>
-                                    <th scope="col" className="px-6 py-3">Course</th>
+                                    <th scope="col" className="px-6 py-3">Program</th>
                                 </>
                             )}
 
@@ -196,14 +196,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                 >
                                     <td className="px-6 py-4">{index + 1}</td>
                                     <td className="px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
-                                    <div className="flex gap-x-6 justify-between items-center">
-                                    	<div className="font-semibold ">{user.firstname} {user.lastname}</div>
-                                        <div className="flex items-center gap-x-1">
-                                        	<div className={`role-badge ${user.role}`}>{user.role}</div>
-																					<Mail className="w-5 h-4 " />
+                                        <div className="flex gap-x-6 justify-between items-center">
+                                            <div className="font-semibold ">{user.firstname} {user.lastname}</div>
+                                            <div className="flex items-center gap-x-1">
+                                                <div className={`role-badge ${user.role}`}>{user.role}</div>
+                                                <Mail className="w-5 h-4 " />
+                                            </div>
+
                                         </div>
-                                        
-                                    </div>
                                     </td>
                                     <td className="px-6 py-4">{user.email}</td>
 
@@ -270,9 +270,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                                 Inactive
                                             </button>
                                             <button className="font-medium text-green-600 dark:text-green-500 hover:underline"
-                                            onClick={() => handleSendEmail(user)}>
-                                            Send Email
-                                        </button>
+                                                onClick={() => handleSendEmail(user)}>
+                                                Send Email
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

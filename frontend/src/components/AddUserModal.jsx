@@ -129,7 +129,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                   </div>
                   <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">
-                      Course
+                      Program
                     </label>
                     <input
                       type="text"
@@ -275,8 +275,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                 );
                               }}
                               className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                  ? "bg-blue-500 text-white"
-                                  : "bg-gray-100 text-gray-700"
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-100 text-gray-700"
                                 } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
