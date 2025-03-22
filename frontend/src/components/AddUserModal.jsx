@@ -17,6 +17,24 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
   const [birthdate, setBirthdate] = useState('');
   const [college, setCollege] = useState('');
   const [course, setCourse] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  // Password validation
+  const validatePassword = (value) => {
+    setPassword(value);
+
+    if (value.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+    } else if (
+      !/^(?=.*[A-Za-z])(?=.*[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(value)
+    ) {
+      setPasswordError('Password must include at least one letter and one number or symbol');
+    } else {
+      setPasswordError('');
+    }
+  };
+
 
   const currRole = suborgAlready.length > 0 ? suborgAlready[0].role : null;
 
@@ -210,14 +228,26 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             <label className="block text-gray-700 font-medium mb-2">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="border rounded p-2 w-full"
-              required
-            />
+            <div className="flex flex-col">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => validatePassword(e.target.value)}
+                className="border rounded-t p-2 w-full"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="bg-gray-200 border-t border-gray-300 text-gray-700 p-2 rounded-b hover:bg-gray-300"
+              >
+                {showPassword ? '🙈 Hide Password' : '👁️ Show Password'}
+              </button>
+            </div>
+            {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
           </div>
+
+
 
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">
