@@ -19,6 +19,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [birthdate, setBirthdate] = useState('');
+  const [message, setMessage] = useState(null);
   const today = new Date();
   // Birthdate restriction
   const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
@@ -40,6 +41,12 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
     }
   };
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 3000); // Clear message after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const currRole = suborgAlready.length > 0 ? suborgAlready[0].role : null;
 
@@ -76,7 +83,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
 
     try {
       await onSubmit(userDetails); // Wait for submission
-      alert("✅ Submission successful!");
+      setMessage({ type: 'success', text: '✅ Submission successful!' });
 
       // Reset form fields
       setFirstname('');
@@ -92,7 +99,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       setCourse('');
     } catch (error) {
       console.error("❌ Submission failed:", error);
-      alert("❌ Submission failed. Please try again.");
+      setMessage({ type: 'error', text: '❌ Submission failed. Please try again.' });
     }
   };
 
@@ -253,7 +260,20 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
           </div>
 
-
+          {/* Message Box */}
+          {message && (
+            <div
+              className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
+                }`}
+            >
+              <div className="flex items-center">
+                <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
+                {message.text}
+              </div>
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">

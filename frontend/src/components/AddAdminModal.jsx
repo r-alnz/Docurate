@@ -20,6 +20,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const [organizations, setOrganizations] = useState([]);
   const [position, setPosition] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState(null);
   const today = new Date();
   const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
     .toISOString()
@@ -53,6 +54,14 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
     }
   }, [token, isOpen, contextOrganizations, dispatch]);
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 3000); // Clear message after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+
   const validatePassword = (value) => {
     setPassword(value);
 
@@ -71,7 +80,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
     e.preventDefault();
 
     if (passwordError) {
-      alert('Please fix the errors before submitting');
+      setMessage('Please fix the errors before submitting');
       return;
     }
 
@@ -79,7 +88,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
     try {
       await onSubmit(userDetails);
-      alert('✅ Submission successful!');
+      setMessage({ type: 'success', text: '✅ Submission successful!' });
 
       // Reset form fields
       setFirstname('');
@@ -93,7 +102,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
       setPosition('');
     } catch (error) {
       console.error('❌ Submission failed:', error);
-      alert('❌ Submission failed. Please try again.');
+      setMessage({ type: 'error', text: '❌ Submission failed. Please try again.' });
     }
   };
 
@@ -196,6 +205,21 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
               required
             />
           </div>
+
+          {/* Message Box */}
+          {message && (
+            <div
+              className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
+                }`}
+            >
+              <div className="flex items-center">
+                <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
+                {message.text}
+              </div>
+            </div>
+          )}
 
           {/* Password */}
           <div className="mb-4">
