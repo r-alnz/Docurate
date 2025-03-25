@@ -8,7 +8,7 @@ const AuthLayout = () => {
         <div className="w-1/2 bg-gradient-to-br from-[#5ccfff] via-[#38b6ff] to-[#1e9ee0] text-white flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black opacity-20"></div>
           <img
-            src="/assets/Docurate_Logo.png"
+            src="/Docurate_Logo.png"
             alt="Docurate Logo"
             className="w-45 h-40 mb-4 relative z-10 rounded-full shadow-lg"
           />
