@@ -20,6 +20,9 @@ const app = express()
 app.use(express.json({ limit: '50mb' })); // Increase the limit for JSON payloads
 app.use(express.urlencoded({ limit: '50mb', extended: true })); // Increase the limit for URL-encoded payloads
 
+app.get('/', (req, res) => {
+    res.send('Backend is running!');
+});
 
 app.use(logger)
 app.use(cors({
