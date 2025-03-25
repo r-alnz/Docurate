@@ -564,7 +564,8 @@ const DocumentContainer = () => {
                 {isDataLoaded ? (pages.map((page) => (
                     <div key={page.id} style={{ display: currentPage === page.id ? 'block' : 'none' }}>
                         <Editor
-                            apiKey="nlhi2d7e29jjlh8lggzbzvaee9h7u3ba4hfywmh0v1skgixg"
+                            apiKey="
+9twhdodm7wbgryd497u6qv9m18gj8lyhajeybkbed4cj5kno"
                             value={page.content}
                             init={{
                                 height: selectedPageSize.height,
