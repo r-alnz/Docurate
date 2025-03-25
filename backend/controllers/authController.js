@@ -38,7 +38,7 @@ const loginUser = async (req, res) => {
         });
     } catch (error) {
         console.error('Login error:', error.message);
-        res.status(500).json({ message: 'Login failed', error: error.message });
+        res.status(500).json({ message: 'Your email or password is incorrect. Please try again', error: error.message });
     }
 };
 

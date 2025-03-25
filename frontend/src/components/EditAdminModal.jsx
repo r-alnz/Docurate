@@ -1,9 +1,8 @@
-
+import { useOrganizationContext } from "../hooks/useOrganizationContext";
+import { useAuthContext } from '../hooks/useAuthContext';
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useOrganizationContext } from "../hooks/useOrganizationContext";
 
-import { useAuthContext } from '../hooks/useAuthContext';
 
 const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => {
     console.log("Organizations from context:", suborganizations);
@@ -23,6 +22,15 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
     });
 
     const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
+    const [showMessageModal, setShowMessageModal] = useState(false);
+    const [handleConfirm, setHandleConfirm] = useState(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [message, setMessage] = useState({ text: "", type: "" });
+    const [birthdate, setBirthdate] = useState('');
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
+        .toISOString()
+        .split('T')[0];
 
     useEffect(() => {
         // Initialize selected suborganizations only when formData.suborganizations is available
@@ -64,7 +72,9 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
+
+
+    const handleSubmit = (e) => {
         e.preventDefault();
 
         if (!user || !user._id) {
@@ -72,26 +82,47 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
             return;
         }
 
-        const updatedUser = {
-            ...formData,
-            suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
-            birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
-            college: formData.college.trim(),
-            course: formData.course.trim(),
-            position: formData.position.trim(),
-        };
+        setHandleConfirm(() => async () => {
+            setShowConfirmDialog(false);
 
-        console.log("🔹 Updating user:", user._id);
-        console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2));
+            const updatedUser = {
+                ...formData,
+                suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
+                birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
+                college: formData.college.trim(),
+                course: formData.course.trim(),
+                position: formData.position.trim(),
+            };
 
-        try {
-            await onEdit(user._id, updatedUser);
-            alert("✅ Edit successful!");
-        } catch (error) {
-            console.error("❌ Edit failed:", error);
-            alert("❌ Edit failed. Please try again.");
-        }
+            console.log("🔹 Updating user:", user._id);
+            console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2));
+
+            try {
+                // Make sure onEdit returns a promise
+                const result = await onEdit(user._id, updatedUser);
+                console.log("✅ Edit result:", result);
+
+                setMessage({ text: "✅ Edit successful!", type: "success" });
+                setShowMessageModal(true);
+
+                // Close the modal after 3 seconds
+                setTimeout(() => {
+                    setShowMessageModal(false);
+                    onClose(); // ✅ Close modal only after showing success message
+                }, 1000);
+            } catch (error) {
+                console.error("❌ Edit failed:", error);
+
+                setMessage({ text: "❌ Edit failed. Please try again.", type: "error" });
+                setShowMessageModal(true);
+
+                setTimeout(() => setShowMessageModal(false), 1000);
+            }
+        });
+
+        setShowConfirmDialog(true);
     };
+
 
     if (!isOpen) return null;
 
@@ -139,6 +170,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             value={formData.birthdate}
                             onChange={handleInputChange}
                             className="w-full border p-2 rounded"
+                            max={maxDate} // Restrict to at least 18 years old
                         />
                     </div>
 
@@ -206,23 +238,23 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
                     {user.role === 'admin' && (
                         <>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Position</label>
-                            <input
-                                type="text"
-                                name="position"
-                                value={formData.position}
-                                onChange={handleInputChange}
-                                className="w-full border p-2 rounded"
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Organization</label>
-                            <div className="w-full border p-2 rounded">
-                                    {user.organization.name}
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Position</label>
+                                <input
+                                    type="text"
+                                    name="position"
+                                    value={formData.position}
+                                    onChange={handleInputChange}
+                                    className="w-full border p-2 rounded"
+                                />
                             </div>
-                        </div>
+
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Organization</label>
+                                <div className="w-full border p-2 rounded">
+                                    {user.organization.name}
+                                </div>
+                            </div>
                         </>
                     )}
 
@@ -242,6 +274,54 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             Save Changes
                         </button>
                     </div>
+
+                    {showMessageModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
+                                <p className={`mb-4 ${message.type === "success" ? "text-green-700" : "text-red-700"}`}>
+                                    {message.text}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+
+                    {message.text && (
+                        <div
+                            className={`mt-4 p-2 rounded ${message.type === "success"
+                                ? "bg-green-100 text-green-700 border border-green-400"
+                                : "bg-red-100 text-red-700 border border-red-400"
+                                }`}
+                        >
+                            {message.text}
+                        </div>
+                    )}
+
+
+                    {showConfirmDialog && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
+                                <p className="text-gray-700 mb-4">Are you sure you want to save these changes?</p>
+                                <div className="flex justify-end">
+                                    <button
+                                        onClick={() => setShowConfirmDialog(false)}
+                                        className="bg-gray-300 text-gray-700 py-2 px-4 rounded mr-2 hover:bg-gray-400"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleConfirm}
+                                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+                                    >
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
+
                 </form>
             </div>
         </div>
