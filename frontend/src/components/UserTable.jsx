@@ -20,6 +20,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const [filteredUsers, setFilteredUsers] = useState(users);
     const [filterRole, setFilterRole] = useState("all");
     const [filterCollege, setFilterCollege] = useState("all");
+    const [message, setMessage] = useState(null);
     // ✅ Get unique colleges from users
     const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
 
@@ -63,6 +64,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setIsResetModalOpen(true)
     }
 
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000); // Clear message after 3 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
+
     const handleSendEmail = async (user) => {
 
         const emailData = {
@@ -75,7 +83,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         console.log("📩 Sending email request:", emailData); // Debugging
 
         if (!user || !user.email) {
-            alert("❌ No email found for this user.");
+            setMessage({ type: 'error', text: '❌ No email found for this user.' });
             return;
         }
 
@@ -97,13 +105,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             const data = await response.json();
 
             if (response.ok) {
-                alert(`✅ Email sent to ${user.email}`);
+                setMessage({ type: 'success', text: `✅ Email sent to ${user.email}` });
             } else {
-                alert(`❌ Error: ${data.error}`);
+                setMessage({ type: 'error', text: `❌ Error: ${data.error}` });
             }
         } catch (error) {
             console.error("Error sending email:", error);
-            alert("❌ Failed to send email.");
+            setMessage({ type: 'error', text: '❌ Failed to send email.' });
         }
     };
 
@@ -307,6 +315,21 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     onClose={() => setIsEditModalOpen(false)}
                     onEdit={onEdit}
                 />
+            )}
+
+            {/* Message Box */}
+            {message && (
+                <div
+                    className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
+                        ? "bg-green-100 text-green-700 border border-green-400"
+                        : "bg-red-100 text-red-700 border border-red-400"
+                        }`}
+                >
+                    <div className="flex items-center">
+                        <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
+                        {message.text}
+                    </div>
+                </div>
             )}
 
             {isResetModalOpen && (

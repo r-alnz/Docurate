@@ -1,11 +1,11 @@
 import { useOrganizationContext } from "../hooks/useOrganizationContext";
 import { useAuthContext } from '../hooks/useAuthContext';
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-
+"use client"
+import { useState, useEffect } from "react"
+import PropTypes from "prop-types"
 
 const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => {
-    console.log("Organizations from context:", suborganizations);
+    console.log("Organizations from context:", suborganizations)
 
     const [formData, setFormData] = useState({
         firstname: "",
@@ -19,33 +19,32 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         college: "",
         course: "",
         position: "",
-    });
+    })
 
-    const [selectedSubOrgs, setSelectedSubOrgs] = useState([]);
-    const [showMessageModal, setShowMessageModal] = useState(false);
-    const [handleConfirm, setHandleConfirm] = useState(null);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [message, setMessage] = useState({ text: "", type: "" });
-    const [birthdate, setBirthdate] = useState('');
-    const today = new Date();
-    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
-        .toISOString()
-        .split('T')[0];
+    const [selectedSubOrgs, setSelectedSubOrgs] = useState([])
+    const [showMessageModal, setShowMessageModal] = useState(false)
+    const [handleConfirm, setHandleConfirm] = useState(null)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [message, setMessage] = useState({ text: "", type: "" })
+    const [birthdate, setBirthdate] = useState("")
+    const today = new Date()
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]
 
     useEffect(() => {
         // Initialize selected suborganizations only when formData.suborganizations is available
         if (formData.suborganizations) {
-            setSelectedSubOrgs([...formData.suborganizations]);
+            setSelectedSubOrgs([...formData.suborganizations])
         }
-    }, [formData.suborganizations]);
+    }, [formData.suborganizations])
 
     const toggleSubOrg = (suborgId) => {
-        setSelectedSubOrgs((prev) =>
-            prev.includes(suborgId)
-                ? prev.filter((id) => id !== suborgId) // Remove if selected
-                : [...prev, suborgId] // Add if not selected
-        );
-    };
+        setSelectedSubOrgs(
+            (prev) =>
+                prev.includes(suborgId)
+                    ? prev.filter((id) => id !== suborgId) // Remove if selected
+                    : [...prev, suborgId], // Add if not selected
+        )
+    }
 
     useEffect(() => {
         if (user) {
@@ -54,36 +53,80 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 lastname: user.lastname || "",
                 email: user.email || "",
                 role: user.role || "",
-                studentId: user.role === 'student' ? user.studentId || '' : '',
+                studentId: user.role === "student" ? user.studentId || "" : "",
                 suborganizations: Array.isArray(user?.suborganizations)
-                    ? user.suborganizations.map(suborg => suborg._id)
+                    ? user.suborganizations.map((suborg) => suborg._id)
                     : [],
                 birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
                 college: user.college || "",
                 course: user.course || "",
                 organization: user.organization || "",
-                position: user.role === 'admin' ? user.position || '' : ''
-            });
+                position: user.role === "admin" ? user.position || "" : "",
+            })
         }
-    }, [user]);
+    }, [user])
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
+        const { name, value } = e.target
+        setFormData((prev) => ({ ...prev, [name]: value }))
+    }
 
+    // Validation functions
+    const validateName = (name) => {
+        const nameRegex = /^[A-Za-z\s]+$/
+        return nameRegex.test(name)
+    }
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return emailRegex.test(email)
+    }
+
+    const validateAge = (birthdate) => {
+        if (!birthdate) return true // Optional field
+        const birthDate = new Date(birthdate)
+        const today = new Date()
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            return age - 1 >= 18
+        }
+
+        return age >= 18
+    }
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        e.preventDefault()
 
         if (!user || !user._id) {
-            console.error("❌ Error: Missing user ID");
-            return;
+            console.error("❌ Error: Missing user ID")
+            return
+        }
+
+        // Validate form data
+        if (!validateName(formData.firstname)) {
+            setMessage({ text: "❌ First name should contain only letters", type: "error" })
+            return
+        }
+
+        if (!validateName(formData.lastname)) {
+            setMessage({ text: "❌ Last name should contain only letters", type: "error" })
+            return
+        }
+
+        if (!validateEmail(formData.email)) {
+            setMessage({ text: "❌ Please enter a valid email address with @ symbol", type: "error" })
+            return
+        }
+
+        if (!validateAge(formData.birthdate)) {
+            setMessage({ text: "❌ User must be at least 18 years old", type: "error" })
+            return
         }
 
         setHandleConfirm(() => async () => {
-            setShowConfirmDialog(false);
+            setShowConfirmDialog(false)
 
             const updatedUser = {
                 ...formData,
@@ -92,39 +135,38 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 college: formData.college.trim(),
                 course: formData.course.trim(),
                 position: formData.position.trim(),
-            };
+            }
 
-            console.log("🔹 Updating user:", user._id);
-            console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2));
+            console.log("🔹 Updating user:", user._id)
+            console.log("📤 Final Payload:", JSON.stringify(updatedUser, null, 2))
 
             try {
                 // Make sure onEdit returns a promise
-                const result = await onEdit(user._id, updatedUser);
-                console.log("✅ Edit result:", result);
+                const result = await onEdit(user._id, updatedUser)
+                console.log("✅ Edit result:", result)
 
-                setMessage({ text: "✅ Edit successful!", type: "success" });
-                setShowMessageModal(true);
+                setMessage({ text: "✅ Edit successful!", type: "success" })
+                setShowMessageModal(true)
 
                 // Close the modal after 3 seconds
                 setTimeout(() => {
-                    setShowMessageModal(false);
-                    onClose(); // ✅ Close modal only after showing success message
-                }, 1000);
+                    setShowMessageModal(false)
+                    onClose() // ✅ Close modal only after showing success message
+                }, 1000)
             } catch (error) {
-                console.error("❌ Edit failed:", error);
+                console.error("❌ Edit failed:", error)
 
-                setMessage({ text: "❌ Edit failed. Please try again.", type: "error" });
-                setShowMessageModal(true);
+                setMessage({ text: "❌ Edit failed. Please try again.", type: "error" })
+                setShowMessageModal(true)
 
-                setTimeout(() => setShowMessageModal(false), 1000);
+                setTimeout(() => setShowMessageModal(false), 1000)
             }
-        });
+        })
 
-        setShowConfirmDialog(true);
-    };
+        setShowConfirmDialog(true)
+    }
 
-
-    if (!isOpen) return null;
+    if (!isOpen) return null
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
@@ -174,7 +216,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                         />
                     </div>
 
-                    {user.role === 'student' && (
+                    {user.role === "student" && (
                         <>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Student ID</label>
@@ -213,18 +255,14 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                                 <label className="block text-gray-700 font-medium mb-2">Suborganizations</label>
 
                                 {suborganizations.length === 0 ? (
-                                    <div className="border rounded p-2 w-full text-gray-500">
-                                        No suborganizations available.
-                                    </div>
+                                    <div className="border rounded p-2 w-full text-gray-500">No suborganizations available.</div>
                                 ) : (
                                     <div className="border rounded p-2 w-full h-32 overflow-y-auto">
                                         {suborganizations.map((org) => (
                                             <div
                                                 key={org._id}
                                                 onClick={() => toggleSubOrg(org._id)}
-                                                className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                                    ? "bg-blue-500 text-white"
-                                                    : "bg-gray-100 text-gray-700"
+                                                className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id) ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
                                                     } rounded mb-1`}
                                             >
                                                 {org.firstname || "(No Name)"}
@@ -236,7 +274,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                         </>
                     )}
 
-                    {user.role === 'admin' && (
+                    {user.role === "admin" && (
                         <>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Position</label>
@@ -251,9 +289,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
                             <div className="mb-4">
                                 <label className="block text-gray-700">Organization</label>
-                                <div className="w-full border p-2 rounded">
-                                    {user.organization.name}
-                                </div>
+                                <div className="w-full border p-2 rounded">{user.organization.name}</div>
                             </div>
                         </>
                     )}
@@ -285,18 +321,16 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                         </div>
                     )}
 
-
                     {message.text && (
                         <div
                             className={`mt-4 p-2 rounded ${message.type === "success"
-                                ? "bg-green-100 text-green-700 border border-green-400"
-                                : "bg-red-100 text-red-700 border border-red-400"
+                                    ? "bg-green-100 text-green-700 border border-green-400"
+                                    : "bg-red-100 text-red-700 border border-red-400"
                                 }`}
                         >
                             {message.text}
                         </div>
                     )}
-
 
                     {showConfirmDialog && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -319,20 +353,18 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             </div>
                         </div>
                     )}
-
-
-
                 </form>
             </div>
         </div>
-    );
-};
+    )
+}
 
 EditAdminModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     user: PropTypes.object.isRequired,
     onClose: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
-};
+}
 
-export default EditAdminModal;
+export default EditAdminModal
+
