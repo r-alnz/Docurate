@@ -15,8 +15,7 @@ const SideNavigationBar = () => {
     ],
     admin: [
       { name: "Users", path: "/users" },
-      // { name: "Templates", path: "/templates" },
-      {name: "Templates", path: "/newtemplates"},
+      { name: "Templates", path: "/templates" },
       { name: "Import Students", path: "/import" },
     ],
     organization: [
