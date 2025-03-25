@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = '/api/templates';
+// const API_URL = '/api/templates';
+const API_URL = import.meta.env.VITE_API_BASE_URL + '/api/templates';
 
 const createTemplate = async (templateData, token) => {
     const config = {
