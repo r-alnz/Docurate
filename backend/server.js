@@ -14,7 +14,7 @@ import emailRoutes from "./routes/emailRoutes.js"
 
 dotenv.config()
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 8000;
 const app = express()
 
 app.use(express.json({ limit: '50mb' })); // Increase the limit for JSON payloads
@@ -23,7 +23,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true })); // Increase the 
 
 app.use(logger)
 app.use(cors({
-    origin: 'http://localhost:7000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:7000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // ✅ Allow credentials (tokens/cookies)
