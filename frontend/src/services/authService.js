@@ -53,10 +53,10 @@ export const resetUserPassword = async (email, newPassword, token) => {
                 },
             }
         );
-        alert(response.data.message);
+        console.log(response.data.message);
     } catch (error) {
         console.error('Error resetting password:', error);
-        alert(error.response?.data?.message || 'Failed to reset password');
+        console.log(error.response?.data?.message || 'Failed to reset password');
     }
 };
 
@@ -71,7 +71,7 @@ export const resetAdminPassword = async (email, newPassword, token) => {
                 },
             }
         );
-        alert(response.data.message);
+        console.log(response.data.message);
         return response.data; // Return the server response
     } catch (error) {
         // Log and rethrow the error for the caller to handle
