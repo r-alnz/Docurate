@@ -130,6 +130,30 @@ const DocumentContainer = () => {
         margin: 0;
         margin-bottom: 8pt;
     }
+
+    @media print {
+    div[style*="dashed"] {
+        display: none !important;
+    }
+    }
+
+    // .editor-container {
+    //     position: relative;
+    //     width: 100%;
+    //     height: ${selectedPageSize.height / DPI}in;
+    //     overflow: hidden;
+    // }
+
+    // .editor-inner {
+    //     position: absolute;
+    //     top: var(--top-margin);
+    //     left: var(--left-margin);
+    //     right: var(--right-margin);
+    //     bottom: var(--bottom-margin);
+    //     overflow: hidden;
+    //     max-height: calc(100% - var(--top-margin) - var(--bottom-margin));
+    // }
+    
     `;
 
     const printStyles = `
@@ -439,18 +463,19 @@ const DocumentContainer = () => {
             `
             )
             .join('');
-
+    
         iframeDoc.open();
         iframeDoc.write(`
             <html>
                 <head>
                     <title>Print Document</title>
                     <style>
-                        ${printStyles}
-                    </style>
-                    <style>
+                        ${printStyles} /* Ensure normal print styles */
                         body {
-                            font-family: Arial; /* Dynamically set font family */
+                            font-family: Arial; /* Dynamically set font family */                            
+                        }
+                        .no-print {
+                            display: none !important; /* Hide margin overlay */
                         }
                     </style>
                 </head>
@@ -460,9 +485,9 @@ const DocumentContainer = () => {
             </html>
         `);
         iframeDoc.close();
-
+    
         const iframeWindow = iframe.contentWindow;
-
+    
         // Ensure images load before printing
         const images = iframeDoc.getElementsByTagName('img');
         const promises = Array.from(images).map((img) => {
@@ -475,7 +500,7 @@ const DocumentContainer = () => {
                 }
             });
         });
-
+    
         Promise.all(promises).then(() => {
             iframeWindow.focus();
             iframeWindow.print();
@@ -501,9 +526,47 @@ const DocumentContainer = () => {
         reader.readAsDataURL(file);
     };
 
+    const handleEditorInit = (editor) => {
+        editor.on("init", () => {
+          setTimeout(() => {
+            const iframe = editor.iframeElement;
+            if (!iframe) return;
+      
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            if (!doc) return;
+      
+            const body = doc.body;
+            if (!body) return;
+      
+            const marginOverlay = doc.createElement("div");
+            marginOverlay.style.position = "absolute";
+            marginOverlay.style.top = `${margins.top}in`;
+            marginOverlay.style.left = `${margins.left}in`;
+            marginOverlay.style.right = `${margins.right}in`;
+            marginOverlay.style.bottom = `${margins.bottom}in`;
+            marginOverlay.style.border = "2px dashed red";
+            marginOverlay.style.pointerEvents = "none";
+            marginOverlay.style.boxSizing = "border-box";
+            marginOverlay.style.width = `calc(100% - ${margins.left + margins.right}in)`;
+            marginOverlay.style.height = `calc(100% - ${margins.top + margins.bottom}in)`;
+            marginOverlay.style.margin = "auto";
+            marginOverlay.classList.add("no-print");
+            body.appendChild(marginOverlay);
+      
+            // Clip content within margin boundaries
+            // const contentBody = body.querySelector('[contenteditable="true"]');
+            // if (contentBody) {
+            //   contentBody.style.position = "relative";
+            //   contentBody.style.overflow = "hidden";
+            //   contentBody.style.clipPath = `inset(${margins.top}in ${margins.right}in ${margins.bottom}in ${margins.left}in)`;
+            //   contentBody.style.maxWidth = `calc(100% - ${margins.left + margins.right}in)`;
+            //   contentBody.style.maxHeight = `calc(100% - ${margins.top + margins.bottom}in)`;
+            // }
 
-
-
+          }, 50);
+        });
+      };      
+      
 
     return (
         <div className="p-4">
@@ -581,7 +644,9 @@ const DocumentContainer = () => {
                                 content_style: sharedStyles,
                                 readonly: 1,
                                 browser_spellcheck: true,
-                                setup: (editor) => {
+                                setup: (editor) => {          
+                                    
+                                    handleEditorInit(editor);
 
                                     editor.on('drop', (event) => {
                                         event.preventDefault(); // Prevent TinyMCE's default drop handling
@@ -589,6 +654,22 @@ const DocumentContainer = () => {
                                     });
 
                                     editor.on('init', () => {
+
+                                        // editor.getContainer().style.height = `${selectedPageSize.height + 300}px`;
+
+                                        // setTimeout(() => {
+                                        //     const contentBody = editor.getBody();
+                                        //     if (contentBody) { // Ensure it's not null
+                                        //         // contentBody.style.overflow = 'hidden'; // Hide overflow content
+                                        //         contentBody.style.maxHeight = `calc(100% - ${topMargin}px - ${bottomMargin}px)`;
+                                        //     }
+                                        // }, 50); // Small delay to ensure initialization
+
+                                        // // 🔹 Enforce Page Clipping
+                                        // const contentBody = editor.getBody();
+                                        // contentBody.style.overflow = 'hidden'; // Hide overflow content
+                                        // contentBody.style.maxHeight = `calc(100% - ${topMargin}px - ${bottomMargin}px)`;
+
                                         const iframeDoc = editor.getDoc(); // Access TinyMCE's iframe document
 
                                         iframeDoc.addEventListener('mousedown', (e) => {
