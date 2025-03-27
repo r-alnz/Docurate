@@ -8,6 +8,8 @@ import DeleteTemplateModal from "./DeleteTemplateModal"
 
 import { Mosaic } from "react-loading-indicators"
 
+import React from "react"
+
 const TemplateListContainer = () => {
   const { templates, dispatch } = useTemplateContext()
   const { user } = useAuthContext()
