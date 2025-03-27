@@ -1,112 +1,170 @@
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { fetchOrganizations } from '../services/superAdminService';
-import { useAuthContext } from '../hooks/useAuthContext';
-import { useOrganizationContext } from '../hooks/useOrganizationContext';
+import { useState, useEffect } from "react"
+import PropTypes from "prop-types"
+import { fetchOrganizations } from "../services/superAdminService"
+import { useAuthContext } from "../hooks/useAuthContext"
+import { useOrganizationContext } from "../hooks/useOrganizationContext"
 
 const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
-  const { token } = useAuthContext();
-  const { organizations: contextOrganizations, dispatch } = useOrganizationContext();
+  const { token } = useAuthContext()
+  const { organizations: contextOrganizations, dispatch } = useOrganizationContext()
 
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [role, setRole] = useState('admin'); // Default role is admin
-  const [organization, setOrganization] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [organizations, setOrganizations] = useState([]);
-  const [position, setPosition] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState(null);
-  const today = new Date();
-  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
+  const [firstname, setFirstname] = useState("")
+  const [lastname, setLastname] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [birthdate, setBirthdate] = useState("")
+  const [role, setRole] = useState("admin") // Default role is admin
+  const [organization, setOrganization] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [organizations, setOrganizations] = useState([])
+  const [position, setPosition] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [message, setMessage] = useState(null)
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const today = new Date()
+  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+    setShowPassword(!showPassword)
+  }
+
+  // Validation functions
+  const validateName = (name) => {
+    const nameRegex = /^[A-Za-z\s]+$/
+    return nameRegex.test(name)
+  }
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validateAge = (birthdate) => {
+    if (!birthdate) return true // Optional field
+    const birthDate = new Date(birthdate)
+    const today = new Date()
+    const age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      return age - 1 >= 18
+    }
+
+    return age >= 18
+  }
 
   useEffect(() => {
     const loadOrganizations = async () => {
       if (contextOrganizations.length > 0) {
-        setOrganizations(contextOrganizations);
-        return;
+        setOrganizations(contextOrganizations)
+        return
       }
 
-      setLoading(true);
+      setLoading(true)
       try {
-        const data = await fetchOrganizations(token);
-        setOrganizations(data.organizations);
-        dispatch({ type: 'SET_ORGANIZATIONS', payload: data.organizations });
+        const data = await fetchOrganizations(token)
+        setOrganizations(data.organizations)
+        dispatch({ type: "SET_ORGANIZATIONS", payload: data.organizations })
       } catch (error) {
-        console.error('Failed to fetch organizations:', error);
+        console.error("Failed to fetch organizations:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
     if (isOpen) {
-      loadOrganizations();
+      loadOrganizations()
     }
-  }, [token, isOpen, contextOrganizations, dispatch]);
+  }, [token, isOpen, contextOrganizations, dispatch])
 
   useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 3000); // Clear message after 3 seconds
-      return () => clearTimeout(timer);
+    if (message && !showMessageModal) {
+      const timer = setTimeout(() => setMessage(null), 3000) // Clear message after 3 seconds
+      return () => clearTimeout(timer)
     }
-  }, [message]);
+  }, [message, showMessageModal])
 
+  // Effect to handle closing the modal after showing success message
+  useEffect(() => {
+    if (showMessageModal) {
+      const timer = setTimeout(() => {
+        setShowMessageModal(false)
+        onClose()
+      }, 1500) // Slightly longer delay to ensure message is visible
+      return () => clearTimeout(timer)
+    }
+  }, [showMessageModal, onClose])
 
   const validatePassword = (value) => {
-    setPassword(value);
+    setPassword(value)
 
     if (value.length < 8) {
-      setPasswordError('Password must be at least 8 characters long');
-    } else if (
-      !/^(?=.*[A-Za-z])(?=.*[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(value)
-    ) {
-      setPasswordError('Password must include at least one letter and one number or symbol');
+      setPasswordError("Password must be at least 8 characters long")
+    } else if (!/^(?=.*[A-Za-z])(?=.*[\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(value)) {
+      setPasswordError("Password must include at least one letter and one number or symbol")
     } else {
-      setPasswordError('');
+      setPasswordError("")
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+
+    // Validate form data
+    if (!validateName(firstname)) {
+      setMessage({ type: "error", text: "❌ First name should contain only letters" })
+      return
+    }
+
+    if (!validateName(lastname)) {
+      setMessage({ type: "error", text: "❌ Last name should contain only letters" })
+      return
+    }
+
+    if (!validateEmail(email)) {
+      setMessage({ type: "error", text: "❌ Please enter a valid email address with @ symbol" })
+      return
+    }
+
+    if (!validateAge(birthdate)) {
+      setMessage({ type: "error", text: "❌ User must be at least 18 years old" })
+      return
+    }
 
     if (passwordError) {
-      setMessage('Please fix the errors before submitting');
-      return;
+      setMessage({ type: "error", text: "❌ Please fix the password issues before submitting" })
+      return
     }
 
-    const userDetails = { firstname, lastname, email, birthdate, password, role, organization, position };
+    const userDetails = { firstname, lastname, email, birthdate, password, role, organization, position }
 
     try {
-      await onSubmit(userDetails);
-      setMessage({ type: 'success', text: '✅ Submission successful!' });
+      await onSubmit(userDetails)
 
       // Reset form fields
-      setFirstname('');
-      setLastname('');
-      setEmail('');
-      setBirthdate('');
-      setPassword('');
-      setPasswordError('');
-      setRole('admin');
-      setOrganization('');
-      setPosition('');
-    } catch (error) {
-      console.error('❌ Submission failed:', error);
-      setMessage({ type: 'error', text: '❌ Submission failed. Please try again.' });
-    }
-  };
+      setFirstname("")
+      setLastname("")
+      setEmail("")
+      setBirthdate("")
+      setPassword("")
+      setPasswordError("")
+      setRole("admin")
+      setOrganization("")
+      setPosition("")
 
-  if (!isOpen) return null;
+      // Show success message modal
+      setMessage({ type: "success", text: "✅ Submission successful!" })
+      setShowMessageModal(true)
+
+      // The modal will close automatically due to the useEffect above
+    } catch (error) {
+      console.error("❌ Submission failed:", error)
+      setMessage({ type: "error", text: "❌ Submission failed. Please try again." })
+    }
+  }
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -115,9 +173,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
         <form onSubmit={handleSubmit}>
           {/* Organization */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Organization
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Organization</label>
             {loading ? (
               <p>Loading organizations...</p>
             ) : (
@@ -139,9 +195,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Position */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Position
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Position</label>
             <input
               type="text"
               value={position}
@@ -152,9 +206,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* First Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              First Name
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">First Name</label>
             <input
               type="text"
               value={firstname}
@@ -166,9 +218,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Last Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Last Name
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Last Name</label>
             <input
               type="text"
               value={lastname}
@@ -180,9 +230,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Birthdate */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Birthdate
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
             <input
               type="date"
               value={birthdate}
@@ -194,9 +242,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
           </div>
           {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Email
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input
               type="email"
               value={email}
@@ -206,28 +252,11 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
             />
           </div>
 
-          {/* Message Box */}
-          {message && (
-            <div
-              className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
-                }`}
-            >
-              <div className="flex items-center">
-                <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
-                {message.text}
-              </div>
-            </div>
-          )}
-
           {/* Password */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Password
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Password</label>
             <input
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => validatePassword(e.target.value)}
               className="border rounded p-2 w-full"
@@ -238,13 +267,22 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
               onClick={() => setShowPassword(!showPassword)}
               className="mt-2 w-full bg-gray-200 text-gray-700 border border-gray-300 rounded p-2 hover:bg-gray-300"
             >
-              {showPassword ? '🙈 Hide Password' : '👁️ Show Password'}
+              {showPassword ? "🙈 Hide Password" : "👁️ Show Password"}
             </button>
-            {passwordError && (
-              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-            )}
+            {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
           </div>
 
+          {/* Inline Message - Moved below password section */}
+          {message && !showMessageModal && (
+            <div
+              className={`mb-4 p-2 rounded ${message.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
+                }`}
+            >
+              {message.text}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex justify-end">
@@ -265,14 +303,24 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
           </div>
         </form>
       </div>
+
+      {/* Success Message Modal - Completely separate from the main modal */}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
+            <p className="text-green-700 text-center font-medium text-lg">✅ Submission successful!</p>
+          </div>
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}
 
 AddAdminModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-};
+}
 
-export default AddAdminModal;
+export default AddAdminModal
+
