@@ -553,19 +553,49 @@ const DocumentContainer = () => {
             marginOverlay.classList.add("no-print");
             body.appendChild(marginOverlay);
       
-            // Clip content within margin boundaries
-            // const contentBody = body.querySelector('[contenteditable="true"]');
-            // if (contentBody) {
-            //   contentBody.style.position = "relative";
-            //   contentBody.style.overflow = "hidden";
-            //   contentBody.style.clipPath = `inset(${margins.top}in ${margins.right}in ${margins.bottom}in ${margins.left}in)`;
-            //   contentBody.style.maxWidth = `calc(100% - ${margins.left + margins.right}in)`;
-            //   contentBody.style.maxHeight = `calc(100% - ${margins.top + margins.bottom}in)`;
-            // }
-
+            // // Hide margin overlay during printing
+            // const style = doc.createElement("style");
+            // style.textContent = "@media print { .no-print { display: none !important; } }";
+            // doc.head.appendChild(style);
           }, 50);
         });
-      };      
+      
+        editor.on('keydown', (event) => {
+            // Allow common shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, etc.)
+            // if (event.ctrlKey || event.metaKey) {
+            //   return;
+            // }
+          
+            const range = editor.selection.getRng();
+            const cursorRect = range.getBoundingClientRect();
+            const iframe = editor.iframeElement;
+            if (!iframe) return;
+          
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const marginBox = doc.querySelector(".no-print");
+            if (!marginBox) return;
+          
+            const marginRect = marginBox.getBoundingClientRect();
+          
+            // Check if cursor is at or beyond the bottom-right margin boundary
+            const isOverflowing = cursorRect.bottom >= marginRect.bottom -5 || cursorRect.right >= marginRect.right -10;
+          
+            // Allow navigation keys and deletion
+            const allowedKeys = ["Backspace", "Delete", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+            if (isOverflowing && !allowedKeys.includes(event.key)) {
+              event.preventDefault();
+              alert("You have reached the typing limit of this page.");
+
+            // //  undo the last type
+            // const content = editor.getContent({ format: "html" });
+            // if (content.length > 0) {
+            //   editor.setContent(content.slice(0, -1)); // Remove only the last typed character
+            // }
+            }
+          });
+          
+      };
+               
       
 
     return (
