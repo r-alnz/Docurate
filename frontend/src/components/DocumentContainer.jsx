@@ -577,22 +577,24 @@ const DocumentContainer = () => {
           
             const marginRect = marginBox.getBoundingClientRect();
           
-            // Check if cursor is at or beyond the bottom-right margin boundary
-            const isOverflowing = cursorRect.bottom >= marginRect.bottom -5 || cursorRect.right >= marginRect.right -10;
-          
-            // Allow navigation keys and deletion
+            const isVerticalOverflow = cursorRect.bottom + 5 >= marginRect.bottom && cursorRect.left > marginRect.left;
+            const isHorizontalOverflow = cursorRect.right + 10 >= marginRect.right;
+
             const allowedKeys = ["Backspace", "Delete", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-            if (isOverflowing && !allowedKeys.includes(event.key)) {
-              event.preventDefault();
-              alert("You have reached the typing limit of this page.");
+
+            if ((isVerticalOverflow || isHorizontalOverflow) && !allowedKeys.includes(event.key)) {
+                event.preventDefault();
+                alert("You have reached the typing limit of this page.");
+                editor.execCommand("Delete"); // Deletes the last character
+            }
 
             // //  undo the last type
             // const content = editor.getContent({ format: "html" });
             // if (content.length > 0) {
             //   editor.setContent(content.slice(0, -1)); // Remove only the last typed character
             // }
-            }
-          });
+        //     }
+        });
           
       };
                
