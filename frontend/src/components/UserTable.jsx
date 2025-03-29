@@ -36,6 +36,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     // State for displaying temporary notification messages
     const [message, setMessage] = useState(null)
 
+    // State for tracking which tooltip is currently visible
+    const [activeTooltip, setActiveTooltip] = useState(null)
+
     // Extract unique colleges from users for the college filter dropdown
     const uniqueColleges = [...new Set(users.map((user) => user.college).filter(Boolean))]
 
@@ -244,10 +247,6 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                     {currentUser?.role === "superadmin" ? "Organization" : "Suborganizations"}
                                 </th>
                             )}
-
-                            <th scope="col" className="px-6 py-3">
-                                Actions
-                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -271,31 +270,74 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
 
                                                 {/* Action buttons */}
                                                 {/* Send email icon button */}
-                                                <Mail
-                                                    className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
-                                                    onClick={() => handleSendEmail(user)}
-                                                    title="Send Email"
-                                                />
+                                                <div className="relative">
+                                                    <Mail
+                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
+                                                        onClick={() => handleSendEmail(user)}
+                                                        title="Send Email"
+                                                        onMouseEnter={() => setActiveTooltip(`email-${user._id}`)}
+                                                        onMouseLeave={() => setActiveTooltip(null)}
+                                                    />
+                                                    {activeTooltip === `email-${user._id}` && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                                            Send Email
+                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
                                                 {/* Reset Password button (admin/superadmin only) */}
                                                 {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
-                                                    <KeyRound
-                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
-                                                        onClick={() => handleResetPasswordClick(user, user.role)}
-                                                        title="Reset Password"
-                                                    />
+                                                    <div className="relative">
+                                                        <KeyRound
+                                                            className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
+                                                            onClick={() => handleResetPasswordClick(user, user.role)}
+                                                            title="Reset Password"
+                                                            onMouseEnter={() => setActiveTooltip(`reset-${user._id}`)}
+                                                            onMouseLeave={() => setActiveTooltip(null)}
+                                                        />
+                                                        {activeTooltip === `reset-${user._id}` && (
+                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                                                Reset Password
+                                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 )}
+
                                                 {/* Edit user button */}
-                                                <Edit
-                                                    className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:shadow-lg"
-                                                    onClick={() => handleEditClick(user)}
-                                                    title="Edit"
-                                                />
+                                                <div className="relative">
+                                                    <Edit
+                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:shadow-lg"
+                                                        onClick={() => handleEditClick(user)}
+                                                        title="Edit"
+                                                        onMouseEnter={() => setActiveTooltip(`edit-${user._id}`)}
+                                                        onMouseLeave={() => setActiveTooltip(null)}
+                                                    />
+                                                    {activeTooltip === `edit-${user._id}` && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                                            Edit
+                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
                                                 {/* Mark user as inactive button */}
-                                                <UserMinus
-                                                    className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
-                                                    onClick={() => handleDeleteClick(user)}
-                                                    title="Mark as Inactive"
-                                                />
+                                                <div className="relative">
+                                                    <UserMinus
+                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                                                        onClick={() => handleDeleteClick(user)}
+                                                        title="Mark as Inactive"
+                                                        onMouseEnter={() => setActiveTooltip(`inactive-${user._id}`)}
+                                                        onMouseLeave={() => setActiveTooltip(null)}
+                                                    />
+                                                    {activeTooltip === `inactive-${user._id}` && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                                            Mark as Inactive
+                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -351,8 +393,6 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                                 : "N/A"}
                                         </td>
                                     )}
-
-
                                 </tr>
                             ))
                         ) : (
@@ -392,8 +432,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             {message && (
                 <div
                     className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-                        ? "bg-green-100 text-green-700 border border-green-400"
-                        : "bg-red-100 text-red-700 border border-red-400"
+                            ? "bg-green-100 text-green-700 border border-green-400"
+                            : "bg-red-100 text-red-700 border border-red-400"
                         }`}
                 >
                     <div className="flex items-center">
