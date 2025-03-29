@@ -1,5 +1,3 @@
-"use client"
-
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
@@ -208,10 +206,17 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                 </th>
                             )}
 
-                            {/* Dynamic column header based on user role
+                            {/* Dynamic column header based on user role hidden
                             <th scope="col" className="px-6 py-3">
                                 {currentUser?.role === "superadmin" ? "Position" : "Role"}
                             </th> */}
+
+                            {/* Fixed Dynamic column header based on user role */}
+                            {currentUser?.role === "superadmin" && (
+                                <th scope="col" className="px-6 py-3">
+                                    Position
+                                </th>
+                            )}
 
                             {/* Student-specific columns for admin users */}
                             {currentUser?.role === "admin" && filterRole !== "organizations" && (
@@ -260,8 +265,10 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                             <div className="flex items-center gap-x-1">
                                                 {/* Badge showing user role */}
                                                 <div className={`role-badge ${user.role}`}>{user.role}</div>
+                                                {user.position && <div className={`role-badge ${user.position}`}>{user.position}</div>}
                                                 {/* Send email icon button */}
-                                                <Mail className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
+                                                <Mail
+                                                    className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
                                                     onClick={() => handleSendEmail(user)}
                                                     title="Send Email"
                                                 />
@@ -283,22 +290,30 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                         </td>
                                     )}
 
-                                    {/* Role/Position column based on current user's role */}
+                                    {/* Role/Position column based on current user's role   hidden */}
                                     {/* {currentUser?.role === "admin" ? (
                                         <td className="px-6 py-4">{user.role}</td>
                                     ) : currentUser?.role === "superadmin" ? (
                                         <td className="px-6 py-4">{user.position || "N/A"}</td>
                                     ) : null} */}
 
-                                    {/* Student-specific columns for admin users */}
+                                    {currentUser?.role === "superadmin" ? <td className="px-6 py-4">{user.position || "N/A"}</td> : null}
+
+                                    {/* Student-specific columns for admin users - Updated to show N/A for organizations */}
                                     {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                                        <td className="px-6 py-4">{user.role === "student" ? user.studentId || "N/A" : ""}</td>
+                                        <td className="px-6 py-4">
+                                            {user.role === "student" ? user.studentId || "N/A" : user.role === "organization" ? "N/A" : ""}
+                                        </td>
                                     )}
 
                                     {currentUser?.role === "admin" && filterRole !== "organizations" && (
                                         <>
-                                            <td className="px-6 py-4">{user.role === "student" ? user.college || "N/A" : ""}</td>
-                                            <td className="px-6 py-4">{user.role === "student" ? user.course || "N/A" : ""}</td>
+                                            <td className="px-6 py-4">
+                                                {user.role === "student" ? user.college || "N/A" : user.role === "organization" ? "N/A" : ""}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {user.role === "student" ? user.course || "N/A" : user.role === "organization" ? "N/A" : ""}
+                                            </td>
                                         </>
                                     )}
 
@@ -380,8 +395,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             {message && (
                 <div
                     className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-                        ? "bg-green-100 text-green-700 border border-green-400"
-                        : "bg-red-100 text-red-700 border border-red-400"
+                            ? "bg-green-100 text-green-700 border border-green-400"
+                            : "bg-red-100 text-red-700 border border-red-400"
                         }`}
                 >
                     <div className="flex items-center">
