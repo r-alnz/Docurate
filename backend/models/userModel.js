@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
         college: { 
             type: String,
         },
-        course: { 
+        program: { 
             type: String,
         },
         suborganizations: [{ 
