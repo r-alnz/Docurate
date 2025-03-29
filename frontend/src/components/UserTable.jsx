@@ -1,3 +1,5 @@
+"use client"
+
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
@@ -8,7 +10,7 @@ import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 
 import "../index.css"
-import { Mail } from "lucide-react"
+import { Mail, KeyRound, Edit, UserMinus } from "lucide-react"
 
 /**
  * UserTable Component
@@ -266,11 +268,33 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                                 {/* Badge showing user role */}
                                                 <div className={`role-badge ${user.role}`}>{user.role}</div>
                                                 {user.position && <div className={`role-badge ${user.position}`}>{user.position}</div>}
+
+                                                {/* Action buttons */}
                                                 {/* Send email icon button */}
                                                 <Mail
                                                     className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
                                                     onClick={() => handleSendEmail(user)}
                                                     title="Send Email"
+                                                />
+                                                {/* Reset Password button (admin/superadmin only) */}
+                                                {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                                                    <KeyRound
+                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
+                                                        onClick={() => handleResetPasswordClick(user, user.role)}
+                                                        title="Reset Password"
+                                                    />
+                                                )}
+                                                {/* Edit user button */}
+                                                <Edit
+                                                    className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:shadow-lg"
+                                                    onClick={() => handleEditClick(user)}
+                                                    title="Edit"
+                                                />
+                                                {/* Mark user as inactive button */}
+                                                <UserMinus
+                                                    className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                                                    onClick={() => handleDeleteClick(user)}
+                                                    title="Mark as Inactive"
                                                 />
                                             </div>
                                         </div>
@@ -328,34 +352,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                         </td>
                                     )}
 
-                                    {/* Action buttons */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex gap-5">
-                                            {/* Reset Password button (admin/superadmin only) */}
-                                            {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
-                                                <button
-                                                    className="font-medium text-yellow-600 dark:text-yellow-500 hover:underline"
-                                                    onClick={() => handleResetPasswordClick(user, user.role)}
-                                                >
-                                                    Reset Password
-                                                </button>
-                                            )}
-                                            {/* Edit user button */}
-                                            <button
-                                                className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                                onClick={() => handleEditClick(user)}
-                                            >
-                                                Edit
-                                            </button>
-                                            {/* Mark user as inactive button */}
-                                            <button
-                                                className="font-medium text-red-600 dark:text-red-500 hover:underline"
-                                                onClick={() => handleDeleteClick(user)}
-                                            >
-                                                Inactive
-                                            </button>
-                                        </div>
-                                    </td>
+
                                 </tr>
                             ))
                         ) : (
