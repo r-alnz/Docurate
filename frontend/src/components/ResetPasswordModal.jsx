@@ -2,6 +2,8 @@
 
 import PropTypes from "prop-types"
 import { useState } from "react"
+import { Eye, EyeOff, CheckCircle, AlertTriangle} from "lucide-react";
+import { motion } from "framer-motion";
 import { getToken } from "../utils/authUtil"
 
 const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
@@ -60,98 +62,153 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg p-4 w-96">
-                {modalState === "input" && (
-                    <>
-                        <h2 className="text-lg font-semibold mb-4">Reset Password for {user.email}</h2>
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg shadow-lg p-4 w-96">
+          {modalState === "input" && (
+            <>
+              <h2 className="text-lg font-semibold mb-4">
+                Reset Password for {user.email}
+              </h2>
 
-                        {/* New Password */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-2">New Password</label>
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Enter new password"
-                                value={newPassword}
-                                onChange={(e) => validatePassword(e.target.value)}
-                                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            {/* ✅ Error message */}
-                            {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-2">Confirm Password</label>
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Confirm new password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            {/* ✅ Confirm Password Error */}
-                            {confirmPasswordError && <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>}
-                        </div>
-
-                        {/* ✅ Show Password Button */}
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] transition"
-                        >
-                            {showPassword ? "🙈 Hide Password" : "👁️ Show Password"}
-                        </button>
-
-                        {/* Buttons */}
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button
-                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
-                                onClick={onClose}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                                onClick={handleResetClick}
-                                disabled={passwordError || !newPassword || !confirmPassword}
-                            >
-                                Reset Password
-                            </button>
-                        </div>
-                    </>
+              {/* New Password */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  New Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => validatePassword(e.target.value)}
+                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {/* ✅ Error message */}
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
                 )}
+              </div>
 
-                {modalState === "confirm" && (
-                    <>
-                        <h2 className="text-lg font-semibold mb-4">Confirm Password Reset</h2>
-                        <p className="mb-4">Are you sure you want to reset the password of this user?</p>
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button
-                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
-                                onClick={handleCancelConfirmation}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                                onClick={handleConfirmReset}
-                            >
-                                OK
-                            </button>
-                        </div>
-                    </>
+              {/* Confirm Password */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {/* ✅ Confirm Password Error */}
+                {confirmPasswordError && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {confirmPasswordError}
+                  </p>
                 )}
+              </div>
 
-                {modalState === "success" && (
-                    <div className="text-center py-4">
-                        <h2 className="text-lg font-semibold text-green-600 mb-2">Success!</h2>
-                        <p>Password reset successfully!</p>
-                    </div>
-                )}
-            </div>
+              {/* ✅ Show Password Button */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-500 hover:text-gray-700 transition flex items-center gap-2 w-[40px] justify-center"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+                  onClick={onClose}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-[#38b6ff] text-white px-4 py-2 rounded hover:bg-[#2a9ed6]transition"
+                  onClick={handleResetClick}
+                  disabled={passwordError || !newPassword || !confirmPassword}
+                >
+                  Reset Password
+                </button>
+              </div>
+            </>
+          )}
+
+          {modalState === "confirm" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="bg-white p-6 rounded-lg shadow-md text-center max-w-sm mx-auto"
+            >
+              {/* ⚠️ Warning Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                className="flex justify-center mb-3"
+              >
+                <AlertTriangle className="text-yellow-500 w-14 h-14" />
+              </motion.div>
+
+              <h2 className="text-xl font-semibold text-gray-800">
+                Confirm Password Reset
+              </h2>
+              <p className="text-gray-600 mt-2">
+                This action cannot be undone. Are you sure you want to reset the
+                password?
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex justify-center gap-4 mt-5">
+                <button
+                  className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
+                  onClick={handleCancelConfirmation}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+                  onClick={handleConfirmReset}
+                >
+                  Reset Password
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {modalState === "success" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="text-center py-6 flex flex-col items-center"
+            >
+              {/* ✅ Animated Check Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 10,
+                  delay: 0.2,
+                }}
+              >
+                <CheckCircle className="text-green-600 w-14 h-14" />
+              </motion.div>
+
+              <h2 className="text-xl font-semibold text-green-600 mt-3">
+                Success!
+              </h2>
+              <p className="text-gray-600 mt-1">Password reset successfully!</p>
+            </motion.div>
+          )}
         </div>
-    )
+      </div>
+    );
 }
 
 ResetPasswordModal.propTypes = {
