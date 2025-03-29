@@ -284,11 +284,11 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                     )}
 
                                     {/* Role/Position column based on current user's role */}
-                                    {currentUser?.role === "admin" ? (
+                                    {/* {currentUser?.role === "admin" ? (
                                         <td className="px-6 py-4">{user.role}</td>
                                     ) : currentUser?.role === "superadmin" ? (
                                         <td className="px-6 py-4">{user.position || "N/A"}</td>
-                                    ) : null}
+                                    ) : null} */}
 
                                     {/* Student-specific columns for admin users */}
                                     {currentUser?.role === "admin" && filterRole !== "organizations" && (
