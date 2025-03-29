@@ -15,7 +15,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
   const [isStudentOrgMember, setIsStudentOrgMember] = useState(true)
   const [selectedSubOrgs, setSelectedSubOrgs] = useState([])
   const [college, setCollege] = useState("")
-  const [course, setCourse] = useState("")
+  const [program, setProgram] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState("")
   const [birthdate, setBirthdate] = useState("")
@@ -136,7 +136,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       organizationName: user.organization.name,
       suborganizations: isStudentOrgMember ? [...selectedSubOrgs] : [],
       college,
-      course,
+      program,
     }
 
     try {
@@ -156,7 +156,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       setSelectedSubOrgs([])
       setBirthdate("")
       setCollege("")
-      setCourse("")
+      setProgram("")
 
       // Close the modal after showing success message
       setTimeout(() => {
@@ -216,8 +216,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     <label className="block text-gray-700 font-medium mb-2">Program</label>
                     <input
                       type="text"
-                      value={course}
-                      onChange={(e) => setCourse(e.target.value)}
+                      value={program}
+                      onChange={(e) => setProgram(e.target.value)}
                       className="border rounded p-2 w-full"
                       required
                     />

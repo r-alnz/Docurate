@@ -17,7 +17,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
         suborganizations: [],
         birthdate: "",
         college: "",
-        course: "",
+        program: "",
         position: "",
     })
 
@@ -59,7 +59,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                     : [],
                 birthdate: user.birthdate ? user.birthdate.split("T")[0] : "",
                 college: user.college || "",
-                course: user.course || "",
+                program: user.program || "",
                 organization: user.organization || "",
                 position: user.role === "admin" ? user.position || "" : "",
             })
@@ -133,7 +133,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 suborganizations: selectedSubOrgs.length ? selectedSubOrgs : [],
                 birthdate: formData.birthdate ? new Date(formData.birthdate).toISOString() : null,
                 college: formData.college.trim(),
-                course: formData.course.trim(),
+                program: formData.program.trim(),
                 position: formData.position.trim(),
             }
 
@@ -241,11 +241,11 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-gray-700">Course</label>
+                                <label className="block text-gray-700">Program</label>
                                 <input
                                     type="text"
-                                    name="course"
-                                    value={formData.course}
+                                    name="program"
+                                    value={formData.program}
                                     onChange={handleInputChange}
                                     className="w-full border p-2 rounded"
                                 />
@@ -324,8 +324,8 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                     {message.text && (
                         <div
                             className={`mt-4 p-2 rounded ${message.type === "success"
-                                    ? "bg-green-100 text-green-700 border border-green-400"
-                                    : "bg-red-100 text-red-700 border border-red-400"
+                                ? "bg-green-100 text-green-700 border border-green-400"
+                                : "bg-red-100 text-red-700 border border-red-400"
                                 }`}
                         >
                             {message.text}
