@@ -477,6 +477,20 @@ const DocumentContainer = () => {
                         .no-print {
                             display: none !important; /* Hide margin overlay */
                         }
+                            
+                        body::before {
+                            content: "";
+                            position: absolute;
+                            top: var(--margin-top, 1in);
+                            left: var(--margin-left, 1in);
+                            right: var(--margin-right, 1in);
+                            bottom: var(--margin-bottom, 1in);
+                            border: 2px dashed red;
+                            pointer-events: none; /* Prevents interaction */
+                            box-sizing: border-box;
+                        }
+
+
                     </style>
                 </head>
                 <body>
@@ -526,77 +540,79 @@ const DocumentContainer = () => {
         reader.readAsDataURL(file);
     };
 
-    const handleEditorInit = (editor) => {
-        editor.on("init", () => {
-          setTimeout(() => {
-            const iframe = editor.iframeElement;
-            if (!iframe) return;
+    // const handleEditorInit = (editor) => {
+    //     editor.on("init", () => {
+    //       setTimeout(() => {
+    //         const iframe = editor.iframeElement;
+    //         if (!iframe) return;
       
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            if (!doc) return;
+    //         const doc = iframe.contentDocument || iframe.contentWindow.document;
+    //         if (!doc) return;
       
-            const body = doc.body;
-            if (!body) return;
+    //         const body = doc.body;
+    //         if (!body) return;
       
-            const marginOverlay = doc.createElement("div");
-            marginOverlay.style.position = "absolute";
-            marginOverlay.style.top = `${margins.top}in`;
-            marginOverlay.style.left = `${margins.left}in`;
-            marginOverlay.style.right = `${margins.right}in`;
-            marginOverlay.style.bottom = `${margins.bottom}in`;
-            marginOverlay.style.border = "2px dashed red";
-            marginOverlay.style.pointerEvents = "none";
-            marginOverlay.style.boxSizing = "border-box";
-            marginOverlay.style.width = `calc(100% - ${margins.left + margins.right}in)`;
-            marginOverlay.style.height = `calc(100% - ${margins.top + margins.bottom}in)`;
-            marginOverlay.style.margin = "auto";
-            marginOverlay.classList.add("no-print");
-            body.appendChild(marginOverlay);
+    //         // const marginOverlay = doc.createElement("div");
+    //         // marginOverlay.style.position = "absolute";
+    //         // marginOverlay.style.top = `${margins.top}in`;
+    //         // marginOverlay.style.left = `${margins.left}in`;
+    //         // marginOverlay.style.width = `calc(100% - ${margins.left + margins.right}in)`;
+    //         // marginOverlay.style.height = `calc(100% - ${margins.top + margins.bottom}in)`;
+    //         // marginOverlay.style.border = "2px dashed red";
+    //         // marginOverlay.style.pointerEvents = "none"; // No interaction
+    //         // marginOverlay.style.userSelect = "none"; // Prevents selection
+    //         // marginOverlay.style.contentEditable = "false"; // Blocks edits
+    //         // marginOverlay.style.cursor = "none"; // Hides the cursor
+    //         // marginOverlay.style.zIndex = "0";
+    //         // marginOverlay.classList.add("no-print");
+            
+    //         // body.appendChild(marginOverlay);
       
-            // // Hide margin overlay during printing
-            // const style = doc.createElement("style");
-            // style.textContent = "@media print { .no-print { display: none !important; } }";
-            // doc.head.appendChild(style);
-          }, 50);
-        });
+    //         // // Hide margin overlay during printing
+    //         // const style = doc.createElement("style");
+    //         // style.textContent = "@media print { .no-print { display: none !important; } }";
+    //         // doc.head.appendChild(style);
+    //       }, 50);
+    //     });
       
-        editor.on('keydown', (event) => {
-            // Allow common shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, etc.)
-            // if (event.ctrlKey || event.metaKey) {
-            //   return;
-            // }
+    //     editor.on('keydown', (event) => {
+    //         // Allow common shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, etc.)
+    //         // if (event.ctrlKey || event.metaKey) {
+    //         //   return;
+    //         // }
           
-            const range = editor.selection.getRng();
-            const cursorRect = range.getBoundingClientRect();
-            const iframe = editor.iframeElement;
-            if (!iframe) return;
+    //         const range = editor.selection.getRng();
+    //         const cursorRect = range.getBoundingClientRect();
+    //         const iframe = editor.iframeElement;
+    //         if (!iframe) return;
           
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            const marginBox = doc.querySelector(".no-print");
-            if (!marginBox) return;
+    //         const doc = iframe.contentDocument || iframe.contentWindow.document;
+    //         const marginBox = doc.querySelector(".no-print");
+    //         if (!marginBox) return;
           
-            const marginRect = marginBox.getBoundingClientRect();
+    //         const marginRect = marginBox.getBoundingClientRect();
           
-            const isVerticalOverflow = cursorRect.bottom + 5 >= marginRect.bottom && cursorRect.left > marginRect.left;
-            const isHorizontalOverflow = cursorRect.right + 10 >= marginRect.right;
+    //         const isVerticalOverflow = cursorRect.bottom + 5 >= marginRect.bottom && cursorRect.left > marginRect.left;
+    //         const isHorizontalOverflow = cursorRect.right + 10 >= marginRect.right;
 
-            const allowedKeys = ["Backspace", "Delete", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    //         const allowedKeys = ["Backspace", "Delete", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
-            if ((isVerticalOverflow || isHorizontalOverflow) && !allowedKeys.includes(event.key)) {
-                event.preventDefault();
-                alert("You have reached the typing limit of this page.");
-                editor.execCommand("Delete"); // Deletes the last character
-            }
+    //         if ((isVerticalOverflow || isHorizontalOverflow) && !allowedKeys.includes(event.key) &&     !(event.ctrlKey) // Allow Ctrl + A
+    //         ) {
+    //             event.preventDefault();
+    //             alert("You have reached the typing limit of this page.");
+    //             editor.execCommand("Delete"); // Deletes the last character
+    //         }
 
-            // //  undo the last type
-            // const content = editor.getContent({ format: "html" });
-            // if (content.length > 0) {
-            //   editor.setContent(content.slice(0, -1)); // Remove only the last typed character
-            // }
-        //     }
-        });
+    //         // //  undo the last type
+    //         // const content = editor.getContent({ format: "html" });
+    //         // if (content.length > 0) {
+    //         //   editor.setContent(content.slice(0, -1)); // Remove only the last typed character
+    //         // }
+    //     //     }
+    //     });
           
-      };
+    //   };
                
       
 
@@ -678,7 +694,7 @@ const DocumentContainer = () => {
                                 browser_spellcheck: true,
                                 setup: (editor) => {          
                                     
-                                    handleEditorInit(editor);
+                                    // handleEditorInit(editor);
 
                                     editor.on('drop', (event) => {
                                         event.preventDefault(); // Prevent TinyMCE's default drop handling
