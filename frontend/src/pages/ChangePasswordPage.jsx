@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { changePassword } from "../services/authService.js"
+import {Eye, EyeOff} from "lucide-react";
 import { getToken } from "../utils/authUtil"
 import { useAuthContext } from "../hooks/useAuthContext"
 
@@ -172,15 +173,15 @@ const ChangePasswordPage = () => {
           <button
             type="button"
             onClick={() => setShowPasswords(!showPasswords)}
-            className="mt-2 w-full bg-gray-200 text-gray-700 border border-gray-300 rounded-lg py-2 hover:bg-gray-300 transition flex justify-center items-center"
+             className="text-gray-500 hover:text-gray-700 transition flex items-center gap-2 w-[40px] justify-center ml-auto"
           >
-            {showPasswords ? "🙈 Hide Password" : "👁️ Show Password"}
+            {showPasswords ? <EyeOff size={20}/> : <Eye size = {20}/>}
           </button>
 
-          {/* ✅ Submit Button */}
+          {/* Change Password */}
           <button
             type="submit"
-            className={`w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition ${passwordError ||
+            className={`w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition ${passwordError ||
                 confirmPasswordError ||
                 !currentPassword ||
                 !newPassword ||
@@ -198,7 +199,7 @@ const ChangePasswordPage = () => {
               isSameAsCurrentPassword()
             }
           >
-            🔒 Change Password
+           Change Password
           </button>
         </form>
       </div>
