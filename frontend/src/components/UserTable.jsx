@@ -143,317 +143,362 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     }
 
     return (
-        <div className="overflow-x-auto shadow-md sm:rounded-lg">
-            {/* Filter controls - only visible to admin users */}
-            {currentUser?.role === "admin" && (
-                <div className="mb-4 flex justify-end">
-                    {/* Role filter dropdown */}
-                    <select
-                        onChange={(e) => setFilterRole(e.target.value)}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-300 to-blue-400 text-white font-semibold rounded-lg shadow-md cursor-pointer transition duration-300 hover:from-blue-600 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="all" className="text-gray-800">
-                            🌎 All Users
-                        </option>
-                        <option value="students" className="text-gray-800">
-                            🎓 Students
-                        </option>
-                        <option value="studentsUnderOrgs" className="text-gray-800">
-                            🏛️ Students (Under Orgs)
-                        </option>
-                        <option value="studentsNotUnderOrgs" className="text-gray-800">
-                            📚 Students (Not Under Orgs)
-                        </option>
-                        <option value="organizations" className="text-gray-800">
-                            🏢 Organizations
-                        </option>
-                    </select>
-
-                    {/* College filter dropdown */}
-                    <select
-                        onChange={(e) => setFilterCollege(e.target.value)}
-                        className="p-2 bg-green-500 text-white rounded-md ml-4"
-                    >
-                        <option value="all">All Colleges</option>
-                        {uniqueColleges.map((college, index) => (
-                            <option key={index} value={college}>
-                                {college}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
-
-            {/* Table with animation on filter change */}
-            <motion.div
-                key={filterRole}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
+      <div className="overflow-x-auto shadow-md sm:rounded-lg">
+        {/* Filter controls - only visible to admin users */}
+        {currentUser?.role === "admin" && (
+          <div className="mb-4 flex justify-end">
+            {/* Role filter dropdown */}
+            <select
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="px-4 py-2 bg-gradient-to-r from-blue-300 to-blue-400 text-white font-semibold rounded-lg shadow-md cursor-pointer transition duration-300 hover:from-blue-600 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-                {/* User data table */}
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" className="px-6 py-3">
-                                #
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Full Name
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Email
-                            </th>
-                            {/* Conditional column for birthdate (not shown for organizations) */}
-                            {filterRole !== "organizations" && (
-                                <th scope="col" className="px-6 py-3">
-                                    Birthdate
-                                </th>
-                            )}
+              <option value="all" className="text-gray-800">
+                All Users
+              </option>
+              <option value="students" className="text-gray-800">
+                Students
+              </option>
+              <option value="studentsUnderOrgs" className="text-gray-800">
+                Students (Under Orgs)
+              </option>
+              <option value="studentsNotUnderOrgs" className="text-gray-800">
+                Students (Not Under Orgs)
+              </option>
+              <option value="organizations" className="text-gray-800">
+                Organizations
+              </option>
+            </select>
 
-                            {/* Dynamic column header based on user role hidden
+            {/* College filter dropdown */}
+            <select
+              onChange={(e) => setFilterCollege(e.target.value)}
+              className="p-2 bg-green-500 text-white rounded-md ml-4"
+            >
+              <option value="all">All Colleges</option>
+              {uniqueColleges.map((college, index) => (
+                <option key={index} value={college}>
+                  {college}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Table with animation on filter change */}
+        <motion.div
+          key={filterRole}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* User data table */}
+          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th scope="col" className="px-6 py-3">
+                  #
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Full Name
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Email
+                </th>
+                {/* Conditional column for birthdate (not shown for organizations) */}
+                {filterRole !== "organizations" && (
+                  <th scope="col" className="px-6 py-3">
+                    Birthdate
+                  </th>
+                )}
+
+                {/* Dynamic column header based on user role hidden
                             <th scope="col" className="px-6 py-3">
                                 {currentUser?.role === "superadmin" ? "Position" : "Role"}
                             </th> */}
 
-                            {/* Fixed Dynamic column header based on user role */}
-                            {currentUser?.role === "superadmin" && (
-                                <th scope="col" className="px-6 py-3">
-                                    Position
-                                </th>
+                {/* Fixed Dynamic column header based on user role */}
+                {currentUser?.role === "superadmin" && (
+                  <th scope="col" className="px-6 py-3">
+                    Position
+                  </th>
+                )}
+
+                {/* Student-specific columns for admin users */}
+                {currentUser?.role === "admin" &&
+                  filterRole !== "organizations" && (
+                    <th scope="col" className="px-6 py-3">
+                      Student ID
+                    </th>
+                  )}
+
+                {currentUser?.role === "admin" &&
+                  filterRole !== "organizations" && (
+                    <>
+                      <th scope="col" className="px-6 py-3">
+                        College
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        Program
+                      </th>
+                    </>
+                  )}
+
+                {/* Organization/Suborganization column based on user role */}
+                {currentUser?.role !== "organization" && (
+                  <th scope="col" className="px-6 py-3">
+                    {currentUser?.role === "superadmin"
+                      ? "Organization"
+                      : "Suborganizations"}
+                  </th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Display filtered users or "No users found" message */}
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => (
+                  <tr
+                    key={user._id}
+                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  >
+                    <td className="px-6 py-4">{index + 1}</td>
+                    <td className="px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
+                      <div className="flex gap-x-6 justify-between items-center">
+                        <div className="font-semibold ">
+                          {user.firstname} {user.lastname}
+                        </div>
+                        <div className="flex items-center gap-x-1">
+                          {/* Action buttons */}
+                          {/* Send email icon button */}
+                          <div className="relative">
+                            <Mail
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-[#1E90FF] hover:text-white dark:hover:text-white rounded-full hover:bg-[#1E90FF] dark:hover:[#1C86EE] hover:shadow-lg"
+                              onClick={() => handleSendEmail(user)}
+                              title="Send Email"
+                              onMouseEnter={() =>
+                                setActiveTooltip(`email-${user._id}`)
+                              }
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `email-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Send Email
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
                             )}
+                          </div>
 
-                            {/* Student-specific columns for admin users */}
-                            {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                                <th scope="col" className="px-6 py-3">
-                                    Student ID
-                                </th>
+                          {/* Reset Password button (admin/superadmin only) */}
+                          {(currentUser?.role === "admin" ||
+                            currentUser?.role === "superadmin") && (
+                            <div className="relative">
+                              <KeyRound
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-yellow-500 hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
+                                onClick={() =>
+                                  handleResetPasswordClick(user, user.role)
+                                }
+                                title="Reset Password"
+                                onMouseEnter={() =>
+                                  setActiveTooltip(`reset-${user._id}`)
+                                }
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                              {activeTooltip === `reset-${user._id}` && (
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                  Reset Password
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Edit user button */}
+                          <div className="relative">
+                            <Edit
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
+                              onClick={() => handleEditClick(user)}
+                              title="Edit"
+                              onMouseEnter={() =>
+                                setActiveTooltip(`edit-${user._id}`)
+                              }
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `edit-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Edit
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
                             )}
+                          </div>
 
-                            {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                                <>
-                                    <th scope="col" className="px-6 py-3">
-                                        College
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Program
-                                    </th>
-                                </>
+                          {/* Mark user as inactive button */}
+                          <div className="relative">
+                            <UserMinus
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                              onClick={() => handleDeleteClick(user)}
+                              title="Mark as Inactive"
+                              onMouseEnter={() =>
+                                setActiveTooltip(`inactive-${user._id}`)
+                              }
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `inactive-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Mark as Inactive
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
                             )}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">{user.email}</td>
 
-                            {/* Organization/Suborganization column based on user role */}
-                            {currentUser?.role !== "organization" && (
-                                <th scope="col" className="px-6 py-3">
-                                    {currentUser?.role === "superadmin" ? "Organization" : "Suborganizations"}
-                                </th>
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {/* Display filtered users or "No users found" message */}
-                        {filteredUsers.length > 0 ? (
-                            filteredUsers.map((user, index) => (
-                                <tr
-                                    key={user._id}
-                                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                >
-                                    <td className="px-6 py-4">{index + 1}</td>
-                                    <td className="px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
-                                        <div className="flex gap-x-6 justify-between items-center">
-                                            <div className="font-semibold ">
-                                                {user.firstname} {user.lastname}
-                                            </div>
-                                            <div className="flex items-center gap-x-1">
-                                                {/* Badge showing user role */}
-                                                <div className={`role-badge ${user.role}`}>{user.role}</div>
-                                                {user.position && <div className={`role-badge ${user.position}`}>{user.position}</div>}
+                    {/* Conditional birthdate column */}
+                    {filterRole !== "organizations" && (
+                      <td className="px-6 py-4">
+                        {user.birthdate
+                          ? new Date(user.birthdate).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                              }
+                            )
+                          : "N/A"}
+                      </td>
+                    )}
 
-                                                {/* Action buttons */}
-                                                {/* Send email icon button */}
-                                                <div className="relative">
-                                                    <Mail
-                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
-                                                        onClick={() => handleSendEmail(user)}
-                                                        title="Send Email"
-                                                        onMouseEnter={() => setActiveTooltip(`email-${user._id}`)}
-                                                        onMouseLeave={() => setActiveTooltip(null)}
-                                                    />
-                                                    {activeTooltip === `email-${user._id}` && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                                            Send Email
-                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Reset Password button (admin/superadmin only) */}
-                                                {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
-                                                    <div className="relative">
-                                                        <KeyRound
-                                                            className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
-                                                            onClick={() => handleResetPasswordClick(user, user.role)}
-                                                            title="Reset Password"
-                                                            onMouseEnter={() => setActiveTooltip(`reset-${user._id}`)}
-                                                            onMouseLeave={() => setActiveTooltip(null)}
-                                                        />
-                                                        {activeTooltip === `reset-${user._id}` && (
-                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                                                Reset Password
-                                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {/* Edit user button */}
-                                                <div className="relative">
-                                                    <Edit
-                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:shadow-lg"
-                                                        onClick={() => handleEditClick(user)}
-                                                        title="Edit"
-                                                        onMouseEnter={() => setActiveTooltip(`edit-${user._id}`)}
-                                                        onMouseLeave={() => setActiveTooltip(null)}
-                                                    />
-                                                    {activeTooltip === `edit-${user._id}` && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                                            Edit
-                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Mark user as inactive button */}
-                                                <div className="relative">
-                                                    <UserMinus
-                                                        className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:text-white dark:hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
-                                                        onClick={() => handleDeleteClick(user)}
-                                                        title="Mark as Inactive"
-                                                        onMouseEnter={() => setActiveTooltip(`inactive-${user._id}`)}
-                                                        onMouseLeave={() => setActiveTooltip(null)}
-                                                    />
-                                                    {activeTooltip === `inactive-${user._id}` && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                                            Mark as Inactive
-                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">{user.email}</td>
-
-                                    {/* Conditional birthdate column */}
-                                    {filterRole !== "organizations" && (
-                                        <td className="px-6 py-4">
-                                            {user.birthdate
-                                                ? new Date(user.birthdate).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "2-digit",
-                                                    day: "2-digit",
-                                                })
-                                                : "N/A"}
-                                        </td>
-                                    )}
-
-                                    {/* Role/Position column based on current user's role   hidden */}
-                                    {/* {currentUser?.role === "admin" ? (
+                    {/* Role/Position column based on current user's role   hidden */}
+                    {/* {currentUser?.role === "admin" ? (
                                         <td className="px-6 py-4">{user.role}</td>
                                     ) : currentUser?.role === "superadmin" ? (
                                         <td className="px-6 py-4">{user.position || "N/A"}</td>
                                     ) : null} */}
 
-                                    {currentUser?.role === "superadmin" ? <td className="px-6 py-4">{user.position || "N/A"}</td> : null}
+                    {currentUser?.role === "superadmin" ? (
+                      <td className="px-6 py-4">{user.position || "N/A"}</td>
+                    ) : null}
 
-                                    {/* Student-specific columns for admin users - Updated to show N/A for organizations */}
-                                    {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                                        <td className="px-6 py-4">
-                                            {user.role === "student" ? user.studentId || "N/A" : user.role === "organization" ? "N/A" : ""}
-                                        </td>
-                                    )}
+                    {/* Student-specific columns for admin users - Updated to show N/A for organizations */}
+                    {currentUser?.role === "admin" &&
+                      filterRole !== "organizations" && (
+                        <td className="px-6 py-4">
+                          {user.role === "student"
+                            ? user.studentId || "N/A"
+                            : user.role === "organization"
+                            ? "N/A"
+                            : ""}
+                        </td>
+                      )}
 
-                                    {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                                        <>
-                                            <td className="px-6 py-4">
-                                                {user.role === "student" ? user.college || "N/A" : user.role === "organization" ? "N/A" : ""}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {user.role === "student" ? user.program || "N/A" : user.role === "organization" ? "N/A" : ""}
-                                            </td>
-                                        </>
-                                    )}
+                    {currentUser?.role === "admin" &&
+                      filterRole !== "organizations" && (
+                        <>
+                          <td className="px-6 py-4">
+                            {user.role === "student"
+                              ? user.college || "N/A"
+                              : user.role === "organization"
+                              ? "N/A"
+                              : ""}
+                          </td>
+                          <td className="px-6 py-4">
+                            {user.role === "student"
+                              ? user.program || "N/A"
+                              : user.role === "organization"
+                              ? "N/A"
+                              : ""}
+                          </td>
+                        </>
+                      )}
 
-                                    {/* Organization/Suborganization column based on user role */}
-                                    {currentUser?.role === "superadmin" ? (
-                                        <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
-                                    ) : (
-                                        <td className="px-6 py-4">
-                                            {user.suborganizations?.length > 0
-                                                ? user.suborganizations.map((suborgs) => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
-                                                : "N/A"}
-                                        </td>
-                                    )}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                                    No users found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </motion.div>
+                    {/* Organization/Suborganization column based on user role */}
+                    {currentUser?.role === "superadmin" ? (
+                      <td className="px-6 py-4">
+                        {user.organization?.name || "N/A"}
+                      </td>
+                    ) : (
+                      <td className="px-6 py-4">
+                        {user.suborganizations?.length > 0
+                          ? user.suborganizations
+                              .map(
+                                (suborgs) =>
+                                  `${suborgs.firstname} ${suborgs.lastname}`
+                              )
+                              .join(", ")
+                          : "N/A"}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-6 py-4 text-center text-gray-500"
+                  >
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </motion.div>
 
-            {/* Modal components for user actions */}
-            {/* Delete user modal */}
-            {isDeleteModalOpen && (
-                <DeleteAdminModal
-                    isOpen={isDeleteModalOpen}
-                    user={selectedUser}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onDelete={onDelete}
-                />
-            )}
+        {/* Modal components for user actions */}
+        {/* Delete user modal */}
+        {isDeleteModalOpen && (
+          <DeleteAdminModal
+            isOpen={isDeleteModalOpen}
+            user={selectedUser}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onDelete={onDelete}
+          />
+        )}
 
-            {/* Edit user modal */}
-            {isEditModalOpen && (
-                <EditAdminModal
-                    isOpen={isEditModalOpen}
-                    user={selectedUser}
-                    suborganizations={suborganizations}
-                    onClose={() => setIsEditModalOpen(false)}
-                    onEdit={onEdit}
-                />
-            )}
+        {/* Edit user modal */}
+        {isEditModalOpen && (
+          <EditAdminModal
+            isOpen={isEditModalOpen}
+            user={selectedUser}
+            suborganizations={suborganizations}
+            onClose={() => setIsEditModalOpen(false)}
+            onEdit={onEdit}
+          />
+        )}
 
-            {/* Temporary notification message */}
-            {message && (
-                <div
-                    className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-                            ? "bg-green-100 text-green-700 border border-green-400"
-                            : "bg-red-100 text-red-700 border border-red-400"
-                        }`}
-                >
-                    <div className="flex items-center">
-                        <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
-                        {message.text}
-                    </div>
-                </div>
-            )}
+        {/* Temporary notification message */}
+        {message && (
+          <div
+            className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${
+              message.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
+            }`}
+          >
+            <div className="flex items-center">
+              <span className="font-medium mr-2">
+                {message.type === "success" ? "✅" : "❌"}
+              </span>
+              {message.text}
+            </div>
+          </div>
+        )}
 
-            {/* Reset password modal */}
-            {isResetModalOpen && (
-                <ResetPasswordModal
-                    isOpen={isResetModalOpen}
-                    user={selectedUser}
-                    onClose={() => setIsResetModalOpen(false)}
-                    onResetPassword={resetMode === "admin" ? resetAdminPassword : resetUserPassword}
-                />
-            )}
-        </div>
-    )
+        {/* Reset password modal */}
+        {isResetModalOpen && (
+          <ResetPasswordModal
+            isOpen={isResetModalOpen}
+            user={selectedUser}
+            onClose={() => setIsResetModalOpen(false)}
+            onResetPassword={
+              resetMode === "admin" ? resetAdminPassword : resetUserPassword
+            }
+          />
+        )}
+      </div>
+    );
 }
 
 UserTable.propTypes = {
