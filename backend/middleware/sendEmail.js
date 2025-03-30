@@ -44,7 +44,7 @@ const sendEmail = async ({ email, firstname, lastname, studentId }) => {
         <p>Please change your password after logging in.</p>
         <br>
         <p>Best Regards,</p>
-        <p>Your Team</p>
+        <p>Docurate</p>
       `
     };
 
