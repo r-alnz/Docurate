@@ -2,6 +2,7 @@ import { useOrganizationContext } from "../hooks/useOrganizationContext";
 import { useAuthContext } from '../hooks/useAuthContext';
 "use client"
 import { useState, useEffect } from "react"
+import  { AlertCircle } from "lucide-react"; 
 import PropTypes from "prop-types"
 
 const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => {
@@ -145,7 +146,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 const result = await onEdit(user._id, updatedUser)
                 console.log("✅ Edit result:", result)
 
-                setMessage({ text: "✅ Edit successful!", type: "success" })
+                setMessage({ text: "Edit successful!", type: "success" })
                 setShowMessageModal(true)
 
                 // Close the modal after 3 seconds
@@ -169,194 +170,224 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
-            <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-                <h2 className="text-lg font-bold mb-4">Edit User</h2>
-                <form>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">First Name</label>
-                        <input
-                            type="text"
-                            name="firstname"
-                            value={formData.firstname}
-                            onChange={handleInputChange}
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Last Name</label>
-                        <input
-                            type="text"
-                            name="lastname"
-                            value={formData.lastname}
-                            onChange={handleInputChange}
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Birthdate</label>
-                        <input
-                            type="date"
-                            name="birthdate"
-                            value={formData.birthdate}
-                            onChange={handleInputChange}
-                            className="w-full border p-2 rounded"
-                            max={maxDate} // Restrict to at least 18 years old
-                        />
-                    </div>
-
-                    {user.role === "student" && (
-                        <>
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Student ID</label>
-                                <input
-                                    type="text"
-                                    name="studentId"
-                                    value={formData.studentId}
-                                    onChange={handleInputChange}
-                                    className="w-full border p-2 rounded"
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700">College</label>
-                                <input
-                                    type="text"
-                                    name="college"
-                                    value={formData.college}
-                                    onChange={handleInputChange}
-                                    className="w-full border p-2 rounded"
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Program</label>
-                                <input
-                                    type="text"
-                                    name="program"
-                                    value={formData.program}
-                                    onChange={handleInputChange}
-                                    className="w-full border p-2 rounded"
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700 font-medium mb-2">Suborganizations</label>
-
-                                {suborganizations.length === 0 ? (
-                                    <div className="border rounded p-2 w-full text-gray-500">No suborganizations available.</div>
-                                ) : (
-                                    <div className="border rounded p-2 w-full h-32 overflow-y-auto">
-                                        {suborganizations.map((org) => (
-                                            <div
-                                                key={org._id}
-                                                onClick={() => toggleSubOrg(org._id)}
-                                                className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id) ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
-                                                    } rounded mb-1`}
-                                            >
-                                                {org.firstname || "(No Name)"}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
-
-                    {user.role === "admin" && (
-                        <>
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Position</label>
-                                <input
-                                    type="text"
-                                    name="position"
-                                    value={formData.position}
-                                    onChange={handleInputChange}
-                                    className="w-full border p-2 rounded"
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Organization</label>
-                                <div className="w-full border p-2 rounded">{user.organization.name}</div>
-                            </div>
-                        </>
-                    )}
-
-                    <div className="flex justify-end">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="bg-gray-300 text-gray-700 py-2 px-4 rounded mr-2 hover:bg-gray-400"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                            onClick={handleSubmit}
-                        >
-                            Save Changes
-                        </button>
-                    </div>
-
-                    {showMessageModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-                                <p className={`mb-4 ${message.type === "success" ? "text-green-700" : "text-red-700"}`}>
-                                    {message.text}
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {message.text && (
-                        <div
-                            className={`mt-4 p-2 rounded ${message.type === "success"
-                                ? "bg-green-100 text-green-700 border border-green-400"
-                                : "bg-red-100 text-red-700 border border-red-400"
-                                }`}
-                        >
-                            {message.text}
-                        </div>
-                    )}
-
-                    {showConfirmDialog && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-                                <p className="text-gray-700 mb-4">Are you sure you want to save these changes?</p>
-                                <div className="flex justify-end">
-                                    <button
-                                        onClick={() => setShowConfirmDialog(false)}
-                                        className="bg-gray-300 text-gray-700 py-2 px-4 rounded mr-2 hover:bg-gray-400"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleConfirm}
-                                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                                    >
-                                        Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </form>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
+        <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <h2 className="text-lg font-bold mb-4">Edit User</h2>
+          <form>
+            <div className="mb-4">
+              <label className="block text-gray-700">First Name</label>
+              <input
+                type="text"
+                name="firstname"
+                value={formData.firstname}
+                onChange={handleInputChange}
+                className="w-full border p-2 rounded"
+              />
             </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Last Name</label>
+              <input
+                type="text"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleInputChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700">Birthdate</label>
+              <input
+                type="date"
+                name="birthdate"
+                value={formData.birthdate}
+                onChange={handleInputChange}
+                className="w-full border p-2 rounded"
+                max={maxDate} // Restrict to at least 18 years old
+              />
+            </div>
+
+            {user.role === "student" && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-gray-700">Student ID</label>
+                  <input
+                    type="text"
+                    name="studentId"
+                    value={formData.studentId}
+                    onChange={handleInputChange}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700">College</label>
+                  <input
+                    type="text"
+                    name="college"
+                    value={formData.college}
+                    onChange={handleInputChange}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700">Program</label>
+                  <input
+                    type="text"
+                    name="program"
+                    value={formData.program}
+                    onChange={handleInputChange}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Suborganizations
+                  </label>
+
+                  {suborganizations.length === 0 ? (
+                    <div className="border rounded p-2 w-full text-gray-500">
+                      No suborganizations available.
+                    </div>
+                  ) : (
+                    <div className="border rounded p-2 w-full h-32 overflow-y-auto">
+                      {suborganizations.map((org) => (
+                        <div
+                          key={org._id}
+                          onClick={() => toggleSubOrg(org._id)}
+                          className={`p-2 cursor-pointer ${
+                            selectedSubOrgs.includes(org._id)
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100 text-gray-700"
+                          } rounded mb-1`}
+                        >
+                          {org.firstname || "(No Name)"}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {user.role === "admin" && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-gray-700">Position</label>
+                  <input
+                    type="text"
+                    name="position"
+                    value={formData.position}
+                    onChange={handleInputChange}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700">Organization</label>
+                  <div className="w-full border p-2 rounded">
+                    {user.organization.name}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-gray-300 text-gray-700 py-2 px-4 rounded mr-2 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] transition"
+                onClick={handleSubmit}
+              >
+                Save Changes
+              </button>
+            </div>
+
+            {showMessageModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
+                  <p
+                    className={`mb-4 ${
+                      message.type === "success"
+                        ? "text-green-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    {message.text}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {message.text && (
+              <div
+                className={`mt-4 p-2 rounded ${
+                  message.type === "success"
+                    ? "bg-green-100 text-green-700 border border-green-400"
+                    : "bg-red-100 text-red-700 border border-red-400"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
+
+            {showConfirmDialog && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+                  {/* Icon and Text */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <AlertCircle className="text-[#38b6ff] w-6 h-6" />
+                    <p className="text-gray-800 text-lg font-semibold">
+                      Confirm Changes
+                    </p>
+                  </div>
+
+                  {/* Message */}
+                  <p className="text-gray-600 mb-6 text-sm">
+                    Are you sure you want to save these changes? This action
+                    cannot be undone.
+                  </p>
+
+                  {/* Buttons */}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowConfirmDialog(false)}
+                      className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirm}
+                      className="bg-[#38b6ff] text-white py-2 px-4 rounded-lg hover:bg-[#2a9ed6] transition"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </form>
         </div>
-    )
+      </div>
+    );
 }
 
 EditAdminModal.propTypes = {

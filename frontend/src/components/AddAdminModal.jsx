@@ -3,6 +3,7 @@ import PropTypes from "prop-types"
 import { fetchOrganizations } from "../services/superAdminService"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useOrganizationContext } from "../hooks/useOrganizationContext"
+import { Eye, EyeOff } from "lucide-react";
 
 const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const { token } = useAuthContext()
@@ -173,7 +174,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
         <form onSubmit={handleSubmit}>
           {/* Organization */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Organization</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Organization
+            </label>
             {loading ? (
               <p>Loading organizations...</p>
             ) : (
@@ -195,7 +198,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Position */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Position</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Position
+            </label>
             <input
               type="text"
               value={position}
@@ -206,7 +211,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* First Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">First Name</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              First Name
+            </label>
             <input
               type="text"
               value={firstname}
@@ -218,7 +225,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Last Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Last Name</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Last Name
+            </label>
             <input
               type="text"
               value={lastname}
@@ -230,7 +239,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Birthdate */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Birthdate
+            </label>
             <input
               type="date"
               value={birthdate}
@@ -240,9 +251,34 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
               max={maxDate} // Restrict to at least 18 years old
             />
           </div>
+
+          {/* Separator with Icon */}
+          <div className="relative flex items-center my-6">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="mx-4 text-gray-600 font-medium text-sm flex items-center">
+              <svg
+                className="w-5 h-5 text-gray-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 12H8m4-4v8"
+                ></path>
+              </svg>
+              Account Information
+            </span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
           {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -254,7 +290,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Password */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Password
+            </label>
             <input
               type={showPassword ? "text" : "password"}
               value={password}
@@ -265,20 +303,24 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="mt-2 w-full bg-gray-200 text-gray-700 border border-gray-300 rounded p-2 hover:bg-gray-300"
+              className="text-gray-500 hover:text-gray-700 transition flex items-center gap-2 w-[870px] justify-center"
             >
-              {showPassword ? "🙈 Hide Password" : "👁️ Show Password"}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-            {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
+            
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+            )}
           </div>
 
           {/* Inline Message - Moved below password section */}
           {message && !showMessageModal && (
             <div
-              className={`mb-4 p-2 rounded ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
-                }`}
+              className={`mb-4 p-2 rounded ${
+                message.type === "success"
+                  ? "bg-green-100 text-green-700 border border-green-400"
+                  : "bg-red-100 text-red-700 border border-red-400"
+              }`}
             >
               {message.text}
             </div>
@@ -308,12 +350,14 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
       {showMessageModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-            <p className="text-green-700 text-center font-medium text-lg">✅ Submission successful!</p>
+            <p className="text-green-700 text-center font-medium text-lg">
+              ✅ Submission successful!
+            </p>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 AddAdminModal.propTypes = {
