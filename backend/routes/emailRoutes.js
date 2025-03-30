@@ -9,13 +9,9 @@ router.post('/send', async (req, res) => {
 
     console.log("[emailRoutes.js]\nReceived email request:", req.body); // Debugging
 
-    let { email, firstname, lastname, password } = req.body; // Get user details
+    let { email, firstname, lastname, studentId } = req.body; // Get user details
     
-    if(!password) {
-      password = "Password empty or encrypted."
-    }
-
-    console.log("[emailRoutes.js]\n📧 Extracted values:", { email, firstname, lastname, password }); // Debugging
+    console.log("[emailRoutes.js]\n📧 Extracted values:", { email, firstname, lastname, studentId }); // Debugging
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
@@ -29,7 +25,7 @@ router.post('/send', async (req, res) => {
         // await sendEmail(testEmail);
         // res.status(200).json({ message: `Email sent to ${testEmail}` });
 
-        await sendEmail({ email, firstname, lastname, password });
+        await sendEmail({ email, firstname, lastname, studentId });
         res.json({ success: true, message: `Email sent successfully! to ${email}` });
     } catch (error) {
         console.error("Email sending failed:", error);
