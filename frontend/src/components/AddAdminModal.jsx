@@ -303,11 +303,11 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-gray-500 hover:text-gray-700 transition flex items-center gap-2 w-[870px] justify-center"
+              className="text-gray-500 hover:text-gray-700 transition flex items-center gap-2 w-[40px] justify-center ml-auto"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-            
+
             {passwordError && (
               <p className="text-red-500 text-sm mt-1">{passwordError}</p>
             )}
@@ -337,7 +337,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
             </button>
             <button
               type="submit"
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              className="bg-[#38b6ff] text-white px-4 py-2 rounded hover:bg-[#2a9ed6] transition"
               disabled={loading}
             >
               Add
