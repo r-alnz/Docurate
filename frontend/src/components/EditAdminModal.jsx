@@ -144,10 +144,10 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
             try {
                 // Make sure onEdit returns a promise
                 const result = await onEdit(user._id, updatedUser)
-                console.log("✅ Edit result:", result)
+                console.log("Edit result:", result)
 
                 setMessage({ text: "Edit successful!", type: "success" })
-                setShowMessageModal(true)
+                setShowMessageModal(false)
 
                 // Close the modal after 3 seconds
                 setTimeout(() => {
@@ -155,9 +155,9 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                     onClose() // ✅ Close modal only after showing success message
                 }, 1000)
             } catch (error) {
-                console.error("❌ Edit failed:", error)
+                console.error("Edit failed:", error)
 
-                setMessage({ text: "❌ Edit failed. Please try again.", type: "error" })
+                setMessage({ text: "Edit failed. Please try again.", type: "error" })
                 setShowMessageModal(true)
 
                 setTimeout(() => setShowMessageModal(false), 1000)
