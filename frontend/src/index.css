@@ -87,3 +87,13 @@ input {
 .role-badge.organization {
   background-color: #3986b0;
 }
+
+.cool-logo {
+  background-color: none;
+  transition: all ease 0.2s;
+}
+
+.cool-logo:hover {
+  background-color: #0c6595;
+  cursor: pointer;
+}

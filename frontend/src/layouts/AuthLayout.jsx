@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom"
+import { Link } from "react-router";
 import "../index.css"
 
 const AuthLayout = () => {
@@ -6,14 +7,25 @@ const AuthLayout = () => {
       <div className="flex h-screen bg-gradient-to-br from-sky-100 to-blue-300">
         {/* Left Side - Illustration or Branding */}
         <div className="w-1/2 bg-gradient-to-br from-[#5ccfff] via-[#38b6ff] to-[#1e9ee0] text-white flex flex-col items-center justify-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black opacity-20"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black opacity-20 z-10"></div>
+          
+                  {/* Logo with hover effect and link */}
+        <Link to="/about" className="relative z-10">
           <img
             src="/Docurate_Logo.png"
             alt="Docurate Logo"
-            className="w-45 h-40 mb-4 relative z-10 rounded-full shadow-lg"
+            className="cool-logo w-45 h-40 mb-4 rounded-full shadow-lg p-2 z-10"
           />
-          <h1 className="text-6xl font-bold mb-4 relative z-10">DOCURATE</h1>
-          <p className="text-xl relative z-10">
+        </Link>
+          
+          
+          {/* <img
+            src="/src/assets/Docurate_Logo.png"
+            alt="Docurate Logo"
+            className="w-45 h-40 mb-4 relative z-10 rounded-full shadow-lg"
+          /> */}
+          <h1 className="text-6xl font-bold mb-4 relative z-0">DOCURATE</h1>
+          <p className="text-xl relative z-0">
             Your Document Management Solution
           </p>
           <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-blue-700 to-transparent"></div>

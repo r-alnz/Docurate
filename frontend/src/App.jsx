@@ -25,6 +25,7 @@ import UserDocumentsPage from './pages/UserDocumentsPage.jsx';
 import UserDocumentCreationPage from './pages/UserDocumentCreationPage.jsx';
 import ChangePasswordPage from './pages/ChangePasswordPage.jsx';
 import BulkImportPage from './pages/BulkImportPage.jsx'
+import AboutPage from './pages/AboutPage.jsx';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, requiredRoles }) => {
@@ -54,6 +55,8 @@ const App = () => {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/" element={<Navigate to="/login" replace />} />
                 </Route>
+
+                <Route path="/about" element={<AboutPage />} />
 
                 {/* Protected SuperAdmin Routes */}
                 <Route
