@@ -4,6 +4,7 @@ import AddUserModal from '../components/AddUserModal';
 import { fetchUserAccounts, addUserAccount, editUserAccount, deleteUserAccount } from '../services/adminService'; // Use the service for users
 import { useAuthContext } from '../hooks/useAuthContext';
 import { useUserContext } from '../hooks/useUserContext';
+import {Plus} from "lucide-react"
 
 const AdminUsersPage = () => {
     const { user, token } = useAuthContext();
@@ -89,7 +90,6 @@ const AdminUsersPage = () => {
     };
 
 
-
     const handleDeleteUser = async (userId) => {
         try {
             await deleteUserAccount(token, userId);
@@ -104,43 +104,44 @@ const AdminUsersPage = () => {
 
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
 
-            {/* Search Bar and Add User Button */}
-            <div className=" relative z-0 flex justify-between items-center mb-4">
-                <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    className="border p-2 rounded w-1/3"
-                />
-                <button
-                    onClick={() => setIsAddUserModalOpen(true)}
-                    className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
-                >
-                    Add User
-                </button>
-            </div>
-
-            {/* User Table */}
-            <UserTable
-                users={filteredUsers}
-                onEdit={handleEditUser}
-                onDelete={handleDeleteUser}
-                suborganizations={suborganizations}
-            />
-
-            {/* Add User Modal */}
-            <AddUserModal
-                isOpen={isAddUserModalOpen}
-                onClose={() => setIsAddUserModalOpen(false)}
-                onSubmit={handleAddUser}
-                suborganizations={suborganizations} // Pass sub-orgs as prop
-                suborgAlready={suborgAlready}
-            />
+        {/* Search Bar and Add User Button */}
+        <div className=" relative z-0 flex justify-between items-center mb-4">
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border p-2 rounded w-1/3"
+          />
+          <button
+            onClick={() => setIsAddUserModalOpen(true)}
+            className="flex items-center gap-2 bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] transition-all duration-200"
+          >
+            <Plus className="w-5 h-5" />
+            Add User
+          </button>
         </div>
+
+        {/* User Table */}
+        <UserTable
+          users={filteredUsers}
+          onEdit={handleEditUser}
+          onDelete={handleDeleteUser}
+          suborganizations={suborganizations}
+        />
+
+        {/* Add User Modal */}
+        <AddUserModal
+          isOpen={isAddUserModalOpen}
+          onClose={() => setIsAddUserModalOpen(false)}
+          onSubmit={handleAddUser}
+          suborganizations={suborganizations} // Pass sub-orgs as prop
+          suborgAlready={suborgAlready}
+        />
+      </div>
     );
 };
 

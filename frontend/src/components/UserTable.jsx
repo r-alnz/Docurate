@@ -87,6 +87,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     setIsResetModalOpen(true)
   }
 
+  
   // Auto-dismiss notification messages after 3 seconds
   useEffect(() => {
     if (message) {
@@ -147,33 +148,28 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     <div className="overflow-x-auto shadow-md sm:rounded-lg">
       {/* Filter controls - only visible to admin users */}
       {currentUser?.role === "admin" && (
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex justify-end sticky left-0">
           {/* Role filter dropdown */}
           <select
             onChange={(e) => setFilterRole(e.target.value)}
-            className="px-4 py-2 bg-gradient-to-r from-blue-300 to-blue-400 text-white font-semibold rounded-lg shadow-md cursor-pointer transition duration-300 hover:from-blue-600 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="px-4 py-2 bg-white text-gray-800 font-medium rounded-lg shadow-md cursor-pointer 
+               transition-all duration-300 border border-gray-300 hover:border-blue-400"
           >
-            <option value="all" className="text-gray-800">
-              All Users
-            </option>
-            <option value="students" className="text-gray-800">
-              Students
-            </option>
-            <option value="studentsUnderOrgs" className="text-gray-800">
-              Students (Under Orgs)
-            </option>
-            <option value="studentsNotUnderOrgs" className="text-gray-800">
+            <option value="all"> All Users </option>
+            <option value="students"> Students </option>
+            <option value="studentsUnderOrgs"> Students (Under Orgs)</option>
+            <option value="studentsNotUnderOrgs">
               Students (Not Under Orgs)
             </option>
-            <option value="organizations" className="text-gray-800">
-              Organizations
-            </option>
+            <option value="organizations"> Organizations </option>
           </select>
 
           {/* College filter dropdown */}
           <select
             onChange={(e) => setFilterCollege(e.target.value)}
-            className="p-2 bg-green-500 text-white rounded-md ml-4"
+            className="px-4 py-2 bg-gray-500 text-white font-medium rounded-lg ml-4 
+               shadow-md cursor-pointer transition-all duration-300 
+               border hover:bg-gray-600 "
           >
             <option value="all">All Colleges</option>
             {uniqueColleges.map((college, index) => (
@@ -292,26 +288,26 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         {/* Reset Password button (admin/superadmin only) */}
                         {(currentUser?.role === "admin" ||
                           currentUser?.role === "superadmin") && (
-                            <div className="relative">
-                              <KeyRound
-                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-yellow-500 hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
-                                onClick={() =>
-                                  handleResetPasswordClick(user, user.role)
-                                }
-                                title="Reset Password"
-                                onMouseEnter={() =>
-                                  setActiveTooltip(`reset-${user._id}`)
-                                }
-                                onMouseLeave={() => setActiveTooltip(null)}
-                              />
-                              {activeTooltip === `reset-${user._id}` && (
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                  Reset Password
-                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          <div className="relative">
+                            <KeyRound
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-yellow-500 hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
+                              onClick={() =>
+                                handleResetPasswordClick(user, user.role)
+                              }
+                              title="Reset Password"
+                              onMouseEnter={() =>
+                                setActiveTooltip(`reset-${user._id}`)
+                              }
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `reset-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Reset Password
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Edit user button */}
                         <div className="relative">
@@ -359,14 +355,11 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                   {filterRole !== "organizations" && (
                     <td className="px-6 py-4">
                       {user.birthdate
-                        ? new Date(user.birthdate).toLocaleDateString(
-                          "en-US",
-                          {
+                        ? new Date(user.birthdate).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
-                          }
-                        )
+                          })
                         : "N/A"}
                     </td>
                   )}
@@ -389,8 +382,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         {user.role === "student"
                           ? user.studentId || "N/A"
                           : user.role === "organization"
-                            ? "N/A"
-                            : ""}
+                          ? "N/A"
+                          : ""}
                       </td>
                     )}
 
@@ -401,15 +394,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                           {user.role === "student"
                             ? user.college || "N/A"
                             : user.role === "organization"
-                              ? "N/A"
-                              : ""}
+                            ? "N/A"
+                            : ""}
                         </td>
                         <td className="px-6 py-4">
                           {user.role === "student"
                             ? user.program || "N/A"
                             : user.role === "organization"
-                              ? "N/A"
-                              : ""}
+                            ? "N/A"
+                            : ""}
                         </td>
                       </>
                     )}
@@ -423,11 +416,11 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     <td className="px-6 py-4">
                       {user.suborganizations?.length > 0
                         ? user.suborganizations
-                          .map(
-                            (suborgs) =>
-                              `${suborgs.firstname} ${suborgs.lastname}`
-                          )
-                          .join(", ")
+                            .map(
+                              (suborgs) =>
+                                `${suborgs.firstname} ${suborgs.lastname}`
+                            )
+                            .join(", ")
                         : "N/A"}
                     </td>
                   )}
@@ -435,10 +428,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="7"
-                  className="px-6 py-4 text-center text-gray-500"
-                >
+                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
                   No users found.
                 </td>
               </tr>
@@ -472,10 +462,11 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
       {/* Temporary notification message */}
       {message && (
         <div
-          className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-            ? "bg-green-100 text-green-700 border border-green-400"
-            : "bg-red-100 text-red-700 border border-red-400"
-            }`}
+          className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${
+            message.type === "success"
+              ? "bg-green-100 text-green-700 border border-green-400"
+              : "bg-red-100 text-red-700 border border-red-400"
+          }`}
         >
           <div className="flex items-center">
             <span className="font-medium mr-2">
