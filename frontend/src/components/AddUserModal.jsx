@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useState, useEffect } from "react"
+import { Eye, EyeOff, CheckCircle, AlertTriangle} from "lucide-react";
 import PropTypes from "prop-types"
 
 const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlready }) => {
@@ -184,8 +185,14 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {role === "student" ? (
             <>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">Role</label>
-                <select value={role} onChange={(e) => setRole(e.target.value)} className="border rounded p-2 w-full">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Role
+                </label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="border rounded p-2 w-full"
+                >
                   <option value="student">Student</option>
                   <option value="organization">Organization</option>
                 </select>
@@ -193,7 +200,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               {role === "student" && (
                 <>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Student ID</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Student ID
+                    </label>
                     <input
                       type="text"
                       value={studentId}
@@ -203,7 +212,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">College</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      College
+                    </label>
                     <input
                       type="text"
                       value={college}
@@ -213,7 +224,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Program</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Program
+                    </label>
                     <input
                       type="text"
                       value={program}
@@ -224,8 +237,33 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                   </div>
                 </>
               )}
+
+              {/* Separator with Icon */}
+              <div className="relative flex items-center my-6">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="mx-4 text-gray-600 font-medium text-sm flex items-center">
+                  <svg
+                    className="w-5 h-5 text-gray-500 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16 12H8m4-4v8"
+                    ></path>
+                  </svg>
+                  Account Information
+                </span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">First Name</label>
+                <label className="block text-gray-700 font-medium mb-2">
+                  First Name
+                </label>
                 <input
                   type="text"
                   value={firstname}
@@ -235,7 +273,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">Last Name</label>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Last Name
+                </label>
                 <input
                   type="text"
                   value={lastname}
@@ -247,7 +287,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             </>
           ) : role === "organization" ? (
             <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">Organization Name</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Organization Name
+              </label>
               <input
                 type="text"
                 value={firstname}
@@ -259,7 +301,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           ) : null}
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Birthdate
+            </label>
             <input
               type="date"
               value={birthdate}
@@ -271,7 +315,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -280,25 +326,36 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               required
             />
           </div>
+
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
-            <div className="flex flex-col">
+            <label className="block text-gray-700 font-medium mb-2">
+              Password
+            </label>
+            <div className="flex items-center border rounded p-2">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => validatePassword(e.target.value)}
-                className="border rounded-t p-2 w-full"
+                className="w-full outline-none"
                 required
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="bg-gray-200 border-t border-gray-300 text-gray-700 p-2 rounded-b hover:bg-gray-300"
+                className="text-gray-500 hover:text-gray-700 transition flex items-center"
               >
-                {showPassword ? "🙈 Hide Password" : "👁️ Show Password"}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
+            <p className="text-gray-500 text-sm mt-1">
+              Hint: Use <strong>lastname + student ID</strong>
+              <br />
+              Example: <i>DelaCruz21-02193</i>
+            </p>
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+            )}
           </div>
 
           {/* Replace the existing message display with this */}
@@ -306,7 +363,13 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {message && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-                <p className={`mb-4 ${message.type === "success" ? "text-green-700" : "text-red-700"}`}>
+                <p
+                  className={`mb-4 ${
+                    message.type === "success"
+                      ? "text-green-700"
+                      : "text-red-700"
+                  }`}
+                >
                   {message.text}
                 </p>
               </div>
@@ -316,24 +379,31 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {/* Inline message display */}
           {message && (
             <div
-              className={`mt-4 p-2 rounded ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
-                }`}
+              className={`mt-4 p-2 rounded ${
+                message.type === "success"
+                  ? "bg-green-100 text-green-700 border border-green-400"
+                  : "bg-red-100 text-red-700 border border-red-400"
+              }`}
             >
               {message.text}
             </div>
           )}
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Organization</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Organization
+            </label>
             <p className="text-gray-700">{user.organization?.name || "N/A"}</p>
           </div>
 
           {currRole === "organization" ? (
             <>
-              <label className="block text-gray-700 font-medium mb-2">Suborganization</label>
-              <p className="text-gray-700">{suborgAlready.map((org) => org.firstname)}</p>
+              <label className="block text-gray-700 font-medium mb-2">
+                Suborganization
+              </label>
+              <p className="text-gray-700">
+                {suborgAlready.map((org) => org.firstname)}
+              </p>
             </>
           ) : currRole === "admin" ? (
             <>
@@ -343,7 +413,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     <input
                       type="checkbox"
                       checked={isStudentOrgMember}
-                      onChange={() => setIsStudentOrgMember(!isStudentOrgMember)}
+                      onChange={() =>
+                        setIsStudentOrgMember(!isStudentOrgMember)
+                      }
                       className="w-4 h-4"
                     />
                     <span className="text-gray-700 font-medium">
@@ -367,13 +439,14 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                   (prev) =>
                                     prev.includes(org._id)
                                       ? prev.filter((id) => id !== org._id) // Remove if already selected
-                                      : [...prev, org._id], // Add if not selected
-                                )
+                                      : [...prev, org._id] // Add if not selected
+                                );
                               }}
-                              className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-100 text-gray-700"
-                                } rounded mb-1`}
+                              className={`p-2 cursor-pointer ${
+                                selectedSubOrgs.includes(org._id)
+                                  ? "bg-[#38b6ff] text-white"
+                                  : "bg-gray-100 text-gray-700"
+                              } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
                             </div>
@@ -394,14 +467,17 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             >
               Cancel
             </button>
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+            <button
+              type="submit"
+              className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
+            >
               Add User
             </button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 AddUserModal.propTypes = {
