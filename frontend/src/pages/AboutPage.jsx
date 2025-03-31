@@ -63,7 +63,7 @@ const AboutPage = () => {
             }}
             style={{ display: "inline-block" }}>
             <img
-              src="/src/assets/Docurate_Logo.png"
+              src="Docurate_Logo.png"
               alt="Logo"
               onMouseMove={onMouseMove}
               onMouseLeave={onMouseLeave}
