@@ -3,24 +3,50 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sendEmail = async ({ email, firstname, lastname, studentId }) => {
+const sendEmail = async ({ email, firstname, lastname, studentId, birthdate, role }) => {
   console.log("[sendEmail.js]:");
   console.log("\t📧 Sending email to:", email);
-  
+  console.log("\t📅 Birthdate received:", birthdate);
+  console.log("\t👤 Role:", role);
+
   if (!email) {
     console.error("❌ Error: Email is undefined or empty.");
     throw new Error("Recipient email is required.");
   }
 
-  // Generate default password using lastname+studentId
-  const defaultPassword = `${lastname}${studentId || ''}`;
-  
-  // Debug environment variables (remove in production)
-  console.log("EMAIL_USER exists:", !!process.env.EMAIL_USER);
-  console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+  // Remove spaces from lastname (e.g., "De Guzman" → "DeGuzman")
+  const formattedLastname = lastname ? lastname.replace(/\s+/g, '') : '';
+
+  // Extract birth year correctly
+  let birthYear = '';
+  if (birthdate) {
+    try {
+      const birthdateObj = new Date(birthdate);
+      if (!isNaN(birthdateObj.getTime())) {
+        birthYear = birthdateObj.getFullYear().toString();
+        console.log("\t🎂 Extracted birth year:", birthYear);
+      } else {
+        console.error("❌ Invalid birthdate format:", birthdate);
+      }
+    } catch (error) {
+      console.error("❌ Error parsing birthdate:", error);
+    }
+  } else {
+    console.log("⚠️ No birthdate provided for user");
+  }
+
+  // 🔹 Fix: Always use birthYear if available, even for non-superadmins
+  let defaultPassword;
+  if (birthYear) {
+    defaultPassword = `${formattedLastname}${birthYear}`;
+  } else {
+    defaultPassword = `${formattedLastname}${studentId || ''}`;
+  }
+
+  // Debugging log
+  console.log("\t🔐 Final Default Password:", defaultPassword);
 
   try {
-    // Create a more detailed transporter configuration
     let transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
