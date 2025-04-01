@@ -26,6 +26,7 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
   }, [isOpen, user])
 
   const formatLastname = user.lastname.replace(/\s+/g, "")
+  const formatFirstname = user.firstname.replace(/\s+/g, "")
 
   // Debug the birthdate processing
   console.log("🔍 Processing birthdate:", user.birthdate)
@@ -61,12 +62,26 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
     console.log("🔍 WARNING: Birthdate is null or undefined")
   }
 
-  // Restore the original conditional logic for default password
-  const defaultPassword =
-    user.role === "admin" ? `${formatLastname}${birthYear}` : `${formatLastname}${user.studentId || ""}`
+  // Declare defaultPassword variable
+  let defaultPassword = ""
+  // Restore the original conditional logic for default password with three conditions
+  if (user.role === "admin") {
+    // For admin: lastname + birthYear
+    defaultPassword = `${formatLastname}${birthYear}`
+  } else if (user.role === "student") {
+    // For student: lastname + studentId
+    defaultPassword = `${formatLastname}${user.studentId || ""}`
+  } else if (user.role === "organization") {
+    // For organization: firstname + "@"
+    defaultPassword = `${formatFirstname}@`
+  } else {
+    // Default fallback for any other roles
+    defaultPassword = `${formatLastname}${user.studentId || birthYear || ""}`
+  }
 
   console.log("🔍 User role:", user.role)
   console.log("🔍 Formatted lastname:", formatLastname)
+  console.log("🔍 Formatted firstname:", formatFirstname)
   console.log("🔍 Birth year:", birthYear)
   console.log("🔍 Student ID:", user.studentId)
   console.log("🔍 Generated default password:", defaultPassword)
