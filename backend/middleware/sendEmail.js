@@ -14,9 +14,9 @@ const sendEmail = async ({ email, firstname, lastname, studentId, birthdate, rol
     throw new Error("Recipient email is required.")
   }
 
-  // Remove spaces from lastname (e.g., "De Guzman" → "DeGuzman")
+  // Remove spaces from lastname (e.g., "Dela Cruz" → "DelaCruz")
   const formattedLastname = lastname ? lastname.replace(/\s+/g, "") : ""
-
+  const formattedFirstname = firstname ? firstname.replace(/\s+/g, "") : ""
   // Extract birth year correctly
   let birthYear = ""
   if (birthdate) {
@@ -39,16 +39,21 @@ const sendEmail = async ({ email, firstname, lastname, studentId, birthdate, rol
   let defaultPassword = ""
 
   // 🔹 Role for setting the default password - use role parameter directly
-  if (role === "admin") {
-    // For admin: lastname + birthYear
-    defaultPassword = `${formattedLastname}${birthYear}`
-  } else if (role === "student") {
-    // For students: lastname + studentId
-    defaultPassword = `${formattedLastname}${studentId || ""}`
-  } else {
-    // Default fallback for other roles
-    defaultPassword = `${formattedLastname}${studentId || birthYear || ""}`
-  }
+   // Restore the original conditional logic for default password with three conditions
+   if (role === "admin") {
+     // For admin: lastname + birthYear
+     defaultPassword = `${formattedLastname}${birthYear}`
+   } else if (role === "student") {
+     // For student: lastname + studentId
+     defaultPassword = `${formattedLastname}${studentId || ""}`
+   } else if (role === "organization") {
+     // For organization: firstname + "@"
+     defaultPassword = `${formattedFirstname}@`
+   } else {
+     // Default fallback for any other roles
+     defaultPassword = `${formattedLastname}${studentId || birthYear || ""}`
+   }
+ 
 
   // Debugging log
   console.log("\t🔐 Final Default Password:", defaultPassword)
