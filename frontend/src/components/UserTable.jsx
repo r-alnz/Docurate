@@ -269,8 +269,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                           <div
                             className={`role-badge px-2 py-rounded-full text-sm font-semibold capitalize ${
                               user.role === "organization"
-                                ? "bg-gray-800 text-white"
-                                : "bg-gray-500 text-white"
+                                ? "bg-[#efc85f]  text-white"
+                                : "bg-[#2a9ed6]  text-white"
                             }`}
                           >
                             {user.role === "organization" ? (
@@ -280,6 +280,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                             )}
                           </div>
                         </div>
+
                         {/* Action buttons */}
 
                         {/* Send email icon button */}
