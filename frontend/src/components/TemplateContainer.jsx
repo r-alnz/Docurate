@@ -1158,99 +1158,99 @@ kvl4klipvu2pnd3pytjngbf7tvr4h6n548r9ksy1pp3ax6fu"
                       }
                     });
 
-                    // ------------ Method 1: Count newlines based sa exceeding ng width
+                    // // ------------ Method 1: Count newlines based sa exceeding ng width
 
-                    editor.on("keydown", (event) => {
-                      const lineHeight =
-                        parseFloat(
-                          window.getComputedStyle(editor.getBody()).lineHeight
-                        ) || 20;
-                      const pageHeightPx = selectedPageSize.height;
-                      const marginTopPx = margins.top * DPI;
-                      const marginBottomPx = margins.bottom * DPI;
-                      const availableHeight =
-                        pageHeightPx - (marginTopPx + marginBottomPx);
-                      const maxLines = Math.floor(
-                        availableHeight / lineHeight
-                      );
-                      const maxTextWidth =
-                        selectedPageSize.width -
-                        (margins.left * DPI + margins.right * DPI);
-                      const textContent = editor.getContent({
-                        format: "text",
-                      });
+                    // editor.on("keydown", (event) => {
+                    //   const lineHeight =
+                    //     parseFloat(
+                    //       window.getComputedStyle(editor.getBody()).lineHeight
+                    //     ) || 20;
+                    //   const pageHeightPx = selectedPageSize.height;
+                    //   const marginTopPx = margins.top * DPI;
+                    //   const marginBottomPx = margins.bottom * DPI;
+                    //   const availableHeight =
+                    //     pageHeightPx - (marginTopPx + marginBottomPx);
+                    //   const maxLines = Math.floor(
+                    //     availableHeight / lineHeight
+                    //   );
+                    //   const maxTextWidth =
+                    //     selectedPageSize.width -
+                    //     (margins.left * DPI + margins.right * DPI);
+                    //   const textContent = editor.getContent({
+                    //     format: "text",
+                    //   });
 
-                      let currentLines = 1; // laging start at line 1
-                      let currentLineWidth = 0;
+                    //   let currentLines = 1; // laging start at line 1
+                    //   let currentLineWidth = 0;
 
-                      for (let char of textContent) {
-                        const charWidth = 13.2; // approx width per char
+                    //   for (let char of textContent) {
+                    //     const charWidth = 13.2; // approx width per char
 
-                        if (currentLineWidth + charWidth > maxTextWidth) {
-                          // increment line count pag exceeds
-                          currentLines++;
-                          currentLineWidth = charWidth; // new line count
-                        } else {
-                          currentLineWidth += charWidth;
-                        }
-                      }
+                    //     if (currentLineWidth + charWidth > maxTextWidth) {
+                    //       // increment line count pag exceeds
+                    //       currentLines++;
+                    //       currentLineWidth = charWidth; // new line count
+                    //     } else {
+                    //       currentLineWidth += charWidth;
+                    //     }
+                    //   }
 
-                      // Prevent typing if beyond max lines na
-                      if (
-                        currentLines >= maxLines &&
-                        (event.key === "Enter" || event.key.length === 1)
-                      ) {
-                        console.log("Typing blocked: max lines reached!");
-                        event.preventDefault(); // Stop Enter and typing beyond max lines
-                      }
-                    });
+                    //   // Prevent typing if beyond max lines na
+                    //   if (
+                    //     currentLines >= maxLines &&
+                    //     (event.key === "Enter" || event.key.length === 1)
+                    //   ) {
+                    //     console.log("Typing blocked: max lines reached!");
+                    //     event.preventDefault(); // Stop Enter and typing beyond max lines
+                    //   }
+                    // });
 
-                    // ------------ Method 2: Count newlines based sa number of Enters
+                    // // ------------ Method 2: Count newlines based sa number of Enters
 
-                    editor.on("keydown", (event) => {
-                      const lineHeight =
-                        parseFloat(
-                          window.getComputedStyle(editor.getBody()).lineHeight
-                        ) || 20;
-                      const pageHeightPx = selectedPageSize.height;
-                      const marginTopPx = margins.top * DPI;
-                      const marginBottomPx = margins.bottom * DPI;
-                      const availableHeight =
-                        pageHeightPx -
-                        (marginTopPx + marginBottomPx) +
-                        lineHeight;
-                      const maxLines = Math.floor(
-                        availableHeight / lineHeight
-                      );
-                      const textContent = editor.getContent({
-                        format: "text",
-                      });
-                      const lines = textContent.split("\n");
-                      const currentLines = lines.length;
-                      const maxTextWidth =
-                        selectedPageSize.width -
-                        (margins.left * DPI + margins.right * DPI);
+                    // editor.on("keydown", (event) => {
+                    //   const lineHeight =
+                    //     parseFloat(
+                    //       window.getComputedStyle(editor.getBody()).lineHeight
+                    //     ) || 20;
+                    //   const pageHeightPx = selectedPageSize.height;
+                    //   const marginTopPx = margins.top * DPI;
+                    //   const marginBottomPx = margins.bottom * DPI;
+                    //   const availableHeight =
+                    //     pageHeightPx -
+                    //     (marginTopPx + marginBottomPx) +
+                    //     lineHeight;
+                    //   const maxLines = Math.floor(
+                    //     availableHeight / lineHeight
+                    //   );
+                    //   const textContent = editor.getContent({
+                    //     format: "text",
+                    //   });
+                    //   const lines = textContent.split("\n");
+                    //   const currentLines = lines.length;
+                    //   const maxTextWidth =
+                    //     selectedPageSize.width -
+                    //     (margins.left * DPI + margins.right * DPI);
 
-                      // approx last line width (since walang exact from TinyMCE)
-                      const lastLine = lines[lines.length - 1] || "";
-                      const lastLineWidthPx = lastLine.length * 7;
+                    //   // approx last line width (since walang exact from TinyMCE)
+                    //   const lastLine = lines[lines.length - 1] || "";
+                    //   const lastLineWidthPx = lastLine.length * 7;
 
-                      // Prevent typing pag beyond max lines
-                      if (currentLines >= maxLines && event.key === "Enter") {
-                        console.log("Typing blocked: max lines reached!");
-                        event.preventDefault(); // Stop Enter key
-                      }
+                    //   // Prevent typing pag beyond max lines
+                    //   if (currentLines >= maxLines && event.key === "Enter") {
+                    //     console.log("Typing blocked: max lines reached!");
+                    //     event.preventDefault(); // Stop Enter key
+                    //   }
 
-                      // Prevent typing pag beyond max width sa last line
-                      if (
-                        currentLines >= maxLines &&
-                        lastLineWidthPx >= maxTextWidth &&
-                        event.key.length === 1
-                      ) {
-                        console.log("Typing blocked: max width reached!");
-                        event.preventDefault(); // Stop adding characters beyond horizontal limit
-                      }
-                    });
+                    //   // Prevent typing pag beyond max width sa last line
+                    //   if (
+                    //     currentLines >= maxLines &&
+                    //     lastLineWidthPx >= maxTextWidth &&
+                    //     event.key.length === 1
+                    //   ) {
+                    //     console.log("Typing blocked: max width reached!");
+                    //     event.preventDefault(); // Stop adding characters beyond horizontal limit
+                    //   }
+                    // });
 
                     editor.ui.registry.addButton("addHeaderImage", {
                       text: "Add Header Image",
