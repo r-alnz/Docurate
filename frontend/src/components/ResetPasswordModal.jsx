@@ -148,7 +148,7 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
             <h2 className="text-lg font-semibold mb-4">Reset Password for {user.email}</h2>
 
             {/* Debug info - remove in production */}
-            <div className="mb-4 p-2 bg-gray-100 text-xs rounded">
+            {/* <div className="mb-4 p-2 bg-gray-100 text-xs rounded">
               <p>
                 <strong>Debug Info:</strong>
               </p>
@@ -158,7 +158,7 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
               <p>Birth Year: {birthYear || "Not extracted"}</p>
               <p>Student ID: {user.studentId || "Not set"}</p>
               <p>Default Password: {defaultPassword}</p>
-            </div>
+            </div> */}
 
             {/* New Password */}
             <div className="mb-4">
