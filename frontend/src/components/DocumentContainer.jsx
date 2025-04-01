@@ -478,18 +478,17 @@ const DocumentContainer = () => {
                             display: none !important; /* Hide margin overlay */
                         }
                             
-                        body::before {
-                            content: "";
-                            position: absolute;
-                            top: var(--margin-top, 1in);
-                            left: var(--margin-left, 1in);
-                            right: var(--margin-right, 1in);
-                            bottom: var(--margin-bottom, 1in);
-                            border: 2px dashed red;
-                            pointer-events: none; /* Prevents interaction */
-                            box-sizing: border-box;
-                        }
-
+                        // body::before {
+                        //     content: "";
+                        //     position: absolute;
+                        //     top: var(--margin-top, 1in);
+                        //     left: var(--margin-left, 1in);
+                        //     right: var(--margin-right, 1in);
+                        //     bottom: var(--margin-bottom, 1in);
+                        //     border: 2px dashed red;
+                        //     pointer-events: none; /* Prevents interaction */
+                        //     box-sizing: border-box;
+                        // }
 
                     </style>
                 </head>
