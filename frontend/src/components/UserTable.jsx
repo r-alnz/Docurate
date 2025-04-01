@@ -8,7 +8,7 @@ import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 
 import "../index.css"
-import { Mail, KeyRound, Edit, UserMinus } from "lucide-react"
+import { Mail, KeyRound, Edit, UserMinus, Building, User} from "lucide-react"
 
 /**
  * UserTable Component
@@ -155,7 +155,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
             <option value="all"> All Users </option>
             <option value="students"> Students </option>
             <option value="studentsUnderOrgs"> Students (Under Orgs)</option>
-            <option value="studentsNotUnderOrgs">Students (Not Under Orgs)</option>
+            <option value="studentsNotUnderOrgs">
+              Students (Not Under Orgs)
+            </option>
             <option value="organizations"> Organizations </option>
           </select>
 
@@ -217,27 +219,31 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
               )}
 
               {/* Student-specific columns for admin users */}
-              {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                <th scope="col" className="px-6 py-3">
-                  Student ID
-                </th>
-              )}
+              {currentUser?.role === "admin" &&
+                filterRole !== "organizations" && (
+                  <th scope="col" className="px-6 py-3">
+                    Student ID
+                  </th>
+                )}
 
-              {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                <>
-                  <th scope="col" className="px-6 py-3">
-                    College
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Program
-                  </th>
-                </>
-              )}
+              {currentUser?.role === "admin" &&
+                filterRole !== "organizations" && (
+                  <>
+                    <th scope="col" className="px-6 py-3">
+                      College
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Program
+                    </th>
+                  </>
+                )}
 
               {/* Organization/Suborganization column based on user role */}
               {currentUser?.role !== "organization" && (
                 <th scope="col" className="px-6 py-3">
-                  {currentUser?.role === "superadmin" ? "Organization" : "Suborganizations"}
+                  {currentUser?.role === "superadmin"
+                    ? "Organization"
+                    : "Suborganizations"}
                 </th>
               )}
             </tr>
@@ -256,17 +262,35 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                       <div className="font-semibold ">
                         {user.firstname} {user.lastname}
                       </div>
+
                       {/* Badge section - fixed position */}
-                      <div className="flex items-center gap-x-1">
-                        <div className={`role-badge ${user.role}`}>{user.role}</div>
+                      <div className="flex items-center gap-x-2">
+                        <div className="flex items-center">
+                          <div
+                            className={`role-badge px-2 py-rounded-full text-sm font-semibold capitalize ${
+                              user.role === "organization"
+                                ? "bg-gray-800 text-white"
+                                : "bg-gray-500 text-white"
+                            }`}
+                          >
+                            {user.role === "organization" ? (
+                              <Building className="w-5 h-5" />
+                            ) : (
+                              <User className="w-5 h-5" />
+                            )}
+                          </div>
+                        </div>
                         {/* Action buttons */}
+
                         {/* Send email icon button */}
                         <div className="relative">
                           <Mail
                             className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-[#1E90FF] hover:text-white dark:hover:text-white rounded-full hover:bg-[#1E90FF] dark:hover:[#1C86EE] hover:shadow-lg"
                             onClick={() => handleSendEmail(user)}
                             title="Send Email"
-                            onMouseEnter={() => setActiveTooltip(`email-${user._id}`)}
+                            onMouseEnter={() =>
+                              setActiveTooltip(`email-${user._id}`)
+                            }
                             onMouseLeave={() => setActiveTooltip(null)}
                           />
                           {activeTooltip === `email-${user._id}` && (
@@ -278,13 +302,18 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         </div>
 
                         {/* Reset Password button (admin/superadmin only) */}
-                        {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                        {(currentUser?.role === "admin" ||
+                          currentUser?.role === "superadmin") && (
                           <div className="relative">
                             <KeyRound
                               className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-yellow-500 hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
-                              onClick={() => handleResetPasswordClick(user, user.role)}
+                              onClick={() =>
+                                handleResetPasswordClick(user, user.role)
+                              }
                               title="Reset Password"
-                              onMouseEnter={() => setActiveTooltip(`reset-${user._id}`)}
+                              onMouseEnter={() =>
+                                setActiveTooltip(`reset-${user._id}`)
+                              }
                               onMouseLeave={() => setActiveTooltip(null)}
                             />
                             {activeTooltip === `reset-${user._id}` && (
@@ -302,7 +331,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                             className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
                             onClick={() => handleEditClick(user)}
                             title="Edit"
-                            onMouseEnter={() => setActiveTooltip(`edit-${user._id}`)}
+                            onMouseEnter={() =>
+                              setActiveTooltip(`edit-${user._id}`)
+                            }
                             onMouseLeave={() => setActiveTooltip(null)}
                           />
                           {activeTooltip === `edit-${user._id}` && (
@@ -319,7 +350,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                             className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
                             onClick={() => handleDeleteClick(user)}
                             title="Mark as Inactive"
-                            onMouseEnter={() => setActiveTooltip(`inactive-${user._id}`)}
+                            onMouseEnter={() =>
+                              setActiveTooltip(`inactive-${user._id}`)
+                            }
                             onMouseLeave={() => setActiveTooltip(null)}
                           />
                           {activeTooltip === `inactive-${user._id}` && (
@@ -339,10 +372,10 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     <td className="px-6 py-4">
                       {user.birthdate
                         ? new Date(user.birthdate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          })
                         : "N/A"}
                     </td>
                   )}
@@ -354,33 +387,56 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                         <td className="px-6 py-4">{user.position || "N/A"}</td>
                                     ) : null} */}
 
-                  {currentUser?.role === "superadmin" ? <td className="px-6 py-4">{user.position || "N/A"}</td> : null}
+                  {currentUser?.role === "superadmin" ? (
+                    <td className="px-6 py-4">{user.position || "N/A"}</td>
+                  ) : null}
 
                   {/* Student-specific columns for admin users - Updated to show N/A for organizations */}
-                  {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                    <td className="px-6 py-4">
-                      {user.role === "student" ? user.studentId || "N/A" : user.role === "organization" ? "N/A" : ""}
-                    </td>
-                  )}
+                  {currentUser?.role === "admin" &&
+                    filterRole !== "organizations" && (
+                      <td className="px-6 py-4">
+                        {user.role === "student"
+                          ? user.studentId || "N/A"
+                          : user.role === "organization"
+                          ? "N/A"
+                          : ""}
+                      </td>
+                    )}
 
-                  {currentUser?.role === "admin" && filterRole !== "organizations" && (
-                    <>
-                      <td className="px-6 py-4">
-                        {user.role === "student" ? user.college || "N/A" : user.role === "organization" ? "N/A" : ""}
-                      </td>
-                      <td className="px-6 py-4">
-                        {user.role === "student" ? user.program || "N/A" : user.role === "organization" ? "N/A" : ""}
-                      </td>
-                    </>
-                  )}
+                  {currentUser?.role === "admin" &&
+                    filterRole !== "organizations" && (
+                      <>
+                        <td className="px-6 py-4">
+                          {user.role === "student"
+                            ? user.college || "N/A"
+                            : user.role === "organization"
+                            ? "N/A"
+                            : ""}
+                        </td>
+                        <td className="px-6 py-4">
+                          {user.role === "student"
+                            ? user.program || "N/A"
+                            : user.role === "organization"
+                            ? "N/A"
+                            : ""}
+                        </td>
+                      </>
+                    )}
 
                   {/* Organization/Suborganization column based on user role */}
                   {currentUser?.role === "superadmin" ? (
-                    <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
+                    <td className="px-6 py-4">
+                      {user.organization?.name || "N/A"}
+                    </td>
                   ) : (
                     <td className="px-6 py-4">
                       {user.suborganizations?.length > 0
-                        ? user.suborganizations.map((suborgs) => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
+                        ? user.suborganizations
+                            .map(
+                              (suborgs) =>
+                                `${suborgs.firstname} ${suborgs.lastname}`
+                            )
+                            .join(", ")
                         : "N/A"}
                     </td>
                   )}
@@ -422,13 +478,16 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
       {/* Temporary notification message */}
       {message && (
         <div
-          className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-            ? "bg-green-100 text-green-700 border border-green-400"
-            : "bg-red-100 text-red-700 border border-red-400"
-            }`}
+          className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${
+            message.type === "success"
+              ? "bg-green-100 text-green-700 border border-green-400"
+              : "bg-red-100 text-red-700 border border-red-400"
+          }`}
         >
           <div className="flex items-center">
-            <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
+            <span className="font-medium mr-2">
+              {message.type === "success" ? "✅" : "❌"}
+            </span>
             {message.text}
           </div>
         </div>
@@ -440,11 +499,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
           isOpen={isResetModalOpen}
           user={selectedUser}
           onClose={() => setIsResetModalOpen(false)}
-          onResetPassword={resetMode === "admin" ? resetAdminPassword : resetUserPassword}
+          onResetPassword={
+            resetMode === "admin" ? resetAdminPassword : resetUserPassword
+          }
         />
       )}
     </div>
-  )
+  );
 }
 
 UserTable.propTypes = {
