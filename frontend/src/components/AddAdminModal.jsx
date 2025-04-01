@@ -307,7 +307,11 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-
+            <p className="text-gray-500 text-sm mt-1">
+              Hint: Use <strong>last name + Bithdate year</strong>
+              <br />
+              Example: <i>delacruz2000</i>
+            </p>
             {passwordError && (
               <p className="text-red-500 text-sm mt-1">{passwordError}</p>
             )}
@@ -316,11 +320,10 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
           {/* Inline Message - Moved below password section */}
           {message && !showMessageModal && (
             <div
-              className={`mb-4 p-2 rounded ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-700 border border-green-400"
-                  : "bg-red-100 text-red-700 border border-red-400"
-              }`}
+              className={`mb-4 p-2 rounded ${message.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
+                }`}
             >
               {message.text}
             </div>
