@@ -1,5 +1,3 @@
-"use client"
-
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
@@ -10,7 +8,7 @@ import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 
 import "../index.css"
-import { Mail, KeyRound, Edit, UserMinus } from "lucide-react"
+import { Mail, KeyRound, Edit, UserMinus, Building, User} from "lucide-react"
 
 /**
  * UserTable Component
@@ -87,7 +85,6 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     setIsResetModalOpen(true)
   }
 
-  
   // Auto-dismiss notification messages after 3 seconds
   useEffect(() => {
     if (message) {
@@ -201,6 +198,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
               <th scope="col" className="px-6 py-3">
                 Email
               </th>
+
               {/* Conditional column for birthdate (not shown for organizations) */}
               {filterRole !== "organizations" && (
                 <th scope="col" className="px-6 py-3">
@@ -264,8 +262,27 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                       <div className="font-semibold ">
                         {user.firstname} {user.lastname}
                       </div>
-                      <div className="flex items-center gap-x-1">
+
+                      {/* Badge section - fixed position */}
+                      <div className="flex items-center gap-x-2">
+                        <div className="flex items-center">
+                          <div
+                            className={`role-badge px-2 py-rounded-full text-sm font-semibold capitalize ${
+                              user.role === "organization"
+                                ? "bg-[#efc85f]  text-white"
+                                : "bg-[#2a9ed6]  text-white"
+                            }`}
+                          >
+                            {user.role === "organization" ? (
+                              <Building className="w-5 h-5" />
+                            ) : (
+                              <User className="w-5 h-5" />
+                            )}
+                          </div>
+                        </div>
+
                         {/* Action buttons */}
+
                         {/* Send email icon button */}
                         <div className="relative">
                           <Mail
