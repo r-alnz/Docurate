@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Editor } from "@tinymce/tinymce-react"
@@ -716,6 +718,32 @@ const DocumentContainer = () => {
                                                 })
                                             })
                                             e.content = doc.body.innerHTML
+                                        })
+
+                                        // Prevent deletion of editable spans when they become empty
+                                        editor.on("KeyDown", (e) => {
+                                            if (e.keyCode === 8 || e.keyCode === 46) {
+                                                // Backspace or Delete key
+                                                const selectedNode = editor.selection.getNode()
+                                                const editableSpan = selectedNode.closest(".editable")
+
+                                                if (editableSpan) {
+                                                    const content = editableSpan.textContent.trim()
+                                                    if (content === "" || content.length === 1) {
+                                                        // If content is empty or has only one character left
+                                                        e.preventDefault() // Prevent the deletion
+                                                        // Optionally, you can set a minimum content to ensure visibility
+                                                        if (content === "") {
+                                                            editableSpan.innerHTML = "&nbsp;"
+                                                            // Place cursor at the beginning of the span
+                                                            const range = editor.dom.createRng()
+                                                            range.setStart(editableSpan, 0)
+                                                            range.setEnd(editableSpan, 0)
+                                                            editor.selection.setRng(range)
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         })
 
                                         // Adjust toolbar interaction based on selection
