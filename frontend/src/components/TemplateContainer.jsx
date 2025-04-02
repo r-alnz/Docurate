@@ -1060,7 +1060,32 @@ const TemplateContainer = ({ suborgs }) => {
                         input.click()
                       },
                     })
+                    // editor.on('init', () => {
+                    //     const iframe = editor.getDoc(); // Access the iframe's document
+                    //     iframe.addEventListener('mousedown', (e) => {
+                    //         const target = e.target.closest('.draggable-image');
+                    //         if (!target) return;
 
+                    //         let offsetX = e.clientX - target.offsetLeft;
+                    //         let offsetY = e.clientY - target.offsetTop;
+
+                    //         const onMouseMove = (event) => {
+                    //             target.style.left = `${event.clientX - offsetX}px`;
+                    //             target.style.top = `${event.clientY - offsetY}px`;
+                    //         };
+
+                    //         const onMouseUp = () => {
+                    //             iframe.removeEventListener('mousemove', onMouseMove);
+                    //             iframe.removeEventListener('mouseup', onMouseUp);
+                    //             console.log(target);
+                    //         };
+
+                    //         console.log(target);
+
+                    //         iframe.addEventListener('mousemove', onMouseMove);
+                    //         iframe.addEventListener('mouseup', onMouseUp);
+                    //     });
+                    // });
                     editor.on("keydown", (event) => {
                       if (event.key === "Tab") {
                         event.preventDefault() // Prevent default tab behavior
