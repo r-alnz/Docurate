@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuthContext } from '../hooks/useAuthContext';
 import axios from "axios";
+import { getApiUrl } from "../api.js";
+
+const API_URL = getApiUrl("/removals");
 
 const RemovalRequestsPage = () => {
   const { user, token } = useAuthContext();
@@ -19,7 +22,7 @@ const RemovalRequestsPage = () => {
             return;
         }
 
-        const response = await axios.get("http://localhost:8000/api/removals/removal-requests", {
+        const response = await axios.get(`${API_URL}/remove-request`, {
           headers: {
             Authorization: `Bearer ${token}`, // Ensure token is included
           },

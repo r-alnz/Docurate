@@ -3,6 +3,9 @@ import * as XLSX from "xlsx"
 import { fetchUserAccounts } from "../services/adminService"
 import { useUserContext } from "../hooks/useUserContext"
 import { getToken } from "../utils/authUtil"
+import { getApiUrl } from "../api.js";
+
+const API_URL = getApiUrl("/import");
 
 const BulkImportPage = () => {
     const [data, setData] = useState([])
@@ -92,7 +95,7 @@ const BulkImportPage = () => {
             const formData = new FormData()
             formData.append("file", document.querySelector('input[type="file"]').files[0])
 
-            const response = await fetch("http://localhost:8000/api/import/bulk-import", {
+            const response = await fetch(`${API_URL}/bulk-import`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -147,7 +150,7 @@ const BulkImportPage = () => {
                             newFormData.append("file", nonDuplicatesFile)
 
                             try {
-                                const retryResponse = await fetch("http://localhost:8000/api/import/bulk-import", {
+                                const retryResponse = await fetch(`${API_URL}/bulk-import`, {
                                     method: "POST",
                                     headers: {
                                         Authorization: `Bearer ${token}`,

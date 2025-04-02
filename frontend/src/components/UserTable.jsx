@@ -6,6 +6,9 @@ import DeleteAdminModal from "./DeleteAdminModal"
 import EditAdminModal from "./EditAdminModal"
 import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
+import { getApiUrl } from "../api.js";
+
+const API_URL = getApiUrl("/email");
 
 import "../index.css"
 import { Mail, KeyRound, Edit, UserMinus, Building, User } from "lucide-react"
@@ -126,7 +129,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
 
     try {
       // Send API request to email service
-      const response = await fetch("http://localhost:8000/api/email/send", {
+      const response = await fetch(`${API_URL}/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
