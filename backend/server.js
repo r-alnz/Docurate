@@ -15,7 +15,7 @@ import removalRoutes from "./routes/removalRoutes.js"
 
 dotenv.config()
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 7000;
 const app = express()
 
 app.use(express.json({ limit: '50mb' })); // Increase the limit for JSON payloads

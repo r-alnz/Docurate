@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import "../index.css"
+import { getApiUrl } from "../api.js";
+
+const API_URL = getApiUrl("/removals");
 
 const ReqRemoveModal = ({ isOpen, onClose, onSubmit, removing }) => {
   const { user } = useAuthContext(); // Fetch current user context
@@ -18,7 +21,7 @@ const ReqRemoveModal = ({ isOpen, onClose, onSubmit, removing }) => {
 
     try {
         const token = localStorage.getItem("authToken");
-        const response = await fetch("/api/removals/remove-request", {
+        const response = await fetch(`${API_URL}/remove-request`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

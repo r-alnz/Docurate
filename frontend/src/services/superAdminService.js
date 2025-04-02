@@ -1,6 +1,6 @@
 import axios from 'axios';
-// const API_URL = '/api/superadmin';
-const API_URL = import.meta.env.VITE_API_BASE_URL + '/api/superadmin';
+import { getApiUrl } from "../api.js";
+const API_URL = getApiUrl("/superadmin");
 
 export const fetchOrganizations = async (token) => {
     const response = await axios.get(`${API_URL}/organizations`, {
