@@ -27,7 +27,7 @@ router.post("/remove-request", authToken, async (req, res) => { // Apply authTok
 });
 
 // GET REQUESTS (Only for the user's organization)
-router.get("/removal-requests", authToken, async (req, res) => { // Apply authToken to ensure req.user exists
+router.get("/remove-request", authToken, async (req, res) => { // Apply authToken to ensure req.user exists
   try {
     console.log("🔍 Fetching removal requests...");
 
