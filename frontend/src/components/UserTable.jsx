@@ -306,11 +306,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                                 Send Email
                                             </button>
 
-                                            {/* temporary for request remove */}
-                                            <button className="font-medium text-red-600 dark:text-red-500 hover:underline"
-                                            onClick={() => handleReqRemoveClick(user)}>
-                                                rekwes remob
-                                            </button>
+                                            {currentUser?.role === "organization" && (
+                                                // {/* temporary for request remove */}
+                                                <button className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                onClick={() => handleReqRemoveClick(user)}>
+                                                    rekwes remob
+                                                </button>
+                                            )}
+                                            
                                         </div>
                                     </td>
                                 </tr>
