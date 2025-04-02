@@ -26,6 +26,7 @@ import UserDocumentCreationPage from './pages/UserDocumentCreationPage.jsx';
 import ChangePasswordPage from './pages/ChangePasswordPage.jsx';
 import BulkImportPage from './pages/BulkImportPage.jsx'
 import AboutPage from './pages/AboutPage.jsx';
+import RemovalRequestsPage from './pages/RemovalRequestsPage.jsx';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, requiredRoles }) => {
@@ -82,6 +83,7 @@ const App = () => {
                     <Route path="/template-creation" element={<AdminTemplateCreationPage />} />
                     <Route path="/templates/:id" element={<AdminTemplateCreationPage />} />
                     <Route path="/import" element={< BulkImportPage />} />
+                    <Route path="/removalrequests" element={< RemovalRequestsPage />} />
                 </Route>
 
                 {/* Protected Admin and Organization Routes */}
