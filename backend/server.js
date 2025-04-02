@@ -11,6 +11,7 @@ import templateRoutes from './routes/templateRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import importRoutes from "./routes/importRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js"
+import removalRoutes from "./routes/removalRoutes.js"
 
 dotenv.config()
 
@@ -26,7 +27,7 @@ app.get('/', (req, res) => {
 
 app.use(logger)
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:7000',
+    origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:7000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // ✅ Allow credentials (tokens/cookies)
@@ -40,6 +41,7 @@ app.use('/api/templates', templateRoutes);
 app.use('/api/documents', documentRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/email", emailRoutes);
+app.use('/api/removals', removalRoutes);
 
 connectDB()
     .then(async () => {

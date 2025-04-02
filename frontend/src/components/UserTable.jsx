@@ -9,6 +9,7 @@ import { resetUserPassword, resetAdminPassword } from "../services/authService"
 
 import "../index.css"
 import { Mail, KeyRound, Edit, UserMinus, Building, User } from "lucide-react"
+import ReqRemoveModal from "./ReqRemoveModal";
 
 /**
  * UserTable Component
@@ -16,48 +17,41 @@ import { Mail, KeyRound, Edit, UserMinus, Building, User } from "lucide-react"
  * Different views and actions are available based on the current user's role
  */
 const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
-  // State for managing selected user and modal visibility
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false)
-  const [resetMode, setResetMode] = useState("")
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
+    const [resetMode, setResetMode] = useState("");
+    const { user: currentUser } = useAuthContext();
+    const [filteredUsers, setFilteredUsers] = useState(users);
+    const [filterRole, setFilterRole] = useState("all");
+    const [filterCollege, setFilterCollege] = useState("all");
 
-  // Get current user from auth context for permission-based UI
-  const { user: currentUser } = useAuthContext()
+    
+    // State for displaying temporary notification messages
+    const [message, setMessage] = useState(null)
 
-  // State for filtering and displaying users
-  const [filteredUsers, setFilteredUsers] = useState(users)
-  const [filterRole, setFilterRole] = useState("all")
-  const [filterCollege, setFilterCollege] = useState("all")
+    // State for tracking which tooltip is currently visible
+    const [activeTooltip, setActiveTooltip] = useState(null)
 
-  // State for displaying temporary notification messages
-  const [message, setMessage] = useState(null)
+    // ✅ Get unique colleges from users
+    const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
 
-  // State for tracking which tooltip is currently visible
-  const [activeTooltip, setActiveTooltip] = useState(null)
 
-  // Extract unique colleges from users for the college filter dropdown
-  const uniqueColleges = [...new Set(users.map((user) => user.college).filter(Boolean))]
-
-  // Filter users based on selected role and college filters
-  useEffect(() => {
-    let updatedUsers = users
-
-    // Role-based filtering
-    if (filterRole === "students") {
-      updatedUsers = users.filter((user) => user.role === "student")
-    } else if (filterRole === "studentsUnderOrgs") {
-      updatedUsers = users.filter((user) => user.role === "student" && user.suborganizations?.length > 0)
-    } else if (filterRole === "studentsNotUnderOrgs") {
-      updatedUsers = users.filter(
-        (user) => user.role === "student" && (!user.suborganizations || user.suborganizations.length === 0),
-      )
-    } else if (filterRole === "organizations") {
-      updatedUsers = users.filter((user) => user.role === "organization")
-    } else if (filterRole === "all") {
-      updatedUsers = users
-    }
+    useEffect(() => {
+        let updatedUsers = users;
+        if (filterRole === "students") {
+            updatedUsers = users.filter(user => user.role === "student");
+        } else if (filterRole === "studentsUnderOrgs") {
+            updatedUsers = users.filter(user => user.role === "student" && user.suborganizations?.length > 0);
+        } else if (filterRole === "studentsNotUnderOrgs") {
+            updatedUsers = users.filter(user => user.role === "student" && (!user.suborganizations || user.suborganizations.length === 0));
+        } else if (filterRole === "organizations") {
+            updatedUsers = users.filter(user => user.role === "organization");
+        } else if (filterRole === "all") {
+            updatedUsers = users;
+        }
 
     // College-based filtering (Only filter if a specific college is selected)
     if (filterCollege && filterCollege !== "all") {
@@ -74,10 +68,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     setIsEditModalOpen(true)
   }
 
-  const handleDeleteClick = (user) => {
-    setSelectedUser(user)
-    setIsDeleteModalOpen(true)
-  }
+    const handleDeleteClick = (user) => {
+        setSelectedUser(user)
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleReqRemoveClick = (user) => {
+        setSelectedUser(user)
+        setIsReqRemoveOpen(true)
+    }
 
   const handleResetPasswordClick = (user, mode) => {
     setSelectedUser(user)
@@ -366,6 +365,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                           )}
 
                         {/* Request for removal user button */}
+                        {currentUser?.role === "organization" && (
+                            // {/* temporary for request remove */}
+                            <button className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                            onClick={() => handleReqRemoveClick(user)}>
+                                rekwes remob
+                            </button>
+                        )}
                         {(currentUser?.role === "organization") && (
                           <div className="relative">
                             <Edit
@@ -512,7 +518,16 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
           suborganizations={suborganizations}
           onClose={() => setIsEditModalOpen(false)}
           onEdit={onEdit}
-        />
+                />
+            )}
+
+            {isReqRemoveOpen && (
+                <ReqRemoveModal
+                    isOpen={isReqRemoveOpen}
+                    removing={selectedUser}
+                    onClose={() => setIsReqRemoveOpen(false)}
+                    onSubmit={handleReqRemoveClick}
+            />
       )}
 
       {/* Temporary notification message */}
