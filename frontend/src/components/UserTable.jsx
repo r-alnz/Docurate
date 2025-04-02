@@ -365,21 +365,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                           )}
 
                         {/* Request for removal user button */}
-                        {currentUser?.role === "organization" && (
-                            // {/* temporary for request remove */}
-                            <button className="font-medium text-red-600 dark:text-red-500 hover:underline"
-                            onClick={() => handleReqRemoveClick(user)}>
-                                rekwes remob
-                            </button>
-                        )}
                         {(currentUser?.role === "organization") && (
                           <div className="relative">
-                            <Edit
-                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
-                              onClick={() => (user)}
-                              title="request"
+                            <UserMinus
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                              onClick={() => handleReqRemoveClick(user)}
+                              title="Request Removal"
                               onMouseEnter={() =>
-                                setActiveTooltip(`Renival-${user._id}`)
+                                setActiveTooltip(`Removal-${user._id}`)
                               }
                               onMouseLeave={() => setActiveTooltip(null)}
                             />
