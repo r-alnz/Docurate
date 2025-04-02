@@ -7,18 +7,40 @@ import "../index.css"
 
 const ReqRemoveModal = ({ isOpen, onClose, onSubmit, removing }) => {
   const { user } = useAuthContext(); // Fetch current user context
-  const [reason, setReason] = useState('');
+  const [ reason, setReason ] = useState('');
 
-    const handleReasonChange = (e) => {
-      setReason(e.target.value);
-    };
-
-    if (!isOpen) return null;
-
-  const handleSubmit = async (e) => {
-    alert("Oki")
+  const handleReasonChange = (e) => {
+    setReason(e.target.value);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+        const response = await fetch("/api/removals/remove-request", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              requestingUser: `${user.firstname.trim()}`,
+              removingUser: `${removing.firstname.trim()} ${removing.lastname.trim()}`,
+              studentId: removing.studentId,
+              reason: reason.trim(),
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to submit request.");
+        }
+
+        alert("✅ Request sent!");
+        onClose();
+    } catch (error) {
+        console.error("❌ Error submitting request:", error);
+        alert("❌ Failed to send request.");
+    }
+  };  
 
   if (!isOpen) return null;
 

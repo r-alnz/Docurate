@@ -64,6 +64,31 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         setIsReqRemoveOpen(true)
     }
 
+    // }
+    // const handleReqRemoveClick = async (formData) => {
+    //     try {
+    //         const response = await fetch("http://localhost:8000/api/removals/remove-request", { // Adjust the URL if necessary
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify(formData),
+    //         });
+    
+    //         const data = await response.json();
+    
+    //         if (!response.ok) {
+    //             console.error("❌ Server Error:", data.message); // Log the response message from the backend
+    //             throw new Error(data.message);
+    //         }
+    
+    //         console.log("✅ Request submitted:", data);
+    //     } catch (error) {
+    //         console.error("❌ Error submitting request:", error);
+    //     }
+    // };
+    
+
     const handleResetPasswordClick = (user, mode) => {
         setSelectedUser(user)
         setResetMode(mode)
@@ -327,6 +352,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     isOpen={isReqRemoveOpen}
                     removing={selectedUser}
                     onClose={() => setIsReqRemoveOpen(false)}
+                    onSubmit={handleReqRemoveClick}
                     />
             )}
 
