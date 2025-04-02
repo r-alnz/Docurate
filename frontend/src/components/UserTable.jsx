@@ -298,23 +298,26 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         {/* Action buttons */}
 
                         {/* Send email icon button */}
-                        <div className="relative">
-                          <Mail
-                            className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-[#1E90FF] hover:text-white dark:hover:text-white rounded-full hover:bg-[#1E90FF] dark:hover:[#1C86EE] hover:shadow-lg"
-                            onClick={() => handleSendEmail(user)}
-                            title="Send Email"
-                            onMouseEnter={() =>
-                              setActiveTooltip(`email-${user._id}`)
-                            }
-                            onMouseLeave={() => setActiveTooltip(null)}
-                          />
-                          {activeTooltip === `email-${user._id}` && (
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                              Send Email
-                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        {(currentUser?.role === "admin" ||
+                          currentUser?.role === "superadmin") && (
+                            <div className="relative">
+                              <Mail
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-[#1E90FF] hover:text-white dark:hover:text-white rounded-full hover:bg-[#1E90FF] dark:hover:[#1C86EE] hover:shadow-lg"
+                                onClick={() => handleSendEmail(user)}
+                                title="Send Email"
+                                onMouseEnter={() =>
+                                  setActiveTooltip(`email-${user._id}`)
+                                }
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                              {activeTooltip === `email-${user._id}` && (
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                  Send Email
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                </div>
+                              )}
                             </div>
                           )}
-                        </div>
 
                         {/* Reset Password button (admin/superadmin only) */}
                         {(currentUser?.role === "admin" ||
@@ -341,43 +344,70 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                           )}
 
                         {/* Edit user button */}
-                        <div className="relative">
-                          <Edit
-                            className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
-                            onClick={() => handleEditClick(user)}
-                            title="Edit"
-                            onMouseEnter={() =>
-                              setActiveTooltip(`edit-${user._id}`)
-                            }
-                            onMouseLeave={() => setActiveTooltip(null)}
-                          />
-                          {activeTooltip === `edit-${user._id}` && (
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                              Edit
-                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        {(currentUser?.role === "admin" ||
+                          currentUser?.role === "superadmin") && (
+                            <div className="relative">
+                              <Edit
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
+                                onClick={() => handleEditClick(user)}
+                                title="Edit"
+                                onMouseEnter={() =>
+                                  setActiveTooltip(`edit-${user._id}`)
+                                }
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                              {activeTooltip === `edit-${user._id}` && (
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                  Edit
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                </div>
+                              )}
                             </div>
                           )}
-                        </div>
+
+                        {/* Request for removal user button */}
+                        {(currentUser?.role === "organization") && (
+                          <div className="relative">
+                            <Edit
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
+                              onClick={() => (user)}
+                              title="request"
+                              onMouseEnter={() =>
+                                setActiveTooltip(`Renival-${user._id}`)
+                              }
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `Removal-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Request Removal
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Mark user as inactive button */}
-                        <div className="relative">
-                          <UserMinus
-                            className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
-                            onClick={() => handleDeleteClick(user)}
-                            title="Mark as Inactive"
-                            onMouseEnter={() =>
-                              setActiveTooltip(`inactive-${user._id}`)
-                            }
-                            onMouseLeave={() => setActiveTooltip(null)}
-                          />
-                          {activeTooltip === `inactive-${user._id}` && (
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                              {/* Mark as Inactive */}
-                              Delete
-                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        {(currentUser?.role === "admin" ||
+                          currentUser?.role === "superadmin") && (
+                            <div className="relative">
+                              <UserMinus
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                                onClick={() => handleDeleteClick(user)}
+                                title="Mark as Inactive"
+                                onMouseEnter={() =>
+                                  setActiveTooltip(`inactive-${user._id}`)
+                                }
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                              {activeTooltip === `inactive-${user._id}` && (
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                  {/* Mark as Inactive */}
+                                  Delete
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                </div>
+                              )}
                             </div>
                           )}
-                        </div>
                       </div>
                     </div>
                   </td>
@@ -438,21 +468,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                         </td>
                       </>
                     )}
-
                   {/* Organization/Suborganization column based on user role */}
                   {currentUser?.role === "superadmin" ? (
-                    <td className="px-6 py-4">
-                      {user.organization?.name || "N/A"}
-                    </td>
+                    <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
+                  ) : currentUser?.role === "organization" ? (
+                    <td className="px-6 py-4"></td>
                   ) : (
                     <td className="px-6 py-4">
                       {user.suborganizations?.length > 0
-                        ? user.suborganizations
-                          .map(
-                            (suborgs) =>
-                              `${suborgs.firstname} ${suborgs.lastname}`
-                          )
-                          .join(", ")
+                        ? user.suborganizations.map((suborgs) => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
                         : "N/A"}
                     </td>
                   )}
