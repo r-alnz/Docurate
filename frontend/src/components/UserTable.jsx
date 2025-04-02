@@ -9,12 +9,14 @@ import { resetUserPassword, resetAdminPassword } from "../services/authService";
 
 import "../index.css"
 import { Mail } from "lucide-react";
+import ReqRemoveModal from "./ReqRemoveModal";
 
 const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
     const [resetMode, setResetMode] = useState("");
     const { user: currentUser } = useAuthContext();
     const [filteredUsers, setFilteredUsers] = useState(users);
@@ -55,6 +57,11 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     const handleDeleteClick = (user) => {
         setSelectedUser(user)
         setIsDeleteModalOpen(true)
+    }
+    
+    const handleReqRemoveClick = (user) => {
+        setSelectedUser(user)
+        setIsReqRemoveOpen(true)
     }
 
     const handleResetPasswordClick = (user, mode) => {
@@ -273,6 +280,12 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                                                 onClick={() => handleSendEmail(user)}>
                                                 Send Email
                                             </button>
+
+                                            {/* temporary for request remove */}
+                                            <button className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                            onClick={() => handleReqRemoveClick(user)}>
+                                                rekwes remob
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -307,6 +320,14 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                     onClose={() => setIsEditModalOpen(false)}
                     onEdit={onEdit}
                 />
+            )}
+
+            {isReqRemoveOpen && (
+                <ReqRemoveModal
+                    isOpen={isReqRemoveOpen}
+                    removing={selectedUser}
+                    onClose={() => setIsReqRemoveOpen(false)}
+                    />
             )}
 
             {isResetModalOpen && (
