@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, CheckCircle, AlertTriangle} from "lucide-react";
+import { Eye, EyeOff, CheckCircle, AlertTriangle } from "lucide-react";
 import PropTypes from "prop-types"
 
 const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlready }) => {
@@ -234,6 +234,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                       className="border rounded p-2 w-full"
                       required
                     />
+
                   </div>
                 </>
               )}
@@ -284,6 +285,19 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                   required
                 />
               </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Birthdate
+                </label>
+                <input
+                  type="date"
+                  value={birthdate}
+                  onChange={(e) => setBirthdate(e.target.value)}
+                  className="border rounded p-2 w-full"
+                  required
+                  max={maxDate} // Restrict to at least 18 years old
+                />
+              </div>
             </>
           ) : role === "organization" ? (
             <div className="mb-4">
@@ -302,20 +316,6 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
 
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">
-              Birthdate
-            </label>
-            <input
-              type="date"
-              value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
-              className="border rounded p-2 w-full"
-              required
-              max={maxDate} // Restrict to at least 18 years old
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
               Email
             </label>
             <input
@@ -327,36 +327,73 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Password
-            </label>
-            <div className="flex items-center border rounded p-2">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => validatePassword(e.target.value)}
-                className="w-full outline-none"
-                required
-              />
+          {role === "student" && (
+            <>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Password
+                </label>
+                <div className="flex items-center border rounded p-2">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => validatePassword(e.target.value)}
+                    className="w-full outline-none"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-gray-500 hover:text-gray-700 transition flex items-center"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                <p className="text-gray-500 text-sm mt-1">
+                  Hint: Use <strong>lastname + student ID</strong>
+                  <br />
+                  Example: <i>DelaCruz21-02193</i>
+                </p>
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
+              </div>
+            </>
+          )}
 
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-500 hover:text-gray-700 transition flex items-center"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-            <p className="text-gray-500 text-sm mt-1">
-              Hint: Use <strong>lastname + student ID</strong>
-              <br />
-              Example: <i>DelaCruz21-02193</i>
-            </p>
-            {passwordError && (
-              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-            )}
-          </div>
+          {role === "organization" && (
+            <>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Password
+                </label>
+                <div className="flex items-center border rounded p-2">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => validatePassword(e.target.value)}
+                    className="w-full outline-none"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-gray-500 hover:text-gray-700 transition flex items-center"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                <p className="text-gray-500 text-sm mt-1">
+                  Hint: Use <strong>organization name + @</strong>
+                  <br />
+                  Example: <i>organizationname@</i>
+                </p>
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Replace the existing message display with this */}
           {/* Message Modal */}
@@ -364,11 +401,10 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
                 <p
-                  className={`mb-4 ${
-                    message.type === "success"
-                      ? "text-green-700"
-                      : "text-red-700"
-                  }`}
+                  className={`mb-4 ${message.type === "success"
+                    ? "text-green-700"
+                    : "text-red-700"
+                    }`}
                 >
                   {message.text}
                 </p>
@@ -379,11 +415,10 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {/* Inline message display */}
           {message && (
             <div
-              className={`mt-4 p-2 rounded ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-700 border border-green-400"
-                  : "bg-red-100 text-red-700 border border-red-400"
-              }`}
+              className={`mt-4 p-2 rounded ${message.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
+                }`}
             >
               {message.text}
             </div>
@@ -442,11 +477,10 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                       : [...prev, org._id] // Add if not selected
                                 );
                               }}
-                              className={`p-2 cursor-pointer ${
-                                selectedSubOrgs.includes(org._id)
-                                  ? "bg-[#38b6ff] text-white"
-                                  : "bg-gray-100 text-gray-700"
-                              } rounded mb-1`}
+                              className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
+                                ? "bg-[#38b6ff] text-white"
+                                : "bg-gray-100 text-gray-700"
+                                } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
                             </div>
