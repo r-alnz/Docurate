@@ -5,6 +5,10 @@ const removalRequestSchema = new mongoose.Schema(
     requestingUser: { type: String, required: true },
     removingUser: { type: String, required: true },
     studentId: { type: String, required: false },
+    organization: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Organization',
+    },
     reason: { type: String, required: false },
     date: { type: Date, default: Date.now },
   },

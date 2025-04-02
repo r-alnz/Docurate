@@ -17,16 +17,20 @@ const ReqRemoveModal = ({ isOpen, onClose, onSubmit, removing }) => {
     e.preventDefault();
 
     try {
+        const token = localStorage.getItem("authToken");
         const response = await fetch("/api/removals/remove-request", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
+              // Add the Authorization header with your authentication token
+              "Authorization": `Bearer ${token}`, 
             },
             body: JSON.stringify({
               requestingUser: `${user.firstname.trim()}`,
               removingUser: `${removing.firstname.trim()} ${removing.lastname.trim()}`,
               studentId: removing.studentId,
               reason: reason.trim(),
+              organization: removing.organization
             }),
         });
 

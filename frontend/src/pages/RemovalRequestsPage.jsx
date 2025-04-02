@@ -11,7 +11,19 @@ const RemovalRequestsPage = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get("/api/removals/removal-requests");
+        const token = localStorage.getItem("authToken");
+        console.log("Token:", token);
+
+        if (!token) {
+            console.error("No token found!");
+            return;
+        }
+
+        const response = await axios.get("http://localhost:8000/api/removals/removal-requests", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Ensure token is included
+          },
+        });
         setRemovalRequests(response.data);
       } catch (error) {
         console.error("Error fetching removal requests:", error);
@@ -35,7 +47,6 @@ const RemovalRequestsPage = () => {
               <th className="border p-2">Removing User</th>
               <th className="border p-2">Student ID</th>
               <th className="border p-2">Reason</th>
-              <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -45,11 +56,6 @@ const RemovalRequestsPage = () => {
                 <td className="border p-2">{request.removingUser}</td>
                 <td className="border p-2">{request.studentId}</td>
                 <td className="border p-2">{request.reason}</td>
-                <td className="border p-2">
-                  <button className="bg-red-500 text-white px-3 py-1 rounded">
-                    Remove
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>
