@@ -15,6 +15,13 @@ import removalRoutes from "./routes/removalRoutes.js"
 
 dotenv.config()
 
+const allowedOrigins = [
+    "http://localhost:5173",  // Local dev
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://docurate-eight.vercel.app"
+  ];
+
 const PORT = process.env.PORT || 7000;
 const app = express()
 
@@ -25,9 +32,14 @@ app.get('/', (req, res) => {
     res.send('Backend is running!');
 });
 
-app.use(logger)
 app.use(cors({
-    origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:7000'],
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // ✅ Allow credentials (tokens/cookies)
