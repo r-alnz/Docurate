@@ -9,6 +9,8 @@ const RemovalRequestsPage = () => {
   const { user, token } = useAuthContext();
   const [removalRequests, setRemovalRequests] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [editingStatus, setEditingStatus] = useState(null); // To keep track of the status we're editing
+  const [newStatus, setNewStatus] = useState(""); // For storing the new status temporarily
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -55,23 +57,55 @@ const RemovalRequestsPage = () => {
     }
   };
 
+  // Function to handle status change
+  const handleStatusChange = async (requestId, newStatus) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        console.error("No token found!");
+        return;
+      }
+  
+      // Send the PATCH request to update the status
+      const response = await axios.patch(
+        `${API_URL}/remove-request/${requestId}`,
+        { status: newStatus }, // Data to be sent in the request body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token in the header
+          },
+        }
+      );
+  
+      console.log("Status updated:", response.data);
+  
+      // Optionally update the UI with the new status
+      setRemovalRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request._id === requestId ? { ...request, status: newStatus } : request
+        )
+      );
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Removal Requests</h2>
 
-      <div className="mb-4">
-        <label htmlFor="statusFilter" className="mr-2">Filter by Status:</label>
-        <select
+      <div className="flex justify-between mb-3">
+      <h2 className="text-2xl font-bold mb-4 rounded-lg">Removal Requests</h2>
+      <div><select
           id="statusFilter"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg bg-gray-100"
         >
           <option value="all">All</option>
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
-        </select>
+        </select></div>
       </div>
 
       {filteredRequests.length === 0 ? (
@@ -94,21 +128,29 @@ const RemovalRequestsPage = () => {
                     </div>
                   </div>
 
-                  <div className={`-mt-2 pr-3 h-[30px] flex items-center pl-3 rounded-xl text-white ${getStatusColor(request.status)}`}>{request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                  </div>                  
+                  <div className="relative">
+                    <select
+                    className={`border p-2 rounded-xl cursor-pointer ${getStatusColor(request.status)} appearance-none text-center text-sm text-white`}
+                    value={request.status}
+                    onChange={(e) => handleStatusChange(request._id, e.target.value)}
+                  >
+                    <option value="pending" className="p-3">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
 
                 </div>
-                
+
                 <div className="REMOVING mt-1">
 
                   {/* INFO */}
                   <div className="flex items-center">
-                    
                     <div className="bg-gray-400 pl-2 h-6 flex items-center text-xs text-white rounded-l-lg">
                       {request.studentId}
                     </div>
                     <div className="pl-3 pb-1 bg-gradient-to-r h-6 from-gray-400 to-white bg-no-repeat items-center"
-                    style={{ backgroundSize: '20% 100%' }}>
+                      style={{ backgroundSize: '20% 100%' }}>
                       {request.removingUser}
                     </div>
                   </div>
@@ -119,10 +161,6 @@ const RemovalRequestsPage = () => {
                   
                 </div>
               </div>
-
-              
-
-              
             </div>
           ))}
         </div>
