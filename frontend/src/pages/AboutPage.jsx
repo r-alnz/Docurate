@@ -112,20 +112,16 @@ const AboutPage = () => {
                 duration: 0.5,
                 delay: 1
               }}>
-              <div className=" mt-[20px] text-lg">PROJECT DETAILS</div>
+              <div className=" mt-[10px] text-lg">PROJECT DETAILS</div>
 
               <p>Docurate is a web application designed to simplify the challenges of manual document creation using the Decision Trees algorithm. Users step through Template-based question sets to determine the type of document to be generated, which is fully customizable with a range of templates. Furthermore, Docurate also provides previews of automatic formatting of documents making it decrease the possibility of errors while enhancing the efficiency. </p>
 
               {/* <p> Blah blah </p>
+              <p> Blah blah </p> */}
 
-              <div className=" mt-[20px] text-lg">PROJECT DETAILS</div>
+              {/* <div className=" mt-[20px] text-lg">PROJECT DETAILS</div> */}
 
-              <p> Blah blah </p>
-              <p> Blah blah </p>
-
-              <div className=" mt-[20px] text-lg">PROJECT DETAILS</div>
-
-              <p> Blah blah </p>
+              {/* <p> Blah blah </p>
               <p> Blah blah </p> */}
             </motion.div>
 
@@ -146,11 +142,10 @@ const AboutPage = () => {
                 duration: 1,
                 delay: 2.5
               }}>
-              <p>A team of passionate individuals,</p>
-              <p>bringing this project into fruition.</p>
+
             </motion.div>
 
-            <div className="gallery flex justify-end mr-[30px] -mt-[130px] gap-x-4 z-10">
+            <div className="gallery flex justify-end mr-[30px] -mt[150px] gap-x-5 z-10">
               <motion.div className="flex flex-col items-center"
                 initial={{ opacity: 0, y: -100 }}
                 animate={{ opacity: 1, y: 0 }}
