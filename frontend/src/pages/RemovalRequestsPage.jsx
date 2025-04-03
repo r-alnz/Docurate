@@ -3,6 +3,8 @@ import { useAuthContext } from '../hooks/useAuthContext';
 import axios from "axios";
 import { getApiUrl } from "../api.js";
 
+import RequestStatusSelect from "../components/RequestStatusSelect.jsx";
+
 const API_URL = getApiUrl("/removals");
 
 const RemovalRequestsPage = () => {
@@ -115,7 +117,7 @@ const RemovalRequestsPage = () => {
           {filteredRequests.map((request) => (
             <div key={request._id} className="bg-gray-100 p-4 rounded-xl shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300">
 
-              <div className="REQUESTING mt-2">
+              <div className="REQUESTING p-3">
                 <div className="flex justify-between">
                 
                   <div className="flex-col">
@@ -128,17 +130,25 @@ const RemovalRequestsPage = () => {
                     </div>
                   </div>
 
-                  <div className="relative">
+                  {/* <div className="relative">
                     <select
                     className={`border p-2 rounded-xl cursor-pointer ${getStatusColor(request.status)} appearance-none text-center text-sm text-white`}
                     value={request.status}
                     onChange={(e) => handleStatusChange(request._id, e.target.value)}
                   >
-                    <option value="pending" className="p-3">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
+                      <option value="pending" className="p-3">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div> */}
+
+{/* Use the CustomSelect component here */}
+<div className="flex items-center">
+                    <RequestStatusSelect
+                      request={request}
+                      handleStatusChange={handleStatusChange}
+                    />
+                  </div>
 
                 </div>
 
@@ -155,7 +165,7 @@ const RemovalRequestsPage = () => {
                     </div>
                   </div>
 
-                  <div className="mt-2 text-gray-700 italic">
+                  <div className="mt-2 text-gray-700 italic mb-5">
                   {request.reason ? request.reason : "Reason not specified."}
                   </div>
                   
