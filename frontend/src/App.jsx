@@ -5,7 +5,6 @@ import {
     RouterProvider,
     Navigate,
 } from 'react-router-dom';
-import { useNavigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // Import Auth Context Hook
@@ -49,18 +48,6 @@ const ProtectedRoute = ({ children, requiredRoles }) => {
 
 // Router Configuration
 const App = () => {
-
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { user } = useAuthContext();
-
-    useEffect(() => {
-        // If not logged in and trying to access any page other than login
-        if (!user && location.pathname !== '/login') {
-            navigate('/');  // Redirect to the home page or login
-        }
-    }, [user, location, navigate]);
-
     const router = createBrowserRouter(
         createRoutesFromElements(
             <>
