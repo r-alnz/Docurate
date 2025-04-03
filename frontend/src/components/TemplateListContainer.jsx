@@ -4,6 +4,7 @@ import { fetchTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from "
 import { useNavigate } from "react-router-dom"
 import { getToken } from "../utils/authUtil"
 import { useAuthContext } from "../hooks/useAuthContext"
+import {Eye, ArchiveX} from "lucide-react"
 import DeleteTemplateModal from "./DeleteTemplateModal"
 
 import { Mosaic } from "react-loading-indicators"
@@ -201,10 +202,18 @@ const TemplateListContainer = () => {
   })
 
   return (
-    <div className={`p-4 relative transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}>
+    <div
+      className={`p-4 relative transition-opacity duration-500 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       {delayedLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-          <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
+          <Mosaic
+            color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+            size="large"
+            text="Docurate!"
+          />
           {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
         </div>
       )}
@@ -214,7 +223,11 @@ const TemplateListContainer = () => {
       <div className="mb-4 flex gap-4">
         {delayedLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-            <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
+            <Mosaic
+              color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
+              size="large"
+              text="Docurate!"
+            />
             {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
           </div>
         )}
@@ -268,20 +281,30 @@ const TemplateListContainer = () => {
           {sortedTemplates.map((template) => (
             <div
               key={template._id}
-              className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white ${template.status === "inactive" ? "opacity-50" : ""
-                }`}
+              className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white flex flex-col h-full ${
+                template.status === "inactive" ? "opacity-50" : ""
+              }`}
             >
+              {/* Member Privilege Badge */}
               {(() => {
-                const matchingSuborg = template?.suborganizations?.find((templateSuborg) =>
-                  user?.suborganizations?.some((userSuborg) => String(userSuborg._id) === String(templateSuborg._id)),
-                )
+                const matchingSuborg = template?.suborganizations?.find(
+                  (templateSuborg) =>
+                    user?.suborganizations?.some(
+                      (userSuborg) =>
+                        String(userSuborg._id) === String(templateSuborg._id)
+                    )
+                );
                 return matchingSuborg ? (
-                  <p className="flex justify-end text-yellow-600 italic">Member Privilege!</p>
-                ) : null
+                  <p className="flex justify-end text-yellow-600 italic">
+                    Member Privilege!
+                  </p>
+                ) : null;
               })()}
 
+              {/* Suborganizations */}
               <div className="flex justify-end gap-2 mb-2">
-                {template.suborganizations && template.suborganizations.length > 0 ? (
+                {template.suborganizations &&
+                template.suborganizations.length > 0 ? (
                   template.suborganizations.map((suborg, index) => (
                     <span
                       key={suborg._id ? String(suborg._id) : `suborg-${index}`}
@@ -297,6 +320,7 @@ const TemplateListContainer = () => {
                 )}
               </div>
 
+              {/* Template Details */}
               <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
               <p className="text-gray-700 mb-1">
                 <strong>Type:</strong> {template.type}
@@ -307,7 +331,9 @@ const TemplateListContainer = () => {
               <p className="text-gray-700 mb-1">
                 <strong>Role:</strong> {template.requiredRole}
               </p>
-              <div className="mt-4 flex gap-2">
+
+              {/* Buttons at the Bottom */}
+              <div className="mt-auto flex flex-col gap-2 pt-4">
                 {template.status === "inactive" ? (
                   <>
                     <button
@@ -327,24 +353,31 @@ const TemplateListContainer = () => {
                   </>
                 ) : (
                   <>
-                    <button
-                      className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
-                      onClick={() =>
-                        navigate(
-                          user.role === "admin" ? `/templates/${template._id}` : `/user-templates/${template._id}`,
-                        )
-                      }
-                    >
-                      View
-                    </button>
-                    {user.role === "admin" && (
+                    <div className="flex gap-2">
+                      {/* View Button with Lucide Eye Icon */}
                       <button
-                        className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-                        onClick={() => handleOpenModal(template)}
+                        className="bg-[#38b6ff] text-white p-2 rounded hover:bg-[#2a9ed6] flex items-center justify-center"
+                        onClick={() =>
+                          navigate(
+                            user.role === "admin"
+                              ? `/templates/${template._id}`
+                              : `/user-templates/${template._id}`
+                          )
+                        }
                       >
-                        Inactive
+                        <Eye className="w-5 h-5" />
                       </button>
-                    )}
+
+                      {/* Inactive Button with Lucide Slash Icon (Visible for Admins Only) */}
+                      {user.role === "admin" && (
+                        <button
+                          className="bg-red-500 text-white p-2 rounded hover:bg-red-700 flex items-center justify-center"
+                          onClick={() => handleOpenModal(template)}
+                        >
+                          <ArchiveX className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -364,8 +397,12 @@ const TemplateListContainer = () => {
       {isEraseModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-semibold">Are you sure you want to erase this template?</p>
-            <p className="text-sm text-red-600 mt-1">This action cannot be undone.</p>
+            <p className="text-lg font-semibold">
+              Are you sure you want to erase this template?
+            </p>
+            <p className="text-sm text-red-600 mt-1">
+              This action cannot be undone.
+            </p>
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={cancelEraseTemplate}
@@ -387,7 +424,9 @@ const TemplateListContainer = () => {
       {isRecoverModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-semibold">Are you sure you want to recover this template?</p>
+            <p className="text-lg font-semibold">
+              Are you sure you want to recover this template?
+            </p>
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={cancelRecoverTemplate}
@@ -412,14 +451,19 @@ const TemplateListContainer = () => {
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                     p-4 rounded shadow-lg text-white text-center w-80"
           style={{
-            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
+            backgroundColor:
+              message.type === "success"
+                ? "#4CAF50"
+                : message.type === "error"
+                ? "#F44336"
+                : "#FFC107",
           }}
         >
           {message.text}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default TemplateListContainer
