@@ -4,7 +4,7 @@ import { fetchTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from "
 import { useNavigate } from "react-router-dom"
 import { getToken } from "../utils/authUtil"
 import { useAuthContext } from "../hooks/useAuthContext"
-import {Eye, ArchiveX} from "lucide-react"
+import { Eye, ArchiveX } from "lucide-react"
 import DeleteTemplateModal from "./DeleteTemplateModal"
 
 import { Mosaic } from "react-loading-indicators"
@@ -27,6 +27,7 @@ const TemplateListContainer = () => {
   const [statusFilter, setStatusFilter] = useState("active")
   const [message, setMessage] = useState(null)
   const [visible, setVisible] = useState(false)
+  const [typeFilter, setTypeFilter] = useState("All")
 
   const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false)
   const [templateToRecover, setTemplateToRecover] = useState(null)
@@ -168,15 +169,16 @@ const TemplateListContainer = () => {
 
     const matchesRole = roleFilter === "All" || template.requiredRole === roleFilter
     const matchesStatus = statusFilter === "All" || template.status === statusFilter.toLowerCase()
+    const matchesType = typeFilter === "All" || template.type === typeFilter
 
     if (user.role === "organization") {
       const isSubOrgMatch = template.suborganizations?.some((suborg) => String(suborg) === String(user._id))
       const isOrgMatch = String(template.organization) === String(user.organization._id)
 
-      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus
+      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus && matchesType
     }
 
-    return matchesSearch && matchesRole && matchesStatus
+    return matchesSearch && matchesRole && matchesStatus && matchesType
   })
 
   // Debugging logs
@@ -201,19 +203,13 @@ const TemplateListContainer = () => {
     }
   })
 
+  const uniqueTemplateTypes = ["All", ...new Set(templates.map((template) => template.type))]
+
   return (
-    <div
-      className={`p-4 relative transition-opacity duration-500 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
-    >
+    <div className={`p-4 relative transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}>
       {delayedLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-          <Mosaic
-            color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
-            size="large"
-            text="Docurate!"
-          />
+          <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
           {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
         </div>
       )}
@@ -223,11 +219,7 @@ const TemplateListContainer = () => {
       <div className="mb-4 flex gap-4">
         {delayedLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-            <Mosaic
-              color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]}
-              size="large"
-              text="Docurate!"
-            />
+            <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
             {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
           </div>
         )}
@@ -239,6 +231,17 @@ const TemplateListContainer = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="border rounded w-full p-2 shadow"
         />
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="border rounded p-2 shadow bg-white"
+        >
+          {uniqueTemplateTypes.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
         {user.role === "admin" && (
           <select
             value={roleFilter}
@@ -281,30 +284,22 @@ const TemplateListContainer = () => {
           {sortedTemplates.map((template) => (
             <div
               key={template._id}
-              className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white flex flex-col h-full ${
-                template.status === "inactive" ? "opacity-50" : ""
-              }`}
+              className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white flex flex-col h-full ${template.status === "inactive" ? "opacity-50" : ""
+                }`}
             >
               {/* Member Privilege Badge */}
               {(() => {
-                const matchingSuborg = template?.suborganizations?.find(
-                  (templateSuborg) =>
-                    user?.suborganizations?.some(
-                      (userSuborg) =>
-                        String(userSuborg._id) === String(templateSuborg._id)
-                    )
-                );
+                const matchingSuborg = template?.suborganizations?.find((templateSuborg) =>
+                  user?.suborganizations?.some((userSuborg) => String(userSuborg._id) === String(templateSuborg._id)),
+                )
                 return matchingSuborg ? (
-                  <p className="flex justify-end text-yellow-600 italic">
-                    Member Privilege!
-                  </p>
-                ) : null;
+                  <p className="flex justify-end text-yellow-600 italic">Member Privilege!</p>
+                ) : null
               })()}
 
               {/* Suborganizations */}
               <div className="flex justify-end gap-2 mb-2">
-                {template.suborganizations &&
-                template.suborganizations.length > 0 ? (
+                {template.suborganizations && template.suborganizations.length > 0 ? (
                   template.suborganizations.map((suborg, index) => (
                     <span
                       key={suborg._id ? String(suborg._id) : `suborg-${index}`}
@@ -359,9 +354,7 @@ const TemplateListContainer = () => {
                         className="bg-[#38b6ff] text-white p-2 rounded hover:bg-[#2a9ed6] flex items-center justify-center"
                         onClick={() =>
                           navigate(
-                            user.role === "admin"
-                              ? `/templates/${template._id}`
-                              : `/user-templates/${template._id}`
+                            user.role === "admin" ? `/templates/${template._id}` : `/user-templates/${template._id}`,
                           )
                         }
                       >
@@ -397,12 +390,8 @@ const TemplateListContainer = () => {
       {isEraseModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-semibold">
-              Are you sure you want to erase this template?
-            </p>
-            <p className="text-sm text-red-600 mt-1">
-              This action cannot be undone.
-            </p>
+            <p className="text-lg font-semibold">Are you sure you want to erase this template?</p>
+            <p className="text-sm text-red-600 mt-1">This action cannot be undone.</p>
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={cancelEraseTemplate}
@@ -424,9 +413,7 @@ const TemplateListContainer = () => {
       {isRecoverModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-semibold">
-              Are you sure you want to recover this template?
-            </p>
+            <p className="text-lg font-semibold">Are you sure you want to recover this template?</p>
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={cancelRecoverTemplate}
@@ -451,19 +438,14 @@ const TemplateListContainer = () => {
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                     p-4 rounded shadow-lg text-white text-center w-80"
           style={{
-            backgroundColor:
-              message.type === "success"
-                ? "#4CAF50"
-                : message.type === "error"
-                ? "#F44336"
-                : "#FFC107",
+            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
           }}
         >
           {message.text}
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export default TemplateListContainer
