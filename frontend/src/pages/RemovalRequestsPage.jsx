@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from '../hooks/useAuthContext';
 import axios from "axios";
 import { getApiUrl } from "../api.js";
+import { useNavigate } from 'react-router-dom';
 
 import RequestStatusSelect from "../components/RequestStatusSelect.jsx";
 
@@ -92,6 +93,18 @@ const RemovalRequestsPage = () => {
     }
   };
 
+  const handleCopy = async (text, navigate) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+      navigate("/users");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
+
+  const navigate = useNavigate();
+
   return (
     <div className="p-6">
 
@@ -142,8 +155,7 @@ const RemovalRequestsPage = () => {
                     </select>
                   </div> */}
 
-{/* Use the CustomSelect component here */}
-<div className="flex items-center">
+                  <div className="flex items-center">
                     <RequestStatusSelect
                       request={request}
                       handleStatusChange={handleStatusChange}
@@ -156,7 +168,8 @@ const RemovalRequestsPage = () => {
 
                   {/* INFO */}
                   <div className="flex items-center">
-                    <div className="bg-gray-400 pl-2 h-6 flex items-center text-xs text-white rounded-l-lg">
+                    <div className="bg-gray-400 pl-2 h-6 flex items-center text-xs text-white rounded-l-lg cursor-pointer"
+                      onClick={() => handleCopy(request.studentId, navigate)}>
                       {request.studentId}
                     </div>
                     <div className="pl-3 pb-1 bg-gradient-to-r h-6 from-gray-400 to-white bg-no-repeat items-center"
