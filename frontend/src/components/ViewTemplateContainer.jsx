@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import { getToken } from '../utils/authUtil.js';
 import { getTemplateById } from '../services/templateService.js';
+import { X } from 'lucide-react' 
 
 const ViewTemplateContainer = () => {
     const { id } = useParams(); // Fetch ID from the URL if available
@@ -15,6 +16,13 @@ const ViewTemplateContainer = () => {
     const [paperSize, setPaperSize] = useState('letter');
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [margins, setMargins] = useState({ top: 1, right: 1, bottom: 1, left: 1 });
+   
+    const navigate = useNavigate();
+
+    const handleGoBack = () => {
+        navigate('/user-templates'); 
+    
+}
 
     const DPI = 96; // Fixed DPI for page dimensions
     const pageSizes = {
@@ -179,65 +187,78 @@ const ViewTemplateContainer = () => {
     };
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">{documentName}</h1>
-            <div className="mb-4 border p-4 rounded shadow">
-                <h2 className="text-xl font-medium mb-4">Template Information</h2>
-                <p className="mb-2">
-                    <strong>Type:</strong> {documentType}
-                </p>
-                <p className="mb-2">
-                    <strong>Subtype:</strong> {documentSubtype || 'N/A'}
-                </p>
-                <p className="mb-2">
-                    <strong>Role:</strong> {requiredRole}
-                </p>
-                <p className="mb-2">
-                    <strong>Paper Size:</strong> {paperSize}
-                </p>
-            </div>
-
-            {/* Pagination Controls */}
-            <div className="mb-4 flex justify-between">
-                <button
-                    disabled={currentPage === 1}
-                    onClick={handlePreviousPage}
-                    className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:opacity-50"
-                >
-                    Previous
-                </button>
-                <span>
-                    Page {currentPage} of {pages.length}
-                </span>
-                <button
-                    disabled={currentPage === pages.length}
-                    onClick={handleNextPage}
-                    className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:opacity-50"
-                >
-                    Next
-                </button>
-            </div>
-
-            {/* Editor */}
-            {isDataLoaded ? pages.map((page) => (
-                <div key={page.id} style={{ display: currentPage === page.id ? 'block' : 'none' }}>
-                    <Editor
-                        apiKey="
-iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
-                        value={page.content}
-                        init={{
-                            height: selectedPageSize.height,
-                            menubar: false,
-                            toolbar: false,
-                            readonly: true,
-                            content_style: sharedStyles,
-                        }}
-                    />
-                </div>
-            )) : (
-                <p>Loading editor...</p>
-            )}
+      <div className="p-4">
+        <div className="flex justify-end">
+          <button
+            onClick={handleGoBack}
+            className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 cursor-pointer"
+          >
+            <X className="text-white" />
+          </button>
         </div>
+        <h1 className="text-2xl font-bold mb-4">{documentName}</h1>
+        <div className="mb-4 border p-4 rounded shadow">
+          <h2 className="text-xl font-medium mb-4">Template Information</h2>
+          <p className="mb-2">
+            <strong>Type:</strong> {documentType}
+          </p>
+          <p className="mb-2">
+            <strong>Subtype:</strong> {documentSubtype || "N/A"}
+          </p>
+          <p className="mb-2">
+            <strong>Role:</strong> {requiredRole}
+          </p>
+          <p className="mb-2">
+            <strong>Paper Size:</strong> {paperSize}
+          </p>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="mb-4 flex justify-between">
+          <button
+            disabled={currentPage === 1}
+            onClick={handlePreviousPage}
+            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {pages.length}
+          </span>
+          <button
+            disabled={currentPage === pages.length}
+            onClick={handleNextPage}
+            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+
+        {/* Editor */}
+        {isDataLoaded ? (
+          pages.map((page) => (
+            <div
+              key={page.id}
+              style={{ display: currentPage === page.id ? "block" : "none" }}
+            >
+              <Editor
+                apiKey="
+iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
+                value={page.content}
+                init={{
+                  height: selectedPageSize.height,
+                  menubar: false,
+                  toolbar: false,
+                  readonly: true,
+                  content_style: sharedStyles,
+                }}
+              />
+            </div>
+          ))
+        ) : (
+          <p>Loading editor...</p>
+        )}
+      </div>
     );
 };
 
