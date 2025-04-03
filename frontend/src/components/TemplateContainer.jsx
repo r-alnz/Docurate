@@ -58,6 +58,9 @@ const TemplateContainer = ({ suborgs }) => {
     right: 1,
   })
 
+  // add this border if need on draggable image
+  // border: 1px dashed #ccc;
+
   const selectedPageSize = pageSizes[paperSize]
 
   const sharedStyles = `
