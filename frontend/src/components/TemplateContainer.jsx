@@ -121,7 +121,7 @@ const TemplateContainer = ({ suborgs }) => {
     }
 
     .draggable-image {
-        border: 1px dashed #ccc;
+        
         padding: 4px;
         background-color: rgba(255, 255, 255, 0.8);
         display: inline-block;
@@ -215,7 +215,7 @@ const TemplateContainer = ({ suborgs }) => {
 
         
         .draggable-image {
-            border: 1px dashed #ccc;
+           
             padding: 4px;
             background-color: rgba(255, 255, 255, 0.8);
             display: inline-block;
@@ -1266,7 +1266,7 @@ const TemplateContainer = ({ suborgs }) => {
           <div className="mt-4 flex gap-4">
             <button
               onClick={handleSaveOrUpdateTemplate}
-              className="bg-blue-200 text-white py-2 px-4 rounded hover:bg-blue-700"
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
             >
               {isUpdateMode ? "Update Template" : "Save Template"}
             </button>
