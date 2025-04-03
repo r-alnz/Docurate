@@ -1,7 +1,7 @@
-import axios from "axios"
+"use client"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, CheckCircle, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react"
 import PropTypes from "prop-types"
 
 const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlready }) => {
@@ -24,6 +24,11 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
   const today = new Date()
   // Birthdate restriction
   const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+
+  // Add a new state for the success popup
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
 
   // Password validation
   const validatePassword = (value) => {
@@ -124,6 +129,12 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
     }
 
     console.log("Submitting with suborganizations:", selectedSubOrgs)
+    setShowConfirmDialog(true)
+  }
+
+  // Modify the handleConfirmSubmit function to show the success popup
+  const handleConfirmSubmit = async () => {
+    setShowConfirmDialog(false)
 
     const userDetails = {
       firstname: firstname.trim() === "" ? null : firstname,
@@ -143,8 +154,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
     try {
       await onSubmit(userDetails) // Wait for submission
 
-      // Show success message modal
-      setMessage({ type: "success", text: "✅ Submission successful!" })
+      // Show success popup with the correct message
+      setSuccessMessage("Password reset successfully!")
+      setShowSuccessPopup(true)
 
       // Reset form fields
       setFirstname("")
@@ -159,11 +171,11 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       setCollege("")
       setProgram("")
 
-      // Close the modal after showing success message
+      // Close the success popup and modal after a delay
       setTimeout(() => {
-        setMessage(null)
+        setShowSuccessPopup(false)
         onClose()
-      }, 1000)
+      }, 2000)
     } catch (error) {
       console.error("❌ Submission failed:", error)
       setMessage({ type: "error", text: "❌ Submission failed. Please try again." })
@@ -185,14 +197,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {role === "student" ? (
             <>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Role
-                </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="border rounded p-2 w-full"
-                >
+                <label className="block text-gray-700 font-medium mb-2">Role</label>
+                <select value={role} onChange={(e) => setRole(e.target.value)} className="border rounded p-2 w-full">
                   <option value="student">Student</option>
                   <option value="organization">Organization</option>
                 </select>
@@ -200,9 +206,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               {role === "student" && (
                 <>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Student ID
-                    </label>
+                    <label className="block text-gray-700 font-medium mb-2">Student ID</label>
                     <input
                       type="text"
                       value={studentId}
@@ -212,9 +216,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">
-                      College
-                    </label>
+                    <label className="block text-gray-700 font-medium mb-2">College</label>
                     <input
                       type="text"
                       value={college}
@@ -224,9 +226,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Program
-                    </label>
+                    <label className="block text-gray-700 font-medium mb-2">Program</label>
                     <input
                       type="text"
                       value={program}
@@ -234,7 +234,6 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                       className="border rounded p-2 w-full"
                       required
                     />
-
                   </div>
                 </>
               )}
@@ -250,11 +249,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M16 12H8m4-4v8"
-                    ></path>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m4-4v8"></path>
                   </svg>
                   Account Information
                 </span>
@@ -262,9 +257,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  First Name
-                </label>
+                <label className="block text-gray-700 font-medium mb-2">First Name</label>
                 <input
                   type="text"
                   value={firstname}
@@ -274,9 +267,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Last Name
-                </label>
+                <label className="block text-gray-700 font-medium mb-2">Last Name</label>
                 <input
                   type="text"
                   value={lastname}
@@ -286,9 +277,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Birthdate
-                </label>
+                <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
                 <input
                   type="date"
                   value={birthdate}
@@ -301,9 +290,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             </>
           ) : role === "organization" ? (
             <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">
-                Organization Name
-              </label>
+              <label className="block text-gray-700 font-medium mb-2">Organization Name</label>
               <input
                 type="text"
                 value={firstname}
@@ -315,9 +302,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           ) : null}
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Email
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input
               type="email"
               value={email}
@@ -330,9 +315,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {role === "student" && (
             <>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Password
-                </label>
+                <label className="block text-gray-700 font-medium mb-2">Password</label>
                 <div className="flex items-center border rounded p-2">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -354,9 +337,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                   <br />
                   Example: <i>DelaCruz21-02193</i>
                 </p>
-                {passwordError && (
-                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-                )}
+                {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
               </div>
             </>
           )}
@@ -364,9 +345,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {role === "organization" && (
             <>
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Password
-                </label>
+                <label className="block text-gray-700 font-medium mb-2">Password</label>
                 <div className="flex items-center border rounded p-2">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -388,9 +367,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                   <br />
                   Example: <i>organizationname@</i>
                 </p>
-                {passwordError && (
-                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-                )}
+                {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
               </div>
             </>
           )}
@@ -400,12 +377,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {message && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-                <p
-                  className={`mb-4 ${message.type === "success"
-                    ? "text-green-700"
-                    : "text-red-700"
-                    }`}
-                >
+                <p className={`mb-4 ${message.type === "success" ? "text-green-700" : "text-red-700"}`}>
                   {message.text}
                 </p>
               </div>
@@ -416,8 +388,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {message && (
             <div
               className={`mt-4 p-2 rounded ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
+                  ? "bg-green-100 text-green-700 border border-green-400"
+                  : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -425,20 +397,14 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           )}
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Organization
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Organization</label>
             <p className="text-gray-700">{user.organization?.name || "N/A"}</p>
           </div>
 
           {currRole === "organization" ? (
             <>
-              <label className="block text-gray-700 font-medium mb-2">
-                Suborganization
-              </label>
-              <p className="text-gray-700">
-                {suborgAlready.map((org) => org.firstname)}
-              </p>
+              <label className="block text-gray-700 font-medium mb-2">Suborganization</label>
+              <p className="text-gray-700">{suborgAlready.map((org) => org.firstname)}</p>
             </>
           ) : currRole === "admin" ? (
             <>
@@ -448,9 +414,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     <input
                       type="checkbox"
                       checked={isStudentOrgMember}
-                      onChange={() =>
-                        setIsStudentOrgMember(!isStudentOrgMember)
-                      }
+                      onChange={() => setIsStudentOrgMember(!isStudentOrgMember)}
                       className="w-4 h-4"
                     />
                     <span className="text-gray-700 font-medium">
@@ -474,12 +438,12 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                   (prev) =>
                                     prev.includes(org._id)
                                       ? prev.filter((id) => id !== org._id) // Remove if already selected
-                                      : [...prev, org._id] // Add if not selected
-                                );
+                                      : [...prev, org._id], // Add if not selected
+                                )
                               }}
                               className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                ? "bg-[#38b6ff] text-white"
-                                : "bg-gray-100 text-gray-700"
+                                  ? "bg-[#38b6ff] text-white"
+                                  : "bg-gray-100 text-gray-700"
                                 } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
@@ -501,17 +465,81 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
-            >
+            <button type="submit" className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]">
               Add User
             </button>
           </div>
         </form>
+
+        {/* Confirmation Dialog */}
+        {showConfirmDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
+              <div className="flex items-start mb-4">
+                <div className="mr-3 bg-blue-100 p-2 rounded-full">
+                  <svg
+                    className="w-6 h-6 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium">Confirm Changes</h3>
+                  <p className="text-gray-600 mt-1">
+                    Are you sure you want to save these changes? This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowConfirmDialog(false)}
+                  className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmSubmit}
+                  className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showSuccessPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full border-4 border-green-500 flex items-center justify-center">
+                  <svg
+                    className="w-10 h-10 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-2xl font-semibold text-green-600 mb-2">Success!</h3>
+              <p className="text-gray-600">Password reset successfully!</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  );
+  )
 }
 
 AddUserModal.propTypes = {
