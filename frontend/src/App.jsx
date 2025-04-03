@@ -5,6 +5,7 @@ import {
     RouterProvider,
     Navigate,
 } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // Import Auth Context Hook
@@ -48,6 +49,16 @@ const ProtectedRoute = ({ children, requiredRoles }) => {
 
 // Router Configuration
 const App = () => {
+
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname === '/login') return;
+
+        navigate('/');
+    }, [location, navigate]);
+
     const router = createBrowserRouter(
         createRoutesFromElements(
             <>
