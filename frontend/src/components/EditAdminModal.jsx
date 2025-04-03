@@ -172,7 +172,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-bold mb-4">Edit User</h2>
+        <h2 className="text-lg font-bold mb-4">Edit Admin</h2>
         <form>
 
           {user.role === "organization" && (
