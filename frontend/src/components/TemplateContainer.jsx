@@ -7,6 +7,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { getToken } from "../utils/authUtil.js"
 import { createTemplate, getTemplateById, updateTemplate, fetchDecisionTree } from "../services/templateService.js"
 import imageCompression from "browser-image-compression"
+import {X, Printer, Save} from "lucide-react"
 
 const TemplateContainer = ({ suborgs }) => {
   console.log("suborgs:", suborgs)
@@ -712,10 +713,20 @@ const TemplateContainer = ({ suborgs }) => {
 
   return (
     <div className="p-4">
+        <div className="flex justify-end">
+              <div
+                onClick={() => navigate(-1)}
+                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 cursor-pointer"
+              >
+                <X className="text-white" />
+              </div>
+            </div>
       <h1 className="text-2xl font-bold mb-4">Template Editor</h1>
       <div className="mb-4 border p-4 rounded shadow">
         <h2 className="text-xl font-medium mb-4">Template Information</h2>
-        <label className="block text-gray-700 font-medium mb-2">Template Name:</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Template Name:
+        </label>
         <div className="relative">
           <input
             type="text"
@@ -732,19 +743,23 @@ const TemplateContainer = ({ suborgs }) => {
             ))}
           </datalist>
         </div>
-        <label className="block text-gray-700 font-medium mb-2">Document Type:</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Document Type:
+        </label>
         <select
           value={isCustomType ? "custom" : documentType}
           onChange={(e) => {
-            const selectedType = e.target.value
-            setDocumentType(selectedType)
-            setDocumentSubtype("")
+            const selectedType = e.target.value;
+            setDocumentType(selectedType);
+            setDocumentSubtype("");
             if (selectedType === "custom") {
-              setIsCustomType(true)
-              setSubtypeOptions([])
+              setIsCustomType(true);
+              setSubtypeOptions([]);
             } else {
-              setIsCustomType(false)
-              setSubtypeOptions(Object.keys(decisionTree[selectedType]?.subtype || {}))
+              setIsCustomType(false);
+              setSubtypeOptions(
+                Object.keys(decisionTree[selectedType]?.subtype || {})
+              );
             }
           }}
           className="w-full border rounded p-2 mb-4"
@@ -759,7 +774,9 @@ const TemplateContainer = ({ suborgs }) => {
         </select>
         {isCustomType && (
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Custom Type:</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Custom Type:
+            </label>
             <input
               type="text"
               value={customType}
@@ -769,21 +786,25 @@ const TemplateContainer = ({ suborgs }) => {
             />
           </div>
         )}
-        <label className="block text-gray-700 font-medium mb-2">Document Subtype:</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Document Subtype:
+        </label>
         <input
           type="text"
           value={isCustomType ? customSubtype : documentSubtype}
           onChange={(e) => {
             if (isCustomType) {
-              setCustomSubtype(e.target.value)
+              setCustomSubtype(e.target.value);
             } else {
-              setDocumentSubtype(e.target.value)
+              setDocumentSubtype(e.target.value);
             }
           }}
           placeholder="Enter subtype"
           className="w-full border rounded p-2 mb-4"
         />
-        <label className="block text-gray-700 font-medium mb-2">Template For:</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Template For:
+        </label>
         <select
           value={requiredRole}
           onChange={(e) => setRequiredRole(e.target.value)}
@@ -794,7 +815,9 @@ const TemplateContainer = ({ suborgs }) => {
           <option value="student">Student</option>
           <option value="organization">Organization</option>
         </select>
-        <label className="block text-gray-700 font-medium mb-2">Suborganization:</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Suborganization:
+        </label>
         {suborgs.length === 0 ? (
           <div className="border rounded p-2 w-full text-gray-500">
             No suborganizations under {user.organization?.name}
@@ -803,12 +826,14 @@ const TemplateContainer = ({ suborgs }) => {
           <select
             value={selectedSubOrg.length === 0 ? "" : selectedSubOrg}
             onChange={(e) => {
-              const value = e.target.value
-              setSelectedSubOrg(value === "" ? [] : value)
+              const value = e.target.value;
+              setSelectedSubOrg(value === "" ? [] : value);
             }}
             className="border rounded p-2 mb-4"
           >
-            <option value="">For general use (under {user.organization?.name})</option>
+            <option value="">
+              For general use (under {user.organization?.name})
+            </option>
             {suborgs.map((org) => (
               <option key={org._id} value={org._id}>
                 {org.firstname || "(No Name)"}
@@ -816,10 +841,19 @@ const TemplateContainer = ({ suborgs }) => {
             ))}
           </select>
         )}
-        <label className="block text-gray-700 font-medium mb-2">Strict Mode:</label>
-        <input type="checkbox" checked={strictMode} onChange={toggleStrictMode} className="mr-2" />
+        <label className="block text-gray-700 font-medium mb-2">
+          Strict Mode:
+        </label>
+        <input
+          type="checkbox"
+          checked={strictMode}
+          onChange={toggleStrictMode}
+          className="mr-2"
+        />
         Enable strict mode
-        <label className="block text-gray-700 font-medium mb-2">Paper Size:</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Paper Size:
+        </label>
         <select
           value={paperSize}
           onChange={(e) => setPaperSize(e.target.value)}
@@ -834,7 +868,9 @@ const TemplateContainer = ({ suborgs }) => {
         <h2 className="text-xl font-medium mb-4">Margins (in inches):</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Top Margin:</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Top Margin:
+            </label>
             <input
               type="number"
               step="0.1"
@@ -845,7 +881,9 @@ const TemplateContainer = ({ suborgs }) => {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Bottom Margin:</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Bottom Margin:
+            </label>
             <input
               type="number"
               step="0.1"
@@ -856,7 +894,9 @@ const TemplateContainer = ({ suborgs }) => {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Left Margin:</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Left Margin:
+            </label>
             <input
               type="number"
               step="0.1"
@@ -867,7 +907,9 @@ const TemplateContainer = ({ suborgs }) => {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Right Margin:</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Right Margin:
+            </label>
             <input
               type="number"
               step="0.1"
@@ -880,14 +922,23 @@ const TemplateContainer = ({ suborgs }) => {
         </div>
         <button
           onClick={() => {
-            if (!documentName || (!documentType && !customType) || !requiredRole || !paperSize) {
-              showMessage("Please fill in all required fields before starting template creation.")
-              return
+            if (
+              !documentName ||
+              (!documentType && !customType) ||
+              !requiredRole ||
+              !paperSize
+            ) {
+              showMessage(
+                "Please fill in all required fields before starting template creation."
+              );
+              return;
             }
-            setEditorLoaded(true)
+            setEditorLoaded(true);
           }}
           disabled={editorLoaded}
-          className={`bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] ${editorLoaded ? "hidden" : ""}`}
+          className={`bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] ${
+            editorLoaded ? "hidden" : ""
+          }`}
         >
           Begin Template Creation
         </button>
@@ -918,17 +969,26 @@ const TemplateContainer = ({ suborgs }) => {
 
           {/* Add/Delete Buttons */}
           <div className="mb-4 flex justify-end gap-4">
-            <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+            <button
+              onClick={handleAddPage}
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
               Add Page
             </button>
-            <button onClick={handleDeletePage} className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700">
+            <button
+              onClick={handleDeletePage}
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
+            >
               Delete Page
             </button>
           </div>
 
           {/* Editors */}
           {pages.map((page) => (
-            <div key={page.id} style={{ display: currentPage === page.id ? "block" : "none" }}>
+            <div
+              key={page.id}
+              style={{ display: currentPage === page.id ? "block" : "none" }}
+            >
               <Editor
                 apiKey="iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
                 value={page.content}
@@ -991,78 +1051,88 @@ const TemplateContainer = ({ suborgs }) => {
                     // Rest of your setup code...
 
                     editor.on("drop", (event) => {
-                      event.preventDefault() // Prevent TinyMCE's default drop handling
-                      event.stopPropagation() // Stop propagation of the event to prevent other handlers
-                    })
+                      event.preventDefault(); // Prevent TinyMCE's default drop handling
+                      event.stopPropagation(); // Stop propagation of the event to prevent other handlers
+                    });
 
                     editor.on("init", () => {
-                      const iframeDoc = editor.getDoc() // Access TinyMCE's iframe document
-                      const editorBody = editor.getBody()
+                      const iframeDoc = editor.getDoc(); // Access TinyMCE's iframe document
+                      const editorBody = editor.getBody();
 
                       iframeDoc.addEventListener("mousedown", (e) => {
-                        const target = e.target.closest(".draggable-image")
-                        if (!target) return
+                        const target = e.target.closest(".draggable-image");
+                        if (!target) return;
 
-                        const offsetX = e.clientX - target.offsetLeft
-                        const offsetY = e.clientY - target.offsetTop
+                        const offsetX = e.clientX - target.offsetLeft;
+                        const offsetY = e.clientY - target.offsetTop;
 
                         const onMouseMove = (event) => {
-                          target.style.left = `${event.clientX - offsetX}px`
-                          target.style.top = `${event.clientY - offsetY}px`
-                        }
+                          target.style.left = `${event.clientX - offsetX}px`;
+                          target.style.top = `${event.clientY - offsetY}px`;
+                        };
 
                         const onMouseUp = () => {
-                          iframeDoc.removeEventListener("mousemove", onMouseMove)
-                          iframeDoc.removeEventListener("mouseup", onMouseUp)
+                          iframeDoc.removeEventListener(
+                            "mousemove",
+                            onMouseMove
+                          );
+                          iframeDoc.removeEventListener("mouseup", onMouseUp);
 
                           // Update TinyMCE's content
-                          const uniqueId = target.getAttribute("id")
+                          const uniqueId = target.getAttribute("id");
                           if (uniqueId) {
-                            const tinyTarget = editor.dom.get(uniqueId)
+                            const tinyTarget = editor.dom.get(uniqueId);
                             editor.dom.setStyles(tinyTarget, {
                               left: target.style.left,
                               top: target.style.top,
-                            })
+                            });
 
                             // Synchronize TinyMCE content
-                            const updatedContent = editor.getContent()
-                            editor.setContent(updatedContent)
+                            const updatedContent = editor.getContent();
+                            editor.setContent(updatedContent);
 
                             // Trigger TinyMCE's change event to ensure synchronization
-                            editor.undoManager.add()
-                            editor.fire("change")
-                            console.log(editor.getContent()) // Verify updated content
+                            editor.undoManager.add();
+                            editor.fire("change");
+                            console.log(editor.getContent()); // Verify updated content
                           } else {
-                            console.warn("Draggable image has no ID. Ensure unique IDs are assigned.")
+                            console.warn(
+                              "Draggable image has no ID. Ensure unique IDs are assigned."
+                            );
                           }
-                        }
+                        };
 
-                        iframeDoc.addEventListener("mousemove", onMouseMove)
-                        iframeDoc.addEventListener("mouseup", onMouseUp)
-                      })
-                    })
+                        iframeDoc.addEventListener("mousemove", onMouseMove);
+                        iframeDoc.addEventListener("mouseup", onMouseUp);
+                      });
+                    });
 
                     editor.ui.registry.addButton("addDraggableImage", {
                       text: "Insert Image",
                       icon: "image",
                       onAction: () => {
-                        const input = document.createElement("input")
-                        input.type = "file"
-                        input.accept = "image/*"
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "image/*";
                         input.onchange = async () => {
-                          const file = input.files[0]
+                          const file = input.files[0];
                           if (file) {
                             try {
-                              addDraggableImage(editor, file)
+                              addDraggableImage(editor, file);
                             } catch (error) {
-                              console.error("Error adding draggable image:", error.message)
-                              showMessage("Failed to add image. Please try again.")
+                              console.error(
+                                "Error adding draggable image:",
+                                error.message
+                              );
+                              showMessage(
+                                "Failed to add image. Please try again."
+                              );
                             }
                           }
-                        }
-                        input.click()
+                        };
+                        input.click();
                       },
-                    })
+                    });
                     // editor.on('init', () => {
                     //     const iframe = editor.getDoc(); // Access the iframe's document
                     //     iframe.addEventListener('mousedown', (e) => {
@@ -1091,98 +1161,121 @@ const TemplateContainer = ({ suborgs }) => {
                     // });
                     editor.on("keydown", (event) => {
                       if (event.key === "Tab") {
-                        event.preventDefault() // Prevent default tab behavior
-                        const selection = editor.selection
+                        event.preventDefault(); // Prevent default tab behavior
+                        const selection = editor.selection;
                         const content = selection.getContent({
                           format: "html",
-                        })
+                        });
 
                         // Insert a "tab" as multiple non-breaking spaces
-                        const tabEquivalent = "&nbsp;&nbsp;&nbsp;&nbsp;" // 4 spaces (adjust as needed)
-                        const newContent = `${tabEquivalent}${content}`
-                        selection.setContent(newContent)
+                        const tabEquivalent = "&nbsp;&nbsp;&nbsp;&nbsp;"; // 4 spaces (adjust as needed)
+                        const newContent = `${tabEquivalent}${content}`;
+                        selection.setContent(newContent);
                       }
-                    })
+                    });
 
                     // ------------ Method 1: Count newlines based sa exceeding ng width
 
                     editor.on("keydown", (event) => {
-                      const lineHeight = Number.parseFloat(window.getComputedStyle(editor.getBody()).lineHeight) || 20
-                      const pageHeightPx = selectedPageSize.height
-                      const marginTopPx = margins.top * DPI
-                      const marginBottomPx = margins.bottom * DPI
-                      const availableHeight = pageHeightPx - (marginTopPx + marginBottomPx)
-                      const maxLines = Math.floor(availableHeight / lineHeight)
-                      const maxTextWidth = selectedPageSize.width - (margins.left * DPI + margins.right * DPI)
+                      const lineHeight =
+                        Number.parseFloat(
+                          window.getComputedStyle(editor.getBody()).lineHeight
+                        ) || 20;
+                      const pageHeightPx = selectedPageSize.height;
+                      const marginTopPx = margins.top * DPI;
+                      const marginBottomPx = margins.bottom * DPI;
+                      const availableHeight =
+                        pageHeightPx - (marginTopPx + marginBottomPx);
+                      const maxLines = Math.floor(availableHeight / lineHeight);
+                      const maxTextWidth =
+                        selectedPageSize.width -
+                        (margins.left * DPI + margins.right * DPI);
                       const textContent = editor.getContent({
                         format: "text",
-                      })
+                      });
 
-                      let currentLines = 1 // laging start at line 1
-                      let currentLineWidth = 0
+                      let currentLines = 1; // laging start at line 1
+                      let currentLineWidth = 0;
 
                       for (const char of textContent) {
-                        const charWidth = 13.2 // approx width per char
+                        const charWidth = 13.2; // approx width per char
 
                         if (currentLineWidth + charWidth > maxTextWidth) {
                           // increment line count pag exceeds
-                          currentLines++
-                          currentLineWidth = charWidth // new line count
+                          currentLines++;
+                          currentLineWidth = charWidth; // new line count
                         } else {
-                          currentLineWidth += charWidth
+                          currentLineWidth += charWidth;
                         }
                       }
 
                       // Prevent typing if beyond max lines na
-                      if (currentLines >= maxLines && (event.key === "Enter" || event.key.length === 1)) {
-                        console.log("Typing blocked: max lines reached!")
-                        event.preventDefault() // Stop Enter and typing beyond max lines
+                      if (
+                        currentLines >= maxLines &&
+                        (event.key === "Enter" || event.key.length === 1)
+                      ) {
+                        console.log("Typing blocked: max lines reached!");
+                        event.preventDefault(); // Stop Enter and typing beyond max lines
                       }
-                    })
+                    });
 
                     // ------------ Method 2: Count newlines based sa number of Enters
 
                     editor.on("keydown", (event) => {
-                      const lineHeight = Number.parseFloat(window.getComputedStyle(editor.getBody()).lineHeight) || 20
-                      const pageHeightPx = selectedPageSize.height
-                      const marginTopPx = margins.top * DPI
-                      const marginBottomPx = margins.bottom * DPI
-                      const availableHeight = pageHeightPx - (marginTopPx + marginBottomPx) + lineHeight
-                      const maxLines = Math.floor(availableHeight / lineHeight)
+                      const lineHeight =
+                        Number.parseFloat(
+                          window.getComputedStyle(editor.getBody()).lineHeight
+                        ) || 20;
+                      const pageHeightPx = selectedPageSize.height;
+                      const marginTopPx = margins.top * DPI;
+                      const marginBottomPx = margins.bottom * DPI;
+                      const availableHeight =
+                        pageHeightPx -
+                        (marginTopPx + marginBottomPx) +
+                        lineHeight;
+                      const maxLines = Math.floor(availableHeight / lineHeight);
                       const textContent = editor.getContent({
                         format: "text",
-                      })
-                      const lines = textContent.split("\n")
-                      const currentLines = lines.length
-                      const maxTextWidth = selectedPageSize.width - (margins.left * DPI + margins.right * DPI)
+                      });
+                      const lines = textContent.split("\n");
+                      const currentLines = lines.length;
+                      const maxTextWidth =
+                        selectedPageSize.width -
+                        (margins.left * DPI + margins.right * DPI);
 
                       // approx last line width (since walang exact from TinyMCE)
-                      const lastLine = lines[lines.length - 1] || ""
-                      const lastLineWidthPx = lastLine.length * 7
+                      const lastLine = lines[lines.length - 1] || "";
+                      const lastLineWidthPx = lastLine.length * 7;
 
                       // Prevent typing pag beyond max lines
                       if (currentLines >= maxLines && event.key === "Enter") {
-                        console.log("Typing blocked: max lines reached!")
-                        event.preventDefault() // Stop Enter key
+                        console.log("Typing blocked: max lines reached!");
+                        event.preventDefault(); // Stop Enter key
                       }
 
                       // Prevent typing pag beyond max width sa last line
-                      if (currentLines >= maxLines && lastLineWidthPx >= maxTextWidth && event.key.length === 1) {
-                        console.log("Typing blocked: max width reached!")
-                        event.preventDefault() // Stop adding characters beyond horizontal limit
+                      if (
+                        currentLines >= maxLines &&
+                        lastLineWidthPx >= maxTextWidth &&
+                        event.key.length === 1
+                      ) {
+                        console.log("Typing blocked: max width reached!");
+                        event.preventDefault(); // Stop adding characters beyond horizontal limit
                       }
-                    })
+                    });
 
                     editor.ui.registry.addButton("addHeaderImage", {
                       text: "Add Header Image",
                       icon: "image",
-                      onAction: () => handleHeaderFooterUpload(editor, "header"),
-                    })
+                      onAction: () =>
+                        handleHeaderFooterUpload(editor, "header"),
+                    });
                     editor.ui.registry.addButton("addFooterImage", {
                       text: "Add Footer Image",
                       icon: "image",
-                      onAction: () => handleHeaderFooterUpload(editor, "footer"),
-                    })
+                      onAction: () =>
+                        handleHeaderFooterUpload(editor, "footer"),
+                    });
 
                     // editor.ui.registry.addButton('addImage', {
                     //     text: 'Add Image',
@@ -1193,42 +1286,49 @@ const TemplateContainer = ({ suborgs }) => {
                     editor.ui.registry.addButton("markEditable", {
                       text: "Mark Editable",
                       onAction: () => {
-                        const content = editor.selection.getContent()
-                        editor.selection.setContent(`<span class="editable">${content}</span>`)
+                        const content = editor.selection.getContent();
+                        editor.selection.setContent(
+                          `<span class="editable">${content}</span>`
+                        );
                       },
-                    })
+                    });
 
                     editor.ui.registry.addButton("removeEditable", {
                       text: "Remove Editable",
                       onAction: () => {
-                        const content = editor.selection.getContent()
-                        editor.selection.setContent(content.replace(/<span class="editable">(.*?)<\/span>/g, "$1"))
+                        const content = editor.selection.getContent();
+                        editor.selection.setContent(
+                          content.replace(
+                            /<span class="editable">(.*?)<\/span>/g,
+                            "$1"
+                          )
+                        );
                       },
-                    })
+                    });
                     // Add Hanging Indent Button
                     editor.ui.registry.addButton("addHangingIndent", {
                       text: "Hanging Indent",
                       icon: "indent",
                       tooltip: "Add Hanging Indent",
                       onAction: () => {
-                        const selectedNode = editor.selection.getNode() // Get the selected node
-                        const isParagraph = selectedNode.nodeName === "P" // Check if it's a <p> element
+                        const selectedNode = editor.selection.getNode(); // Get the selected node
+                        const isParagraph = selectedNode.nodeName === "P"; // Check if it's a <p> element
 
                         if (isParagraph) {
                           // Update the style directly for <p> elements
-                          selectedNode.style.textIndent = "-40px"
-                          selectedNode.style.marginLeft = "40px"
+                          selectedNode.style.textIndent = "-40px";
+                          selectedNode.style.marginLeft = "40px";
                         } else {
                           // Wrap in a <p> if not already a block element
                           const content = editor.selection.getContent({
                             format: "html",
-                          })
+                          });
                           editor.selection.setContent(
-                            `<p style="text-indent: -40px; margin-left: 40px;">${content}</p>`,
-                          )
+                            `<p style="text-indent: -40px; margin-left: 40px;">${content}</p>`
+                          );
                         }
                       },
-                    })
+                    });
 
                     // Remove Hanging Indent Button
                     editor.ui.registry.addButton("removeHangingIndent", {
@@ -1236,31 +1336,31 @@ const TemplateContainer = ({ suborgs }) => {
                       icon: "outdent",
                       tooltip: "Remove Hanging Indent",
                       onAction: () => {
-                        const selectedNode = editor.selection.getNode() // Get the selected node
-                        const isParagraph = selectedNode.nodeName === "P" // Check if it's a <p> element
+                        const selectedNode = editor.selection.getNode(); // Get the selected node
+                        const isParagraph = selectedNode.nodeName === "P"; // Check if it's a <p> element
 
                         if (isParagraph) {
                           // Remove the hanging indent styles
-                          selectedNode.style.textIndent = ""
-                          selectedNode.style.marginLeft = ""
+                          selectedNode.style.textIndent = "";
+                          selectedNode.style.marginLeft = "";
                         } else {
                           // Handle nested <p> tags (if any)
                           const content = editor.selection.getContent({
                             format: "html",
-                          })
+                          });
                           editor.selection.setContent(
                             content.replace(
                               /<p[^>]*style=["'][^"']*text-indent:\s*-40px;?\s*margin-left:\s*40px;?[^"']*["'][^>]*>(.*?)<\/p>/g,
-                              "$1",
-                            ),
-                          )
+                              "$1"
+                            )
+                          );
                         }
                       },
-                    })
+                    });
                   },
                 }}
                 onEditorChange={(content, editor) => {
-                  handleEditorChange(content, editor, page.id)
+                  handleEditorChange(content, editor, page.id);
                 }}
               />
             </div>
@@ -1269,14 +1369,17 @@ const TemplateContainer = ({ suborgs }) => {
           <div className="mt-4 flex gap-4">
             <button
               onClick={handleSaveOrUpdateTemplate}
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              className="bg-[#4CAF50] text-white py-2 px-4 rounded hover:bg-[#45a049] flex items-center gap-2 transform hover:scale-105 transition-all duration-200"
             >
+              <Save className="text-white" />
               {isUpdateMode ? "Update Template" : "Save Template"}
             </button>
             <button
               onClick={handlePrintDocument}
-              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+              className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#1a8cd8] flex items-center gap-2 hover:scale-105"
             >
+              <Printer className="text-white" />{" "}
+              {/* Replace X with the desired icon */}
               Print Document
             </button>
           </div>
@@ -1288,14 +1391,19 @@ const TemplateContainer = ({ suborgs }) => {
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                     p-4 rounded shadow-lg text-white text-center w-80 z-50"
           style={{
-            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
+            backgroundColor:
+              message.type === "success"
+                ? "#4CAF50"
+                : message.type === "error"
+                ? "#F44336"
+                : "#FFC107",
           }}
         >
           {message.text}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default TemplateContainer
