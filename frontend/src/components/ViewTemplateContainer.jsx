@@ -159,7 +159,7 @@ const ViewTemplateContainer = () => {
                     setIsDataLoaded(true);
                 } catch (error) {
                     console.error('Error loading template:', error.message);
-                    alert('Failed to load template. Please try again.');
+                    // alert('Failed to load template. Please try again.');
                 }
             };
             loadTemplate();

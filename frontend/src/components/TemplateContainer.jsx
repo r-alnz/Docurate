@@ -291,7 +291,7 @@ const TemplateContainer = ({ suborgs }) => {
         setDecisionTree(tree)
       } catch (error) {
         console.error("Error fetching decision tree:", error.message)
-        alert("Failed to fetch decision tree. Please try again.")
+        // alert("Failed to fetch decision tree. Please try again.")
       }
     }
 
