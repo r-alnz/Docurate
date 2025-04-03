@@ -155,10 +155,10 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       await onSubmit(userDetails) // Wait for submission
 
       // Show success popup with the correct message
-      setSuccessMessage("Password reset successfully!")
+      setSuccessMessage("Adding user successfully!")
       setShowSuccessPopup(true)
 
-      // Reset form fields
+      // Adding form fields
       setFirstname("")
       setLastname("")
       setEmail("")
@@ -388,8 +388,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {message && (
             <div
               className={`mt-4 p-2 rounded ${message.type === "success"
-                  ? "bg-green-100 text-green-700 border border-green-400"
-                  : "bg-red-100 text-red-700 border border-red-400"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -442,8 +442,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                 )
                               }}
                               className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                  ? "bg-[#38b6ff] text-white"
-                                  : "bg-gray-100 text-gray-700"
+                                ? "bg-[#38b6ff] text-white"
+                                : "bg-gray-100 text-gray-700"
                                 } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
@@ -493,9 +493,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium">Confirm Changes</h3>
+                  <h3 className="text-lg font-medium">Confirm Adding</h3>
                   <p className="text-gray-600 mt-1">
-                    Are you sure you want to save these changes? This action cannot be undone.
+                    Are you sure you want to add these user?
                   </p>
                 </div>
               </div>
@@ -533,7 +533,6 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                 </div>
               </div>
               <h3 className="text-2xl font-semibold text-green-600 mb-2">Success!</h3>
-              <p className="text-gray-600">Password reset successfully!</p>
             </div>
           </div>
         )}
