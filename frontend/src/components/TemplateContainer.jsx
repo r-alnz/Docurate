@@ -7,7 +7,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { getToken } from "../utils/authUtil.js"
 import { createTemplate, getTemplateById, updateTemplate, fetchDecisionTree } from "../services/templateService.js"
 import imageCompression from "browser-image-compression"
-import {X, Printer, Save} from "lucide-react"
+import { X, Printer, Save } from "lucide-react"
 
 const TemplateContainer = ({ suborgs }) => {
   console.log("suborgs:", suborgs)
@@ -107,22 +107,7 @@ const TemplateContainer = ({ suborgs }) => {
     }
 
 
-    .header, .footer {
-        max-height: ${DPI - DPI / 3}px;
-        position: relative; /* Ensure it doesn't interfere with other content flow */
-        margin: -${margins.top}in -${margins.right}in 0 -${margins.left}in;
-        overflow: hidden; /* Ensure no content spills over */
-    }
-
-    .footer {
-        margin: -0.70in -0.70in; /* Adjust for the footer */
-    }
-
-    .header img, .footer img {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
+   
 
     .draggable-image {
         
@@ -257,29 +242,6 @@ const TemplateContainer = ({ suborgs }) => {
             page-break-after: always;
         }
 
-        .header, .footer {
-            position: absolute;
-            left: 0;
-            max-height: ${DPI}px;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .header {
-            top: 0;
-        }
-
-        .footer {
-            bottom: 0;
-        }
-
-        .header img, .footer img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
 
         p {
             margin: 0;
@@ -460,37 +422,37 @@ const TemplateContainer = ({ suborgs }) => {
     input.click()
   }
 
-  const insertHeaderFooterImage = (editor, position, file) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const imageHtml = `
-                <div class="${position}">
-                    <img src="${reader.result}" alt="${position} image" />
-                </div>
-            `
-      editor.insertContent(imageHtml)
-    }
-    reader.readAsDataURL(file)
-  }
+  // const insertHeaderFooterImage = (editor, position, file) => {
+  //   const reader = new FileReader()
+  //   reader.onload = () => {
+  //     const imageHtml = `
+  //               <div class="${position}">
+  //                   <img src="${reader.result}" alt="${position} image" />
+  //               </div>
+  //           `
+  //     editor.insertContent(imageHtml)
+  //   }
+  //   reader.readAsDataURL(file)
+  // }
 
-  const handleHeaderFooterUpload = (editor, position) => {
-    const input = document.createElement("input")
-    input.type = "file"
-    input.accept = "image/*"
-    input.onchange = async () => {
-      const file = input.files[0]
-      if (file) {
-        try {
-          const compressedFile = await compressImage(file)
-          insertHeaderFooterImage(editor, position, compressedFile)
-        } catch (error) {
-          console.error("Error compressing header/footer image:", error.message)
-          showMessage("Failed to add header/footer image. Please try again.")
-        }
-      }
-    }
-    input.click()
-  }
+  // const handleHeaderFooterUpload = (editor, position) => {
+  //   const input = document.createElement("input")
+  //   input.type = "file"
+  //   input.accept = "image/*"
+  //   input.onchange = async () => {
+  //     const file = input.files[0]
+  //     if (file) {
+  //       try {
+  //         const compressedFile = await compressImage(file)
+  //         insertHeaderFooterImage(editor, position, compressedFile)
+  //       } catch (error) {
+  //         console.error("Error compressing header/footer image:", error.message)
+  //         showMessage("Failed to add header/footer image. Please try again.")
+  //       }
+  //     }
+  //   }
+  //   input.click()
+  // }
 
   const handleEditorChange = (content, editor, pageId) => {
     const updatedContent = strictMode
@@ -713,14 +675,14 @@ const TemplateContainer = ({ suborgs }) => {
 
   return (
     <div className="p-4">
-        <div className="flex justify-end">
-              <div
-                onClick={() => navigate(-1)}
-                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 cursor-pointer"
-              >
-                <X className="text-white" />
-              </div>
-            </div>
+      <div className="flex justify-end">
+        <div
+          onClick={() => navigate(-1)}
+          className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 cursor-pointer"
+        >
+          <X className="text-white" />
+        </div>
+      </div>
       <h1 className="text-2xl font-bold mb-4">Template Editor</h1>
       <div className="mb-4 border p-4 rounded shadow">
         <h2 className="text-xl font-medium mb-4">Template Information</h2>
@@ -936,9 +898,8 @@ const TemplateContainer = ({ suborgs }) => {
             setEditorLoaded(true);
           }}
           disabled={editorLoaded}
-          className={`bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] ${
-            editorLoaded ? "hidden" : ""
-          }`}
+          className={`bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] ${editorLoaded ? "hidden" : ""
+            }`}
         >
           Begin Template Creation
         </button>
@@ -1019,7 +980,7 @@ const TemplateContainer = ({ suborgs }) => {
                     "spellchecker",
                   ],
                   toolbar:
-                    "undo redo | styles | bold italic underline | fontsize fontfamily | addDraggableImage | addHeaderImage addFooterImage| markEditable removeEditable | lineheight pagebreak| " +
+                    "undo redo | styles | bold italic underline | fontsize fontfamily | addDraggableImage | markEditable removeEditable | lineheight pagebreak| " +
                     "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | addHangingIndent removeHangingIndent | " +
                     "link image | fullscreen | forecolor backcolor emoticons | help",
                   object_resizing: "img",
@@ -1264,18 +1225,18 @@ const TemplateContainer = ({ suborgs }) => {
                       }
                     });
 
-                    editor.ui.registry.addButton("addHeaderImage", {
-                      text: "Add Header Image",
-                      icon: "image",
-                      onAction: () =>
-                        handleHeaderFooterUpload(editor, "header"),
-                    });
-                    editor.ui.registry.addButton("addFooterImage", {
-                      text: "Add Footer Image",
-                      icon: "image",
-                      onAction: () =>
-                        handleHeaderFooterUpload(editor, "footer"),
-                    });
+                    // editor.ui.registry.addButton("addHeaderImage", {
+                    //   text: "Add Header Image",
+                    //   icon: "image",
+                    //   onAction: () =>
+                    //     handleHeaderFooterUpload(editor, "header"),
+                    // });
+                    // editor.ui.registry.addButton("addFooterImage", {
+                    //   text: "Add Footer Image",
+                    //   icon: "image",
+                    //   onAction: () =>
+                    //     handleHeaderFooterUpload(editor, "footer"),
+                    // });
 
                     // editor.ui.registry.addButton('addImage', {
                     //     text: 'Add Image',
@@ -1395,8 +1356,8 @@ const TemplateContainer = ({ suborgs }) => {
               message.type === "success"
                 ? "#4CAF50"
                 : message.type === "error"
-                ? "#F44336"
-                : "#FFC107",
+                  ? "#F44336"
+                  : "#FFC107",
           }}
         >
           {message.text}
