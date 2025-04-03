@@ -927,7 +927,7 @@ const TemplateContainer = ({ suborgs }) => {
           {pages.map((page) => (
             <div key={page.id} style={{ display: currentPage === page.id ? "block" : "none" }}>
               <Editor
-                apiKey="nlhi2d7e29jjlh8lggzbzvaee9h7u3ba4hfywmh0v1skgixg"
+                apiKey="iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
                 value={page.content}
                 init={{
                   height: selectedPageSize.height,

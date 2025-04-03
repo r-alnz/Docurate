@@ -51,37 +51,37 @@ const AboutPage = () => {
     >
       <div className="about-page">
 
-      <div class="grid grid-cols-2 gap-4">
-  
-        <div class="left-smth flex flex-col mt-[40px] -ml-[40px] align-items items-center justify-center">
-          <motion.div
-            class=""
-            initial={{ opacity: 0, scale: 0.95, x: 0 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{
-              duration: 1,
-            }}
-            style={{ display: "inline-block" }}>
-            <img
-              src="Docurate_Logo.png"
-              alt="Logo"
-              onMouseMove={onMouseMove}
-              onMouseLeave={onMouseLeave}
-              style={{
-                transform: `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
-                transition: "all 0.3s cubic-bezier(0.03, 0.98, 0.52, 0.99)", // Smooth transition
+        <div class="grid grid-cols-2 gap-4">
+
+          <div class="left-smth flex flex-col mt-[40px] -ml-[40px] align-items items-center justify-center">
+            <motion.div
+              class=""
+              initial={{ opacity: 0, scale: 0.95, x: 0 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{
+                duration: 1,
               }}
-            />
-          </motion.div>
+              style={{ display: "inline-block" }}>
+              <img
+                src="Docurate_Logo.png"
+                alt="Logo"
+                onMouseMove={onMouseMove}
+                onMouseLeave={onMouseLeave}
+                style={{
+                  transform: `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
+                  transition: "all 0.3s cubic-bezier(0.03, 0.98, 0.52, 0.99)", // Smooth transition
+                }}
+              />
+            </motion.div>
 
-          <h1 className="white-text text-6xl -mt-[20px] font-bold">DOCURATE</h1>
-          <h1 className="subtitle text-2xl ">Your Document Management Solution</h1>
-          <Link to="/" className="text-lg back-button mt-10">
-            Back to Login
-          </Link>
-        </div>
+            <h1 className="white-text text-6xl -mt-[20px] font-bold">DOCURATE</h1>
+            <h1 className="subtitle text-2xl ">Your Document Management Solution</h1>
+            <Link to="/" className="text-lg back-button mt-10">
+              Back to Login
+            </Link>
+          </div>
 
-        <div>
+          <div>
             <motion.div className="header mt-[100px] text-lg font-bold flex justify-between"
               initial={{ opacity: 0, x: 300 }}
               animate={{ opacity: 1, x: 0 }}
@@ -89,21 +89,21 @@ const AboutPage = () => {
                 duration: 1,
               }}>
 
-                <div className="flex flex-col gap-y-1">
-                  <p>A Thesis Project Submitted to the Faculty of ____ </p>
-                  <p>Bachelor of Computer Science blah</p>
-                  <p>Bataan Peninsula State University</p>
-                </div>
-              
-                <div>
-                  <div className="flex gap-x-3 mr-[10px]">
-                    <img src="bpsu.png" className="h-[100px]" />
-                    <img src="bpsu.png" className="h-[100px]" />
-                    <img src="bpsu.png" className="h-[100px]" />
-                  </div>
-                </div>
+              <div className="flex flex-col gap-y-1">
+                <p>A Thesis Project Submitted to the Faculty of CCST </p>
+                <p>BSCS - Major in Software Development</p>
+                <p>Bataan Peninsula State University</p>
+              </div>
 
-              </motion.div>
+              <div>
+                <div className="flex gap-x-3 mr-[10px]">
+                  <img src="bpsu.png" className="h-[100px]" />
+                  <img src="bpsu.png" className="h-[100px]" />
+                  <img src="bpsu.png" className="h-[100px]" />
+                </div>
+              </div>
+
+            </motion.div>
 
             <motion.div className="project-details ml-[30px]"
               initial={{ opacity: 0 }}
@@ -114,8 +114,9 @@ const AboutPage = () => {
               }}>
               <div className=" mt-[20px] text-lg">PROJECT DETAILS</div>
 
-              <p> Blah blah </p>
-              <p> Blah blah </p>
+              <p>Docurate is a web application designed to simplify the challenges of manual document creation using the Decision Trees algorithm. Users step through Template-based question sets to determine the type of document to be generated, which is fully customizable with a range of templates. Furthermore, Docurate also provides previews of automatic formatting of documents making it decrease the possibility of errors while enhancing the efficiency. </p>
+
+              {/* <p> Blah blah </p>
 
               <div className=" mt-[20px] text-lg">PROJECT DETAILS</div>
 
@@ -125,7 +126,7 @@ const AboutPage = () => {
               <div className=" mt-[20px] text-lg">PROJECT DETAILS</div>
 
               <p> Blah blah </p>
-              <p> Blah blah </p>
+              <p> Blah blah </p> */}
             </motion.div>
 
             <motion.div className="header mt-[20px] text-lg font-bold z-0"
@@ -138,16 +139,16 @@ const AboutPage = () => {
               Meet the Docurators
             </motion.div>
 
-              <motion.div className="ml-[30px] mt-[20px] text-lg italic"
+            <motion.div className="ml-[30px] mt-[20px] text-lg italic"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{
                 duration: 1,
                 delay: 2.5
               }}>
-                <p>A team of passionate individuals,</p>
-                <p>bringing this project into fruition.</p>
-              </motion.div>
+              <p>A team of passionate individuals,</p>
+              <p>bringing this project into fruition.</p>
+            </motion.div>
 
             <div className="gallery flex justify-end mr-[30px] -mt-[130px] gap-x-4 z-10">
               <motion.div className="flex flex-col items-center"
@@ -158,9 +159,9 @@ const AboutPage = () => {
                   delay: 1.5,
                   ease: "easeInOut",
                 }}>
-                <img src="bust.avif"/>
+                <img src="bust.avif" />
                 <div>Renz Alonzo</div>
-                <div>[mail][idk]</div>
+                <div>rlpalonzo@bpsu.edu.ph</div>
               </motion.div>
 
               <motion.div className="flex flex-col items-center"
@@ -171,9 +172,9 @@ const AboutPage = () => {
                   delay: 1.6,
                   ease: "easeInOut",
                 }}>
-                <img src="bust.avif"/>
-                <div>Louise de Guzman</div>
-                <div>[mail][idk]</div>
+                <img src="bust.avif" />
+                <div>Louise Ceasar De Guzman</div>
+                <div>lccdeguzman@bpsu.edu.ph</div>
               </motion.div>
 
               <motion.div className="flex flex-col items-center"
@@ -184,9 +185,9 @@ const AboutPage = () => {
                   delay: 1.7,
                   ease: "easeInOut",
                 }}>
-                <img src="bust.avif"/>
-                <div>Super Man</div>
-                <div>[mail][idk]</div>
+                <img src="bust.avif" />
+                <div>Hazee Marie Ilao</div>
+                <div>hmdilao@bpsu.edu.ph</div>
               </motion.div>
 
               <motion.div className="flex flex-col items-center"
@@ -197,20 +198,20 @@ const AboutPage = () => {
                   delay: 1.8,
                   ease: "easeInOut",
                 }}>
-                <img src="bust.avif"/>
-                <div>Wally Bayola</div>
-                <div>[mail][idk]</div>
+                <img src="bust.avif" />
+                <div>Azriel Dale Roque</div>
+                <div>addlroque@bpsu.edu.ph</div>
               </motion.div>
             </div>
+          </div>
         </div>
-      </div>
-
-        
-
-        
 
 
-        
+
+
+
+
+
       </div>
     </motion.div>
   );
