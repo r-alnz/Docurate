@@ -4,6 +4,7 @@ import { fetchTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from "
 import { useNavigate } from "react-router-dom"
 import { getToken } from "../utils/authUtil"
 import { useAuthContext } from "../hooks/useAuthContext"
+import { Eye, ArchiveX } from "lucide-react"
 import DeleteTemplateModal from "./DeleteTemplateModal"
 
 import { Mosaic } from "react-loading-indicators"
@@ -26,6 +27,7 @@ const TemplateListContainer = () => {
   const [statusFilter, setStatusFilter] = useState("active")
   const [message, setMessage] = useState(null)
   const [visible, setVisible] = useState(false)
+  const [typeFilter, setTypeFilter] = useState("All")
 
   const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false)
   const [templateToRecover, setTemplateToRecover] = useState(null)
@@ -167,15 +169,16 @@ const TemplateListContainer = () => {
 
     const matchesRole = roleFilter === "All" || template.requiredRole === roleFilter
     const matchesStatus = statusFilter === "All" || template.status === statusFilter.toLowerCase()
+    const matchesType = typeFilter === "All" || template.type === typeFilter
 
     if (user.role === "organization") {
       const isSubOrgMatch = template.suborganizations?.some((suborg) => String(suborg) === String(user._id))
       const isOrgMatch = String(template.organization) === String(user.organization._id)
 
-      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus
+      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus && matchesType
     }
 
-    return matchesSearch && matchesRole && matchesStatus
+    return matchesSearch && matchesRole && matchesStatus && matchesType
   })
 
   // Debugging logs
@@ -199,6 +202,8 @@ const TemplateListContainer = () => {
         return 0
     }
   })
+
+  const uniqueTemplateTypes = ["All", ...new Set(templates.map((template) => template.type))]
 
   return (
     <div className={`p-4 relative transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}>
@@ -226,6 +231,17 @@ const TemplateListContainer = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="border rounded w-full p-2 shadow"
         />
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="border rounded p-2 shadow bg-white"
+        >
+          {uniqueTemplateTypes.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
         {user.role === "admin" && (
           <select
             value={roleFilter}
@@ -268,9 +284,10 @@ const TemplateListContainer = () => {
           {sortedTemplates.map((template) => (
             <div
               key={template._id}
-              className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white ${template.status === "inactive" ? "opacity-50" : ""
+              className={`border rounded p-4 shadow hover:shadow-lg transition-shadow duration-300 bg-white flex flex-col h-full ${template.status === "inactive" ? "opacity-50" : ""
                 }`}
             >
+              {/* Member Privilege Badge */}
               {(() => {
                 const matchingSuborg = template?.suborganizations?.find((templateSuborg) =>
                   user?.suborganizations?.some((userSuborg) => String(userSuborg._id) === String(templateSuborg._id)),
@@ -280,6 +297,7 @@ const TemplateListContainer = () => {
                 ) : null
               })()}
 
+              {/* Suborganizations */}
               <div className="flex justify-end gap-2 mb-2">
                 {template.suborganizations && template.suborganizations.length > 0 ? (
                   template.suborganizations.map((suborg, index) => (
@@ -297,6 +315,7 @@ const TemplateListContainer = () => {
                 )}
               </div>
 
+              {/* Template Details */}
               <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
               <p className="text-gray-700 mb-1">
                 <strong>Type:</strong> {template.type}
@@ -307,7 +326,9 @@ const TemplateListContainer = () => {
               <p className="text-gray-700 mb-1">
                 <strong>Role:</strong> {template.requiredRole}
               </p>
-              <div className="mt-4 flex gap-2">
+
+              {/* Buttons at the Bottom */}
+              <div className="mt-auto flex flex-col gap-2 pt-4">
                 {template.status === "inactive" ? (
                   <>
                     <button
@@ -327,24 +348,29 @@ const TemplateListContainer = () => {
                   </>
                 ) : (
                   <>
-                    <button
-                      className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6]"
-                      onClick={() =>
-                        navigate(
-                          user.role === "admin" ? `/templates/${template._id}` : `/user-templates/${template._id}`,
-                        )
-                      }
-                    >
-                      View
-                    </button>
-                    {user.role === "admin" && (
+                    <div className="flex gap-2">
+                      {/* View Button with Lucide Eye Icon */}
                       <button
-                        className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-                        onClick={() => handleOpenModal(template)}
+                        className="bg-[#38b6ff] text-white p-2 rounded hover:bg-[#2a9ed6] flex items-center justify-center"
+                        onClick={() =>
+                          navigate(
+                            user.role === "admin" ? `/templates/${template._id}` : `/user-templates/${template._id}`,
+                          )
+                        }
                       >
-                        Inactive
+                        <Eye className="w-5 h-5" />
                       </button>
-                    )}
+
+                      {/* Inactive Button with Lucide Slash Icon (Visible for Admins Only) */}
+                      {user.role === "admin" && (
+                        <button
+                          className="bg-red-500 text-white p-2 rounded hover:bg-red-700 flex items-center justify-center"
+                          onClick={() => handleOpenModal(template)}
+                        >
+                          <ArchiveX className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
