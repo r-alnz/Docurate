@@ -2,7 +2,7 @@
 
 import PropTypes from "prop-types"
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, CheckCircle, AlertTriangle } from "lucide-react"
+import { Eye, EyeOff, CheckCircle, AlertTriangle, X, Key, RotateCw } from "lucide-react"
 import { motion } from "framer-motion"
 import { getToken } from "../utils/authUtil"
 
@@ -145,7 +145,9 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
       <div className="bg-white rounded-lg shadow-lg p-4 w-96">
         {modalState === "input" && (
           <>
-            <h2 className="text-lg font-semibold mb-4">Reset Password for {user.email}</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              Reset Password for {user.email}
+            </h2>
 
             {/* Debug info - remove in production */}
             {/* <div className="mb-4 p-2 bg-gray-100 text-xs rounded">
@@ -162,7 +164,9 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
 
             {/* New Password */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">New Password</label>
+              <label className="block text-sm font-medium mb-2">
+                New Password
+              </label>
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter new password"
@@ -171,12 +175,16 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {/* ✅ Error message */}
-              {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
+              {passwordError && (
+                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+              )}
             </div>
 
             {/* Confirm Password */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium mb-2">
+                Confirm Password
+              </label>
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Confirm new password"
@@ -185,7 +193,11 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {/* ✅ Confirm Password Error */}
-              {confirmPasswordError && <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>}
+              {confirmPasswordError && (
+                <p className="text-red-500 text-sm mt-1">
+                  {confirmPasswordError}
+                </p>
+              )}
             </div>
 
             {/* ✅ Show Password Button */}
@@ -198,21 +210,37 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
             </button>
 
             {/* Buttons */}
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-end gap-3 mt-4">
+              {/* Cancel Button (Icon) */}
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+                className="bg-gray-500 text-white p-2 rounded-lg shadow-md hover:bg-gray-700 transition duration-200 ease-in-out focus:ring-2 focus:ring-gray-300 relative group"
                 onClick={onClose}
               >
-                Cancel
+                <X size={20} />
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 bg-gray-700 text-white text-xs rounded py-1 px-2 transition-all">
+                  Cancel
+                </span>
               </button>
+
+              {/* Default Password Button (Icon) */}
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-blue-500 text-white p-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-200 ease-in-out focus:ring-2 focus:ring-blue-300 relative group"
                 onClick={handleDefaultReset}
               >
-                Default Password
+                <Key size={20} />
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 bg-gray-700 text-white text-xs rounded py-1 px-2 transition-all">
+                  Default Password
+                </span>
               </button>
+
+              {/* Reset Password Button (Text) */}
               <button
-                className="bg-[#38b6ff] text-white px-4 py-2 rounded hover:bg-[#2a9ed6] transition"
+                className={`px-4 py-2 rounded-lg shadow-md transition duration-200 ease-in-out 
+      ${
+        passwordError || !newPassword || !confirmPassword
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+          : "bg-[#38b6ff] text-white hover:bg-[#2a9ed6] focus:ring-2 focus:ring-[#2a9ed6]"
+      }`}
                 onClick={handleResetClick}
                 disabled={passwordError || !newPassword || !confirmPassword}
               >
@@ -239,9 +267,12 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
               <AlertTriangle className="text-yellow-500 w-14 h-14" />
             </motion.div>
 
-            <h2 className="text-xl font-semibold text-gray-800">Confirm Password Reset</h2>
+            <h2 className="text-xl font-semibold text-gray-800">
+              Confirm Password Reset
+            </h2>
             <p className="text-gray-600 mt-2">
-              This action cannot be undone. Are you sure you want to reset the password?
+              This action cannot be undone. Are you sure you want to reset the
+              password?
             </p>
 
             {/* Action Buttons */}
@@ -283,13 +314,15 @@ const ResetPasswordModal = ({ isOpen, user, onClose, onResetPassword }) => {
               <CheckCircle className="text-green-600 w-14 h-14" />
             </motion.div>
 
-            <h2 className="text-xl font-semibold text-green-600 mt-3">Success!</h2>
-            <p className="text-gray-600 mt-1">Password reset successfully!</p>
+            <h2 className="text-xl font-semibold text-green-600 mt-3">
+              Success!
+            </h2>
+            <p className="text-gray-600 mt-1">Password reset successully!</p>
           </motion.div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
 ResetPasswordModal.propTypes = {
