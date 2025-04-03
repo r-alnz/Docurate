@@ -117,7 +117,7 @@ const AdminUsersPage = () => {
                     onChange={handleSearchChange}
                     className="border p-2 rounded w-1/3"
                 />
-                {(currentUser?.role === "superadmin" || currentUser?.role === "student") && (
+                {(currentUser?.role === "superadmin" || currentUser?.role === "admin") && (
                     <button
                         onClick={() => setIsAddUserModalOpen(true)}
                         className="flex items-center gap-2 bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#2a9ed6] transition-all duration-200"
