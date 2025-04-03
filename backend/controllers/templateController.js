@@ -54,7 +54,7 @@ const getTemplates = async (req, res) => {
         } else if (req.user.role === "organization") {
             console.warn("org acc")
             // query.$and.push({requiredRole: req.user.role})
-            query.$and.push({requiredRole: req.user.role}) // just show templates for org
+            // query.$and.push({requiredRole: req.user.role}) // just show templates for org
             query.$or.push({ suborganizations: req.user._id }); // Match org itself
         }
 
