@@ -1,0 +1,26 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+			{
+					"label": "Run Project",
+					"type": "shell",
+					"command": "powershell",
+					"args": [
+							"-ExecutionPolicy",
+							"Bypass",
+							"-File",
+							"${workspaceFolder}/run-proj.ps1"
+					],
+					"problemMatcher": [],
+					"group": {
+							"kind": "build",
+							"isDefault": true
+					},
+					"presentation": {
+							"reveal": "always",   // This ensures the terminal is shown every time
+							"focus": true,        // This brings focus to the terminal
+							"panel": "shared"     // Use the same terminal panel for tasks
+					}
+			}
+	]
+}

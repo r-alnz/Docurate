@@ -5,6 +5,7 @@ import FilteredTemplateListContainer from './FilteredTemplateListContainer';
 import { useTemplateContext } from '../hooks/useTemplateContext';
 import { fetchDecisionTree } from '../services/templateService';
 import { getToken } from '../utils/authUtil';
+import {X} from 'lucide-react'
 
 
 const AddDocumentModal = ({ onClose }) => {
@@ -63,76 +64,85 @@ const AddDocumentModal = ({ onClose }) => {
     if (contextError) return <p className="text-red-500">{contextError}</p>;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl">
-                <h2 className="text-xl font-bold mb-4">Create New Document</h2>
-                <label className="block text-gray-700 mb-2">
-                    Document Type:
-                    <select
-                        className="w-full border rounded p-2 mb-4"
-                        value={documentType}
-                        onChange={(e) => {
-                            setDocumentType(e.target.value);
-                            setDocumentSubtype('');
-                        }}
-                    >
-                        <option value="">Select Type</option>
-                        {Object.keys(decisionTree).map((type) => (
-                            <option key={type} value={type}>
-                                {type}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                {documentType && decisionTree[documentType]?.subtype && (
-                    <label className="block text-gray-700 mb-2">
-                        Document Subtype (Optional):
-                        <select
-                            className="w-full border rounded p-2 mb-4"
-                            value={documentSubtype}
-                            onChange={(e) => setDocumentSubtype(e.target.value)}
-                        >
-                            <option value="">Select Subtype</option>
-                            {Object.keys(decisionTree[documentType].subtype).map((subtype) => (
-                                <option key={subtype} value={subtype}>
-                                    {subtype}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                )}
-                <div className="mt-4 max-h-[40vh] overflow-y-auto">
-                    {documentType && (
-                        <FilteredTemplateListContainer
-                            templates={[
-                                ...(decisionTree[documentType].names || []),
-                                ...(documentSubtype
-                                    ? decisionTree[documentType].subtype[documentSubtype] || []
-                                    : Object.values(decisionTree[documentType].subtype || {}).flat()),
-                            ]}
-                            onSelectTemplate={(template) => setSelectedTemplate(template)}
-                        />
-                    )}
-                </div>
-                {selectedTemplate && (
-                    <div className="mt-4">
-                        <button
-                            className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
-                            onClick={handleUseTemplate}
-                        >
-                            Use Template
-                        </button>
-                    </div>
-                )}
-                <button
-                    className="mt-4 w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-                    onClick={onClose}
-                >
-                    Close
-                </button>
-            </div>
-        </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl relative">
+          {/* Close Icon positioned at the upper right */}
+          <button
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+          </button>
 
+          <h2 className="text-xl font-bold mb-4">Create New Document</h2>
+
+          <label className="block text-gray-700 mb-2">
+            Document Type:
+            <select
+              className="w-full border rounded p-2 mb-4"
+              value={documentType}
+              onChange={(e) => {
+                setDocumentType(e.target.value);
+                setDocumentSubtype("");
+              }}
+            >
+              <option value="">Select Type</option>
+              {Object.keys(decisionTree).map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {documentType && decisionTree[documentType]?.subtype && (
+            <label className="block text-gray-700 mb-2">
+              Document Subtype (Optional):
+              <select
+                className="w-full border rounded p-2 mb-4"
+                value={documentSubtype}
+                onChange={(e) => setDocumentSubtype(e.target.value)}
+              >
+                <option value="">Select Subtype</option>
+                {Object.keys(decisionTree[documentType].subtype).map(
+                  (subtype) => (
+                    <option key={subtype} value={subtype}>
+                      {subtype}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
+          )}
+
+          <div className="mt-4 max-h-[40vh] overflow-y-auto bg-white p-2 rounded-lg shadow-lg border border-gray-200">
+            {documentType && (
+              <FilteredTemplateListContainer
+                templates={[
+                  ...(decisionTree[documentType].names || []),
+                  ...(documentSubtype
+                    ? decisionTree[documentType].subtype[documentSubtype] || []
+                    : Object.values(
+                        decisionTree[documentType].subtype || {}
+                      ).flat()),
+                ]}
+                onSelectTemplate={(template) => setSelectedTemplate(template)}
+              />
+            )}
+          </div>
+
+          {selectedTemplate && (
+            <div className="flex justify-end mt-4">
+              <button
+                className=" bg-[#38b6ff] text-white px-4 py-2 rounded hover:bg-[#2a9ed6] transition"
+                onClick={handleUseTemplate}
+              >
+                Select Template
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     );
 };
 

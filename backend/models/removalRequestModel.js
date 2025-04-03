@@ -11,6 +11,11 @@ const removalRequestSchema = new mongoose.Schema(
     },
     reason: { type: String, required: false },
     date: { type: Date, default: Date.now },
+    status: { 
+      type: String, 
+      enum: ['pending', 'approved', 'rejected'], 
+      default: 'pending' 
+    },
   },
   { timestamps: true,
     collection: "removals"

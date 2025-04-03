@@ -842,7 +842,7 @@ const DocumentContainer = () => {
         {message && (
           <div
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                    p-4 rounded shadow-lg text-white text-center w-80 z-50"
+                    p-4 rounded shadow-lg text-white text-center w-80"
             style={{
               backgroundColor:
                 message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
