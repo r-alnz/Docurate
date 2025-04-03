@@ -5,7 +5,8 @@ import { useUserContext } from "../hooks/useUserContext"
 import { getToken } from "../utils/authUtil"
 import { getApiUrl } from "../api.js";
 
-const API_URL = getApiUrl("/import");
+const API_URL = getApiUrl("/import"); 
+// const API_URL = "https://docurate.onrender.com/api/import"
 
 const BulkImportPage = () => {
     const [data, setData] = useState([])
