@@ -1,6 +1,6 @@
 import axios from 'axios';
-
-const API_URL = '/api/documents';
+import { getApiUrl } from "../api.js";
+const API_URL = getApiUrl("/documents");
 
 // Create a new document
 const createDocument = async (documentData, token) => {

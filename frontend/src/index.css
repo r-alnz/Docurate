@@ -87,3 +87,29 @@ input {
 .role-badge.organization {
   background-color: #3986b0;
 }
+
+.cool-logo {
+  background-color: none;
+  transition: all ease 0.2s;
+}
+
+.cool-logo:hover {
+  background-color: #0c6595;
+  cursor: pointer;
+}
+
+.remove-studid {
+  color: white;
+  background-color: #33637d;
+  padding: 0px 6px 2px 6px;
+  border-radius: 10px;
+}
+
+.confirm-remove {
+  color: white;
+  background-color: rgb(215, 77, 77);
+}
+
+.confirm-remove:hover {
+  background-color: rgb(197, 17, 17);
+}

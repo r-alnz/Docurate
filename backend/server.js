@@ -11,19 +11,38 @@ import templateRoutes from './routes/templateRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import importRoutes from "./routes/importRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js"
+import removalRoutes from "./routes/removalRoutes.js"
 
 dotenv.config()
 
-const PORT = process.env.PORT
+const allowedOrigins = [
+    "http://localhost:5173",  // Local dev
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://localhost:7000",
+    "http://localhost:5000",
+    "https://docurate-eight.vercel.app"
+  ];
+
+const PORT = process.env.PORT || 7000;
 const app = express()
 
 app.use(express.json({ limit: '50mb' })); // Increase the limit for JSON payloads
 app.use(express.urlencoded({ limit: '50mb', extended: true })); // Increase the limit for URL-encoded payloads
 
+app.get('/', (req, res) => {
+    res.send('Backend is running!');
+});
 
-app.use(logger)
 app.use(cors({
-    origin: 'http://localhost:7000',
+    origin: '*',
+    // origin: function (origin, callback) {
+    //     if (!origin || allowedOrigins.includes(origin)) {
+    //         callback(null, true);
+    //     } else {
+    //         callback(new Error("Not allowed by CORS"));
+    //     }
+    // },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // ✅ Allow credentials (tokens/cookies)
@@ -37,6 +56,7 @@ app.use('/api/templates', templateRoutes);
 app.use('/api/documents', documentRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/email", emailRoutes);
+app.use('/api/removals', removalRoutes);
 
 connectDB()
     .then(async () => {

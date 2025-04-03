@@ -1,5 +1,7 @@
 import axios from 'axios';
-const API_URL = '/api/admin'; // Adjust based on your API structure
+import { getApiUrl } from "../api.js";
+
+const API_URL = getApiUrl("/admin");
 
 // Fetch user accounts
 export const fetchUserAccounts = async (token) => {

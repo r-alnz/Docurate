@@ -1,5 +1,7 @@
 import axios from 'axios';
-const API_URL = '/api/auth'
+import { getApiUrl } from "../api.js";
+
+const API_URL = getApiUrl("/auth");
 
 export const logIn = async (email, password) => {
     const response = await axios.post(`${API_URL}/login`, { email, password });
@@ -53,10 +55,10 @@ export const resetUserPassword = async (email, newPassword, token) => {
                 },
             }
         );
-        console.log(response.data.message);
+        alert(response.data.message);
     } catch (error) {
         console.error('Error resetting password:', error);
-        console.log(error.response?.data?.message || 'Failed to reset password');
+        alert(error.response?.data?.message || 'Failed to reset password');
     }
 };
 
@@ -71,7 +73,7 @@ export const resetAdminPassword = async (email, newPassword, token) => {
                 },
             }
         );
-        console.log(response.data.message);
+        alert(response.data.message);
         return response.data; // Return the server response
     } catch (error) {
         // Log and rethrow the error for the caller to handle

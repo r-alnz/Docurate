@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { getApiUrl } from "../api.js";
 
-const API_URL = '/api/templates';
+const API_URL = getApiUrl("/templates");
 
 const createTemplate = async (templateData, token) => {
     const config = {

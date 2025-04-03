@@ -431,30 +431,44 @@ const DocumentContainer = () => {
                 </div>
             `,
             )
-            .join("")
+            .join('');
 
-        iframeDoc.open()
+        iframeDoc.open();
         iframeDoc.write(`
             <html>
                 <head>
                     <title>Print Document</title>
                     <style>
-                        ${printStyles}
-                    </style>
-                    <style>
+                        ${printStyles} /* Ensure normal print styles */
                         body {
-                            font-family: Arial; /* Dynamically set font family */
+                            font-family: Arial; /* Dynamically set font family */                            
                         }
+                        .no-print {
+                            display: none !important; /* Hide margin overlay */
+                        }
+                            
+                        // body::before {
+                        //     content: "";
+                        //     position: absolute;
+                        //     top: var(--margin-top, 1in);
+                        //     left: var(--margin-left, 1in);
+                        //     right: var(--margin-right, 1in);
+                        //     bottom: var(--margin-bottom, 1in);
+                        //     border: 2px dashed red;
+                        //     pointer-events: none; /* Prevents interaction */
+                        //     box-sizing: border-box;
+                        // }
+
                     </style>
                 </head>
                 <body>
                     ${combinedContent}
                 </body>
             </html>
-        `)
-        iframeDoc.close()
+        `);
+        iframeDoc.close();
 
-        const iframeWindow = iframe.contentWindow
+        const iframeWindow = iframe.contentWindow;
 
         // Ensure images load before printing
         const images = iframeDoc.getElementsByTagName("img")
@@ -466,8 +480,8 @@ const DocumentContainer = () => {
                     img.onload = resolve
                     img.onerror = resolve
                 }
-            })
-        })
+            });
+        });
 
         Promise.all(promises).then(() => {
             iframeWindow.focus()
