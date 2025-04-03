@@ -311,37 +311,37 @@ const DocumentContainer = () => {
         input.click()
     }
 
-    const insertHeaderFooterImage = (editor, position, file) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-            const imageHtml = `
-                <div class="${position}">
-                    <img src="${reader.result}" alt="${position} image" />
-                </div>
-            `
-            editor.insertContent(imageHtml)
-        }
-        reader.readAsDataURL(file)
-    }
+    // const insertHeaderFooterImage = (editor, position, file) => {
+    //     const reader = new FileReader()
+    //     reader.onload = () => {
+    //         const imageHtml = `
+    //             <div class="${position}">
+    //                 <img src="${reader.result}" alt="${position} image" />
+    //             </div>
+    //         `
+    //         editor.insertContent(imageHtml)
+    //     }
+    //     reader.readAsDataURL(file)
+    // }
 
-    const handleHeaderFooterUpload = (editor, position) => {
-        const input = document.createElement("input")
-        input.type = "file"
-        input.accept = "image/*"
-        input.onchange = async () => {
-            const file = input.files[0]
-            if (file) {
-                try {
-                    const compressedFile = await compressImage(file)
-                    insertHeaderFooterImage(editor, position, compressedFile)
-                } catch (error) {
-                    console.error("Error compressing header/footer image:", error.message)
-                    showMessage("Failed to add header/footer image. Please try again.")
-                }
-            }
-        }
-        input.click()
-    }
+    // const handleHeaderFooterUpload = (editor, position) => {
+    //     const input = document.createElement("input")
+    //     input.type = "file"
+    //     input.accept = "image/*"
+    //     input.onchange = async () => {
+    //         const file = input.files[0]
+    //         if (file) {
+    //             try {
+    //                 const compressedFile = await compressImage(file)
+    //                 insertHeaderFooterImage(editor, position, compressedFile)
+    //             } catch (error) {
+    //                 console.error("Error compressing header/footer image:", error.message)
+    //                 showMessage("Failed to add header/footer image. Please try again.")
+    //             }
+    //         }
+    //     }
+    //     input.click()
+    // }
 
     const handleEditorChange = (content, pageId) => {
         setPages((prevPages) => prevPages.map((page) => (page.id === pageId ? { ...page, content } : page)))
@@ -550,14 +550,14 @@ const DocumentContainer = () => {
                 </div>
 
                 {/* Add/Delete Buttons */}
-                <div className="mb-4 flex justify-end gap-4">
+                {/* <div className="mb-4 flex justify-end gap-4">
                     <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
                         Add Page
                     </button>
                     <button onClick={handleDeletePage} className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700">
                         Delete Page
                     </button>
-                </div>
+                </div> */}
 
                 {isDataLoaded ? (
                     pages.map((page) => (
@@ -648,27 +648,27 @@ const DocumentContainer = () => {
                                             })
                                         })
 
-                                        editor.ui.registry.addButton("addDraggableImage", {
-                                            text: "Insert Image",
-                                            icon: "image",
-                                            onAction: () => {
-                                                const input = document.createElement("input")
-                                                input.type = "file"
-                                                input.accept = "image/*"
-                                                input.onchange = async () => {
-                                                    const file = input.files[0]
-                                                    if (file) {
-                                                        try {
-                                                            addDraggableImage(editor, file)
-                                                        } catch (error) {
-                                                            console.error("Error adding draggable image:", error.message)
-                                                            showMessage("Failed to add image. Please try again.")
-                                                        }
-                                                    }
-                                                }
-                                                input.click()
-                                            },
-                                        })
+                                        // editor.ui.registry.addButton("addDraggableImage", {
+                                        //     text: "Insert Image",
+                                        //     icon: "image",
+                                        //     onAction: () => {
+                                        //         const input = document.createElement("input")
+                                        //         input.type = "file"
+                                        //         input.accept = "image/*"
+                                        //         input.onchange = async () => {
+                                        //             const file = input.files[0]
+                                        //             if (file) {
+                                        //                 try {
+                                        //                     addDraggableImage(editor, file)
+                                        //                 } catch (error) {
+                                        //                     console.error("Error adding draggable image:", error.message)
+                                        //                     showMessage("Failed to add image. Please try again.")
+                                        //                 }
+                                        //             }
+                                        //         }
+                                        //         input.click()
+                                        //     },
+                                        // })
 
                                         editor.on("keydown", (event) => {
                                             if (event.key === "Tab") {
@@ -683,16 +683,16 @@ const DocumentContainer = () => {
                                             }
                                         })
 
-                                        editor.ui.registry.addButton("addHeaderImage", {
-                                            text: "Add Header Image",
-                                            icon: "image",
-                                            onAction: () => handleHeaderFooterUpload(editor, "header"),
-                                        })
-                                        editor.ui.registry.addButton("addFooterImage", {
-                                            text: "Add Footer Image",
-                                            icon: "image",
-                                            onAction: () => handleHeaderFooterUpload(editor, "footer"),
-                                        })
+                                        // editor.ui.registry.addButton("addHeaderImage", {
+                                        //     text: "Add Header Image",
+                                        //     icon: "image",
+                                        //     onAction: () => handleHeaderFooterUpload(editor, "header"),
+                                        // })
+                                        // editor.ui.registry.addButton("addFooterImage", {
+                                        //     text: "Add Footer Image",
+                                        //     icon: "image",
+                                        //     onAction: () => handleHeaderFooterUpload(editor, "footer"),
+                                        // })
 
                                         // editor.ui.registry.addButton('addImage', {
                                         //     text: 'Add Image',
