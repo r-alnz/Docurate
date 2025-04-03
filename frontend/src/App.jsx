@@ -52,12 +52,14 @@ const App = () => {
 
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuthContext();
 
     useEffect(() => {
-        if (location.pathname === '/login') return;
-
-        navigate('/');
-    }, [location, navigate]);
+        // If not logged in and trying to access any page other than login
+        if (!user && location.pathname !== '/login') {
+            navigate('/');  // Redirect to the home page or login
+        }
+    }, [user, location, navigate]);
 
     const router = createBrowserRouter(
         createRoutesFromElements(
