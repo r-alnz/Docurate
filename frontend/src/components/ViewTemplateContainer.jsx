@@ -15,7 +15,7 @@ const ViewTemplateContainer = () => {
     const [paperSize, setPaperSize] = useState('letter');
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [margins, setMargins] = useState({ top: 1, right: 1, bottom: 1, left: 1 });
-    
+
     const DPI = 96; // Fixed DPI for page dimensions
     const pageSizes = {
         letter: { width: DPI * 8.5, height: DPI * 11 },
@@ -69,7 +69,7 @@ const ViewTemplateContainer = () => {
 
 
     .header, .footer {
-        max-height: ${DPI - DPI/3}px;
+        max-height: ${DPI - DPI / 3}px;
         position: relative; /* Ensure it doesn't interfere with other content flow */
         margin: -${margins.top}in -${margins.right}in 0 -${margins.left}in;
         overflow: hidden; /* Ensure no content spills over */
@@ -142,9 +142,9 @@ const ViewTemplateContainer = () => {
                         console.log(1);
                         const { top, bottom, left, right } = templateData.margins;
                         setMargins({
-                            top:top ,
+                            top: top,
                             bottom: bottom,
-                            left: left ,
+                            left: left,
                             right: right,
                         });
                     }
@@ -222,7 +222,7 @@ const ViewTemplateContainer = () => {
             {isDataLoaded ? pages.map((page) => (
                 <div key={page.id} style={{ display: currentPage === page.id ? 'block' : 'none' }}>
                     <Editor
-                        apiKey="nlhi2d7e29jjlh8lggzbzvaee9h7u3ba4hfywmh0v1skgixg"
+                        apiKey="iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
                         value={page.content}
                         init={{
                             height: selectedPageSize.height,
@@ -233,7 +233,7 @@ const ViewTemplateContainer = () => {
                         }}
                     />
                 </div>
-            )): (
+            )) : (
                 <p>Loading editor...</p>
             )}
         </div>
