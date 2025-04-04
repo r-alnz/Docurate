@@ -20,7 +20,7 @@ const SideNavigationBar = ({ isOpen, setIsOpen }) => {
       { name: "Removal Requests", path: "/removalrequests" },
     ],
     organization: [
-      { name: "Organization Members", path: "/users" },
+      { name: "Organization Officers", path: "/users" },
       { name: "Templates", path: "/user-templates" },
       { name: "Documents", path: "/documents" },
     ],

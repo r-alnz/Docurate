@@ -107,7 +107,7 @@ const AdminUsersPage = () => {
     return (
         <div className="p-4">
             {(currentUser?.role === "organization") && (
-                <h1 className="text-2xl font-bold mb-6">Members</h1>
+                <h1 className="text-2xl font-bold mb-6">Officers</h1>
             )}
             {(currentUser?.role === "admin") && (
                 <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
@@ -128,7 +128,7 @@ const AdminUsersPage = () => {
                 {(currentUser?.role === "organization") && (
                     <input
                         type="text"
-                        placeholder="Search members..."
+                        placeholder="Search Officers..."
                         value={searchQuery}
                         onChange={handleSearchChange}
                         className="border p-2 rounded w-1/3"
