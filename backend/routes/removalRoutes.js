@@ -55,4 +55,33 @@ router.get("/remove-request", authToken, async (req, res) => { // Apply authToke
   }
 });
 
+// PATCH: Update status of a removal request
+router.patch("/remove-request/:id", authToken, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // Expecting the new status in the request body
+
+  try {
+    // Ensure user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: No user data found" });
+    }
+
+    // Find and update the removal request status by ID
+    const updatedRequest = await RemovalRequest.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true } // This ensures the response is the updated document
+    );
+
+    if (!updatedRequest) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json(updatedRequest);
+  } catch (error) {
+    console.error("❌ Error updating removal request status:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;

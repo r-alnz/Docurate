@@ -35,14 +35,14 @@ app.get('/', (req, res) => {
 });
 
 app.use(cors({
-    origin: '*',
-    // origin: function (origin, callback) {
-    //     if (!origin || allowedOrigins.includes(origin)) {
-    //         callback(null, true);
-    //     } else {
-    //         callback(new Error("Not allowed by CORS"));
-    //     }
-    // },
+    // origin: '*',
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, origin);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // ✅ Allow credentials (tokens/cookies)
@@ -57,6 +57,8 @@ app.use('/api/documents', documentRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/email", emailRoutes);
 app.use('/api/removals', removalRoutes);
+
+
 
 connectDB()
     .then(async () => {
