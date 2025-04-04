@@ -65,11 +65,26 @@ const DocumentListContainer = () => {
   };
 
   // Recover a document
+  // In your handleRecoverDocument function
   const handleRecoverDocument = async (documentId) => {
     try {
       const token = getToken();
-      const response = await recoverDocument(documentId, token);
-      dispatch({ type: 'RECOVER_DOCUMENT', payload: response.document });
+      await recoverDocument(documentId, token);
+
+      if (statusFilter === 'inactive') {
+        // If we're viewing archived documents, remove this one from view
+        dispatch({
+          type: 'REMOVE_FROM_VIEW',
+          payload: documentId
+        });
+      } else if (statusFilter === 'all') {
+        // If we're viewing all documents, update its status
+        dispatch({
+          type: 'RECOVER_DOCUMENT',
+          payload: { _id: documentId }
+        });
+      }
+
       showMessage('Document recovered successfully!');
     } catch (error) {
       console.error(error);
@@ -78,7 +93,6 @@ const DocumentListContainer = () => {
     setIsRecoverModalOpen(false);
     setDocumentToRecover(null);
   };
-
   // Permanently delete a document
   const handleEraseDocument = async (documentId) => {
     try {

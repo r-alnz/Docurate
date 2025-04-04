@@ -11,6 +11,19 @@ const createDocument = async (req, res) => {
             return res.status(400).json({ message: 'All fields are required.' });
         }
 
+        // Check if a document with the same title already exists for this user
+        const existingDocument = await Document.findOne({ 
+            title: title,
+            user: req.user._id,
+            status: 'active' // Only check active documents
+        });
+
+        if (existingDocument) {
+            return res.status(400).json({ 
+                message: 'A document with this title already exists. Please choose a different title.' 
+            });
+        }
+
         const document = new Document({
             title,
             template,
@@ -18,10 +31,19 @@ const createDocument = async (req, res) => {
             content,
             user: req.user._id,
         });
+
         await document.save();
         res.status(201).json(document);
     } catch (error) {
         console.error('Error creating document:', error);
+        
+        // Check for MongoDB duplicate key error
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                message: 'A document with this title already exists. Please choose a different title.' 
+            });
+        }
+        
         res.status(500).json({ message: 'Failed to create document.' });
     }
 };
@@ -59,6 +81,22 @@ const updateDocument = async (req, res) => {
             return res.status(403).json({ message: 'Unauthorized action.' });
         }
 
+        // If title is being changed, check for duplicates
+        if (title && title !== document.title) {
+            const existingDocument = await Document.findOne({ 
+                title: title,
+                user: req.user._id,
+                _id: { $ne: req.params.id }, // Exclude current document
+                status: 'active' // Only check active documents
+            });
+
+            if (existingDocument) {
+                return res.status(400).json({ 
+                    message: 'A document with this title already exists. Please choose a different title.' 
+                });
+            }
+        }
+
         document.title = title || document.title;
         document.content = content || document.content;
 
@@ -66,6 +104,14 @@ const updateDocument = async (req, res) => {
         res.status(200).json(document);
     } catch (error) {
         console.error('Error updating document:', error);
+        
+        // Check for MongoDB duplicate key error
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                message: 'A document with this title already exists. Please choose a different title.' 
+            });
+        }
+        
         res.status(500).json({ message: 'Failed to update document.' });
     }
 };

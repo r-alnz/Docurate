@@ -1,11 +1,13 @@
-// documentModel.js - Add status field
+// documentModel.js
 import mongoose from 'mongoose';
 
 const documentSchema = new mongoose.Schema(
     {
         title: { 
             type: String, 
-            required: true 
+            required: true,
+            // Add this index for uniqueness within the scope of a user
+            // This makes titles unique per user, not globally
         },
         template: { 
             type: mongoose.Schema.Types.ObjectId, 
@@ -36,6 +38,9 @@ const documentSchema = new mongoose.Schema(
         timestamps: true
     }
 );
+
+// Create a compound index for user+title to ensure titles are unique per user
+documentSchema.index({ user: 1, title: 1 }, { unique: true });
 
 documentSchema.pre('save', async function (next) {
     const template = await mongoose.model('Template').findById(this.template);

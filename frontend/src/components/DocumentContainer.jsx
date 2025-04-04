@@ -4,10 +4,63 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Editor } from "@tinymce/tinymce-react"
 import { getToken } from "../utils/authUtil"
-import { createDocument, updateDocument, getDocumentById } from "../services/documentService"
+import { createDocument, updateDocument, getDocumentById, getDocumentsByUser } from "../services/documentService"
 import { getTemplateById } from "../services/templateService"
 import imageCompression from "browser-image-compression"
 import { X, Printer, Save } from "lucide-react"
+
+// Function to find user ID from various storage locations
+const findUserId = () => {
+  // Try to find user info in common storage patterns
+  try {
+    // Option 1: Check localStorage with common keys
+    const storageKeys = ["userInfo", "user", "currentUser", "auth", "userData", "profile"]
+
+    for (const key of storageKeys) {
+      const data = localStorage.getItem(key)
+      if (data) {
+        const parsed = JSON.parse(data)
+        if (parsed._id) return parsed._id
+        if (parsed.id) return parsed.id
+        if (parsed.userId) return parsed.userId
+        if (parsed.user && parsed.user._id) return parsed.user._id
+        if (parsed.user && parsed.user.id) return parsed.user.id
+      }
+    }
+
+    // Option 2: Check sessionStorage with the same keys
+    for (const key of storageKeys) {
+      const data = sessionStorage.getItem(key)
+      if (data) {
+        const parsed = JSON.parse(data)
+        if (parsed._id) return parsed._id
+        if (parsed.id) return parsed.id
+        if (parsed.userId) return parsed.userId
+        if (parsed.user && parsed.user._id) return parsed.user._id
+        if (parsed.user && parsed.user.id) return parsed.user.id
+      }
+    }
+
+    // Option 3: Try to parse the token itself if it's a JWT
+    const token = getToken()
+    if (token && token.split(".").length === 3) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]))
+        if (payload.id) return payload.id
+        if (payload._id) return payload._id
+        if (payload.sub) return payload.sub
+      } catch (e) {
+        console.error("Error parsing JWT token:", e)
+      }
+    }
+
+    // If we get here, we couldn't find a user ID
+    return null
+  } catch (error) {
+    console.error("Error finding user ID:", error)
+    return null
+  }
+}
 
 const DocumentContainer = () => {
   const { id, templateId } = useParams() // `id` for the document and `templateId` for creating based on a template
@@ -20,6 +73,9 @@ const DocumentContainer = () => {
   const navigate = useNavigate()
   const [isDataLoaded, setIsDataLoaded] = useState(false)
   const [message, setMessage] = useState(null)
+  // Inside your DocumentContainer component, add this state
+  const [existingTitles, setExistingTitles] = useState([])
+  const [titleError, setTitleError] = useState(null)
 
   const DPI = 96 // Fixed DPI for page dimensions
   const pageSizes = {
@@ -36,6 +92,56 @@ const DocumentContainer = () => {
     left: 1,
     right: 1,
   })
+
+  // Add this useEffect to load existing document titles
+  useEffect(() => {
+    const loadExistingTitles = async () => {
+      try {
+        const token = getToken()
+
+        // Find the user ID using our helper function
+        const userId = findUserId()
+
+        if (!userId) {
+          console.error("User ID not found")
+          // Instead of returning, let's continue without filtering by existing titles
+          setExistingTitles([])
+          return
+        }
+
+        const documents = await getDocumentsByUser(userId, token, "active")
+
+        // Filter out the current document's title if in update mode
+        const titles = documents.filter((doc) => !isUpdateMode || doc._id !== id).map((doc) => doc.title.toLowerCase())
+        setExistingTitles(titles)
+      } catch (err) {
+        console.error("Error loading document titles:", err)
+        // Set empty array to avoid undefined errors
+        setExistingTitles([])
+      }
+    }
+
+    // Only load titles after user authentication is confirmed
+    if (getToken()) {
+      loadExistingTitles()
+    }
+  }, [id, isUpdateMode])
+
+  // Add this validation function
+  const validateTitle = (title) => {
+    if (!title) {
+      setTitleError("Title is required")
+      return false
+    }
+
+    if (existingTitles.includes(title.toLowerCase())) {
+      setTitleError("A document with this title already exists. Please choose a different title.")
+      return false
+    }
+
+    setTitleError(null)
+    return true
+  }
 
   const sharedStyles = `
     @font-face {
@@ -311,38 +417,6 @@ const DocumentContainer = () => {
     input.click()
   }
 
-  // const insertHeaderFooterImage = (editor, position, file) => {
-  //     const reader = new FileReader()
-  //     reader.onload = () => {
-  //         const imageHtml = `
-  //             <div class="${position}">
-  //                 <img src="${reader.result}" alt="${position} image" />
-  //             </div>
-  //         `
-  //         editor.insertContent(imageHtml)
-  //     }
-  //     reader.readAsDataURL(file)
-  // }
-
-  // const handleHeaderFooterUpload = (editor, position) => {
-  //     const input = document.createElement("input")
-  //     input.type = "file"
-  //     input.accept = "image/*"
-  //     input.onchange = async () => {
-  //         const file = input.files[0]
-  //         if (file) {
-  //             try {
-  //                 const compressedFile = await compressImage(file)
-  //                 insertHeaderFooterImage(editor, position, compressedFile)
-  //             } catch (error) {
-  //                 console.error("Error compressing header/footer image:", error.message)
-  //                 showMessage("Failed to add header/footer image. Please try again.")
-  //             }
-  //         }
-  //     }
-  //     input.click()
-  // }
-
   const handleEditorChange = (content, pageId) => {
     setPages((prevPages) => prevPages.map((page) => (page.id === pageId ? { ...page, content } : page)))
   }
@@ -382,9 +456,10 @@ const DocumentContainer = () => {
     setTimeout(() => setMessage(null), 3000) // Auto-hide after 3 seconds
   }
 
+  // Modify the handleSaveOrUpdateDocument function
   const handleSaveOrUpdateDocument = async () => {
-    if (!title || pages.length === 0) {
-      showMessage("⚠️ Please fill in all required fields and ensure there is content.", "warning")
+    if (!validateTitle(title) || pages.length === 0) {
+      showMessage(titleError || "⚠️ Please fill in all required fields and ensure there is content.", "warning")
       return
     }
 
@@ -408,11 +483,15 @@ const DocumentContainer = () => {
         navigate("/documents")
       }
     } catch (error) {
-      console.error("Error saving/updating document:", error.message)
-      showMessage("❌ Failed to save/update document. Please try again.", "error")
+      if (error.message.includes("title already exists")) {
+        setTitleError("A document with this title already exists. Please choose a different title.")
+        showMessage("❌ " + error.message, "error")
+      } else {
+        console.error("Error saving/updating document:", error.message)
+        showMessage("❌ Failed to save/update document. Please try again.", "error")
+      }
     }
   }
-
   const handlePrintDocument = () => {
     const iframe = document.createElement("iframe")
     document.body.appendChild(iframe)
@@ -431,9 +510,9 @@ const DocumentContainer = () => {
                 </div>
             `,
       )
-      .join('');
+      .join("")
 
-    iframeDoc.open();
+    iframeDoc.open()
     iframeDoc.write(`
             <html>
                 <head>
@@ -465,10 +544,10 @@ const DocumentContainer = () => {
                     ${combinedContent}
                 </body>
             </html>
-        `);
-    iframeDoc.close();
+        `)
+    iframeDoc.close()
 
-    const iframeWindow = iframe.contentWindow;
+    const iframeWindow = iframe.contentWindow
 
     // Ensure images load before printing
     const images = iframeDoc.getElementsByTagName("img")
@@ -480,8 +559,8 @@ const DocumentContainer = () => {
           img.onload = resolve
           img.onerror = resolve
         }
-      });
-    });
+      })
+    })
 
     Promise.all(promises).then(() => {
       iframeWindow.focus()
@@ -489,24 +568,6 @@ const DocumentContainer = () => {
       document.body.removeChild(iframe) // Cleanup the iframe
     })
   }
-
-  // const addDraggableImage = (editor, file) => {
-  //   const reader = new FileReader()
-  //   reader.onload = () => {
-  //     const uniqueId = `draggable-${Date.now()}`
-  //     const imageHtml = `
-  //               <img
-  //                   id="${uniqueId}"
-  //                   src="${reader.result}"
-  //                   alt="Draggable Image"
-  //                   class="draggable-image"
-  //                   style="position: absolute; top: 50px; left: 50px; display: block; cursor: move; z-index: 1000;"
-  //               />
-  //           `
-  //     editor.insertContent(imageHtml)
-  //   }
-  //   reader.readAsDataURL(file)
-  // }
 
   return (
     <div className="p-4">
@@ -518,19 +579,21 @@ const DocumentContainer = () => {
           <X className="text-white" />
         </div>
       </div>
-      <h1 className="text-2xl font-bold mb-4">
-        {isUpdateMode ? "Edit Document" : "Create New Document"}
-      </h1>
+      <h1 className="text-2xl font-bold mb-4">{isUpdateMode ? "Edit Document" : "Create New Document"}</h1>
       <div className="mb-4 border p-4 rounded shadow">
         <h2 className="text-xl font-medium mb-4">Document Information</h2>
         <label className="block text-gray-700 font-medium mb-2">Title:</label>
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value)
+            if (e.target.value) validateTitle(e.target.value)
+          }}
           placeholder="Enter document title"
-          className="w-full border rounded p-2 mb-4"
+          className={`w-full border rounded p-2 ${titleError ? "border-red-500" : ""}`}
         />
+        {titleError && <p className="text-red-500 text-sm mt-1">{titleError}</p>}
         {template && (
           <p className="text-gray-700 mb-4">
             <strong>Template:</strong> {template.name}
@@ -559,22 +622,9 @@ const DocumentContainer = () => {
           </button>
         </div>
 
-        {/* Add/Delete Buttons */}
-        {/* <div className="mb-4 flex justify-end gap-4">
-                    <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
-                        Add Page
-                    </button>
-                    <button onClick={handleDeletePage} className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700">
-                        Delete Page
-                    </button>
-                </div> */}
-
         {isDataLoaded ? (
           pages.map((page) => (
-            <div
-              key={page.id}
-              style={{ display: currentPage === page.id ? "block" : "none" }}
-            >
+            <div key={page.id} style={{ display: currentPage === page.id ? "block" : "none" }}>
               <Editor
                 apiKey="iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
                 value={page.content}
@@ -596,7 +646,7 @@ const DocumentContainer = () => {
                     "insertdatetime",
                     "media",
                     "table",
-                    "paste",
+                    // "paste", // Removed the paste plugin that was causing 404 errors
                     "code",
                     "help",
                     "wordcount",
@@ -611,224 +661,124 @@ const DocumentContainer = () => {
                   contextmenu: false, // Disable TinyMCE's default context menu to allow browser's spell check menu
                   setup: (editor) => {
                     editor.on("drop", (event) => {
-                      event.preventDefault(); // Prevent TinyMCE's default drop handling
-                      event.stopPropagation(); // Stop propagation of the event to prevent other handlers
-                    });
+                      event.preventDefault() // Prevent TinyMCE's default drop handling
+                      event.stopPropagation() // Stop propagation of the event to prevent other handlers
+                    })
 
                     editor.on("init", () => {
-                      const iframeDoc = editor.getDoc(); // Access TinyMCE's iframe document
-
-                      // iframeDoc.addEventListener("mousedown", (e) => {
-                      //   const target = e.target.closest(".draggable-image");
-                      //   if (!target) return;
-
-                      //   const offsetX = e.clientX - target.offsetLeft;
-                      //   const offsetY = e.clientY - target.offsetTop;
-
-                      //   const onMouseMove = (event) => {
-                      //     target.style.left = `${event.clientX - offsetX}px`;
-                      //     target.style.top = `${event.clientY - offsetY}px`;
-                      //   };
-
-                      //   const onMouseUp = () => {
-                      //     iframeDoc.removeEventListener(
-                      //       "mousemove",
-                      //       onMouseMove
-                      //     );
-                      //     iframeDoc.removeEventListener("mouseup", onMouseUp);
-
-                      //     // Update TinyMCE's content
-                      //     const uniqueId = target.getAttribute("id");
-                      //     if (uniqueId) {
-                      //       const tinyTarget = editor.dom.get(uniqueId);
-                      //       editor.dom.setStyles(tinyTarget, {
-                      //         left: target.style.left,
-                      //         top: target.style.top,
-                      //       });
-
-                      //       // Synchronize TinyMCE content
-                      //       const updatedContent = editor.getContent();
-                      //       editor.setContent(updatedContent);
-
-                      //       // Trigger TinyMCE's change event to ensure synchronization
-                      //       editor.undoManager.add();
-                      //       editor.fire("change");
-                      //       console.log(editor.getContent()); // Verify updated content
-                      //     } else {
-                      //       console.warn(
-                      //         "Draggable image has no ID. Ensure unique IDs are assigned."
-                      //       );
-                      //     }
-                      //   };
-
-                      //   // iframeDoc.addEventListener("mousemove", onMouseMove);
-                      //   // iframeDoc.addEventListener("mouseup", onMouseUp);
-                      // });
-                    });
-
-                    // editor.ui.registry.addButton("addDraggableImage", {
-                    //     text: "Insert Image",
-                    //     icon: "image",
-                    //     onAction: () => {
-                    //         const input = document.createElement("input")
-                    //         input.type = "file"
-                    //         input.accept = "image/*"
-                    //         input.onchange = async () => {
-                    //             const file = input.files[0]
-                    //             if (file) {
-                    //                 try {
-                    //                     addDraggableImage(editor, file)
-                    //                 } catch (error) {
-                    //                     console.error("Error adding draggable image:", error.message)
-                    //                     showMessage("Failed to add image. Please try again.")
-                    //                 }
-                    //             }
-                    //         }
-                    //         input.click()
-                    //     },
-                    // })
+                      const iframeDoc = editor.getDoc() // Access TinyMCE's iframe document
+                    })
 
                     editor.on("keydown", (event) => {
                       if (event.key === "Tab") {
-                        event.preventDefault(); // Prevent default tab behavior
-                        const selection = editor.selection;
+                        event.preventDefault() // Prevent default tab behavior
+                        const selection = editor.selection
                         const content = selection.getContent({
                           format: "html",
-                        });
+                        })
 
                         // Insert a "tab" as multiple non-breaking spaces
-                        const tabEquivalent = "&nbsp;&nbsp;&nbsp;&nbsp;"; // 4 spaces (adjust as needed)
-                        const newContent = `${tabEquivalent}${content}`;
-                        selection.setContent(newContent);
+                        const tabEquivalent = "&nbsp;&nbsp;&nbsp;&nbsp;" // 4 spaces (adjust as needed)
+                        const newContent = `${tabEquivalent}${content}`
+                        selection.setContent(newContent)
                       }
-                    });
-
-                    // editor.ui.registry.addButton("addHeaderImage", {
-                    //     text: "Add Header Image",
-                    //     icon: "image",
-                    //     onAction: () => handleHeaderFooterUpload(editor, "header"),
-                    // })
-                    // editor.ui.registry.addButton("addFooterImage", {
-                    //     text: "Add Footer Image",
-                    //     icon: "image",
-                    //     onAction: () => handleHeaderFooterUpload(editor, "footer"),
-                    // })
-
-                    // editor.ui.registry.addButton('addImage', {
-                    //     text: 'Add Image',
-                    //     icon: 'image',
-                    //     onAction: () => handleImageUpload(editor),
-                    // });
+                    })
 
                     // Prevent interaction outside of editable spans within non-editable blocks
                     editor.on("BeforeExecCommand", (e) => {
-                      const selectedNode = editor.selection.getNode();
-                      if (
-                        selectedNode.closest(".non-editable") &&
-                        !selectedNode.classList.contains("editable")
-                      ) {
-                        e.preventDefault(); // Block commands like typing or formatting
+                      const selectedNode = editor.selection.getNode()
+                      if (selectedNode.closest(".non-editable") && !selectedNode.classList.contains("editable")) {
+                        e.preventDefault() // Block commands like typing or formatting
                       }
-                    });
+                    })
 
                     // Prevent cursor placement or interaction outside of editable spans
                     editor.on("MouseDown", (e) => {
-                      const targetNode = e.target;
-                      if (
-                        targetNode.closest(".non-editable") &&
-                        !targetNode.classList.contains("editable")
-                      ) {
-                        e.preventDefault(); // Prevent clicking into non-editable areas
-                        editor.selection.collapse(); // Remove selection
+                      const targetNode = e.target
+                      if (targetNode.closest(".non-editable") && !targetNode.classList.contains("editable")) {
+                        e.preventDefault() // Prevent clicking into non-editable areas
+                        editor.selection.collapse() // Remove selection
                       }
-                    });
+                    })
 
                     // Ensure `editable` spans remain editable
                     editor.on("BeforeSetContent", (e) => {
-                      const parser = new DOMParser();
-                      const doc = parser.parseFromString(
-                        e.content,
-                        "text/html"
-                      );
-                      const nonEditableElements =
-                        doc.querySelectorAll(".non-editable");
+                      const parser = new DOMParser()
+                      const doc = parser.parseFromString(e.content, "text/html")
+                      const nonEditableElements = doc.querySelectorAll(".non-editable")
                       nonEditableElements.forEach((el) => {
                         // Set non-editable container to not allow interaction
-                        el.setAttribute("contenteditable", "false");
+                        el.setAttribute("contenteditable", "false")
 
                         // Ensure editable spans inside remain editable
                         el.querySelectorAll(".editable").forEach((span) => {
-                          span.setAttribute("contenteditable", "true");
-                        });
-                      });
-                      e.content = doc.body.innerHTML;
-                    });
+                          span.setAttribute("contenteditable", "true")
+                        })
+                      })
+                      e.content = doc.body.innerHTML
+                    })
 
                     // Prevent deletion of editable spans when they become empty
                     editor.on("KeyDown", (e) => {
                       if (e.keyCode === 8 || e.keyCode === 46) {
                         // Backspace or Delete key
-                        const selectedNode = editor.selection.getNode();
-                        const editableSpan =
-                          selectedNode.closest(".editable");
+                        const selectedNode = editor.selection.getNode()
+                        const editableSpan = selectedNode.closest(".editable")
 
                         if (editableSpan) {
-                          const content = editableSpan.textContent.trim();
+                          const content = editableSpan.textContent.trim()
                           if (content === "" || content.length === 1) {
                             // If content is empty or has only one character left
-                            e.preventDefault(); // Prevent the deletion
+                            e.preventDefault() // Prevent the deletion
                             // Optionally, you can set a minimum content to ensure visibility
                             if (content === "") {
-                              editableSpan.innerHTML = "&nbsp;";
+                              editableSpan.innerHTML = "&nbsp;"
                               // Place cursor at the beginning of the span
-                              const range = editor.dom.createRng();
-                              range.setStart(editableSpan, 0);
-                              range.setEnd(editableSpan, 0);
-                              editor.selection.setRng(range);
+                              const range = editor.dom.createRng()
+                              range.setStart(editableSpan, 0)
+                              range.setEnd(editableSpan, 0)
+                              editor.selection.setRng(range)
                             }
                           }
                         }
                       }
-                    });
+                    })
 
                     // Adjust toolbar interaction based on selection
                     editor.on("NodeChange", () => {
-                      const selectedNode = editor.selection.getNode();
+                      const selectedNode = editor.selection.getNode()
                       const inNonEditable =
-                        selectedNode.closest(".non-editable") &&
-                        !selectedNode.classList.contains("editable");
-                      const toolbarButtons = editor
-                        .getContainer()
-                        .querySelectorAll(".tox-tbtn");
+                        selectedNode.closest(".non-editable") && !selectedNode.classList.contains("editable")
+                      const toolbarButtons = editor.getContainer().querySelectorAll(".tox-tbtn")
 
                       toolbarButtons.forEach((btn) => {
-                        btn.disabled = inNonEditable; // Disable buttons if in a non-editable area
-                      });
-                    });
+                        btn.disabled = inNonEditable // Disable buttons if in a non-editable area
+                      })
+                    })
                     // Add Hanging Indent Button
                     editor.ui.registry.addButton("addHangingIndent", {
                       text: "Hanging Indent",
                       icon: "indent",
                       tooltip: "Add Hanging Indent",
                       onAction: () => {
-                        const selectedNode = editor.selection.getNode(); // Get the selected node
-                        const isParagraph = selectedNode.nodeName === "P"; // Check if it's a <p> element
+                        const selectedNode = editor.selection.getNode() // Get the selected node
+                        const isParagraph = selectedNode.nodeName === "P" // Check if it's a <p> element
 
                         if (isParagraph) {
                           // Update the style directly for <p> elements
-                          selectedNode.style.textIndent = "-40px";
-                          selectedNode.style.marginLeft = "40px";
+                          selectedNode.style.textIndent = "-40px"
+                          selectedNode.style.marginLeft = "40px"
                         } else {
                           // Wrap in a <p> if not already a block element
                           const content = editor.selection.getContent({
                             format: "html",
-                          });
+                          })
                           editor.selection.setContent(
-                            `<p style="text-indent: -40px; margin-left: 40px;">${content}</p>`
-                          );
+                            `<p style="text-indent: -40px; margin-left: 40px;">${content}</p>`,
+                          )
                         }
                       },
-                    });
+                    })
 
                     // Remove Hanging Indent Button
                     editor.ui.registry.addButton("removeHangingIndent", {
@@ -836,32 +786,30 @@ const DocumentContainer = () => {
                       icon: "outdent",
                       tooltip: "Remove Hanging Indent",
                       onAction: () => {
-                        const selectedNode = editor.selection.getNode(); // Get the selected node
-                        const isParagraph = selectedNode.nodeName === "P"; // Check if it's a <p> element
+                        const selectedNode = editor.selection.getNode() // Get the selected node
+                        const isParagraph = selectedNode.nodeName === "P" // Check if it's a <p> element
 
                         if (isParagraph) {
                           // Remove the hanging indent styles
-                          selectedNode.style.textIndent = "";
-                          selectedNode.style.marginLeft = "";
+                          selectedNode.style.textIndent = ""
+                          selectedNode.style.marginLeft = ""
                         } else {
                           // Handle nested <p> tags (if any)
                           const content = editor.selection.getContent({
                             format: "html",
-                          });
+                          })
                           editor.selection.setContent(
                             content.replace(
                               /<p[^>]*style=["'][^"']*text-indent:\s*-40px;?\s*margin-left:\s*40px;?[^"']*["'][^>]*>(.*?)<\/p>/g,
-                              "$1"
-                            )
-                          );
+                              "$1",
+                            ),
+                          )
                         }
                       },
-                    });
+                    })
                   },
                 }}
-                onEditorChange={(content) =>
-                  handleEditorChange(content, page.id)
-                }
+                onEditorChange={(content) => handleEditorChange(content, page.id)}
               />
             </div>
           ))
@@ -886,11 +834,7 @@ const DocumentContainer = () => {
                     p-4 rounded shadow-lg text-white text-center w-80"
             style={{
               backgroundColor:
-                message.type === "success"
-                  ? "#4CAF50"
-                  : message.type === "error"
-                    ? "#F44336"
-                    : "#FFC107",
+                message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
             }}
           >
             {message.text}
@@ -901,13 +845,12 @@ const DocumentContainer = () => {
           onClick={handlePrintDocument}
           className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#1a8cd8] flex items-center gap-2 hover:scale-105"
         >
-          <Printer className="text-white" />{" "}
-          {/* Replace X with the desired icon */}
+          <Printer className="text-white" /> {/* Replace X with the desired icon */}
           Print Document
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 export default DocumentContainer

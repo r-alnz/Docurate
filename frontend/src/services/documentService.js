@@ -13,7 +13,9 @@ const createDocument = async (documentData, token) => {
         });
         return response.data;
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Error creating document');
+        // Extract the error message from the response
+        const errorMessage = error.response?.data?.message || 'Error creating document';
+        throw new Error(errorMessage);
     }
 };
 
@@ -41,7 +43,9 @@ const updateDocument = async (id, documentData, token) => {
         });
         return response.data;
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Error updating document');
+        // Extract the error message from the response
+        const errorMessage = error.response?.data?.message || 'Error updating document';
+        throw new Error(errorMessage);
     }
 };
 
