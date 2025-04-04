@@ -1,3 +1,4 @@
+// documentController.js - Add soft delete, recover, and erase functions
 import Document from '../models/documentModel.js';
 import Template from '../models/templateModel.js';
 
@@ -5,8 +6,6 @@ import Template from '../models/templateModel.js';
 const createDocument = async (req, res) => {
     try {
         const { title, template, content } = req.body;
-        // console.log(req.body);
-        // console.log(req.user);
 
         if (!title || !template || !content) {
             return res.status(400).json({ message: 'All fields are required.' });
@@ -19,7 +18,6 @@ const createDocument = async (req, res) => {
             content,
             user: req.user._id,
         });
-        // console.log(document);
         await document.save();
         res.status(201).json(document);
     } catch (error) {
@@ -30,7 +28,6 @@ const createDocument = async (req, res) => {
 
 // Get a single document by ID
 const getDocumentById = async (req, res) => {
-    console.log(req.params.id);
     try {
         const document = await Document.findById(req.params.id)
             .populate('template')
@@ -73,13 +70,11 @@ const updateDocument = async (req, res) => {
     }
 };
 
-// Delete a document
+// Soft Delete a document (set status to inactive)
 const deleteDocument = async (req, res) => {
     try {
         const documentId = req.params.id;
         const userId = req.user._id;
-
-        console.log(documentId);
 
         // Find the document
         const document = await Document.findById(documentId);
@@ -92,21 +87,84 @@ const deleteDocument = async (req, res) => {
             return res.status(403).json({ message: 'Unauthorized action.' });
         }
 
-        // Delete the document
-        await Document.findByIdAndDelete(documentId);
+        // Update the document's status to "inactive"
+        document.status = 'inactive';
+        await document.save();
 
-        res.status(200).json({ message: 'Document deleted successfully.' });
+        res.status(200).json({ message: 'Document archived successfully.', document });
     } catch (error) {
-        console.error('Error deleting document:', error);
-        res.status(500).json({ message: 'Failed to delete document.' });
+        console.error('Error archiving document:', error);
+        res.status(500).json({ message: 'Failed to archive document.' });
     }
 };
 
+// Recover a document (set status back to active)
+const recoverDocument = async (req, res) => {
+    try {
+        const documentId = req.params.id;
+        const userId = req.user._id;
+
+        // Find the document
+        const document = await Document.findById(documentId);
+        if (!document) {
+            return res.status(404).json({ message: 'Document not found.' });
+        }
+
+        // Check if the document belongs to the requesting user
+        if (document.user.toString() !== userId.toString()) {
+            return res.status(403).json({ message: 'Unauthorized action.' });
+        }
+
+        // Update the document's status to "active"
+        document.status = 'active';
+        await document.save();
+
+        res.status(200).json({ message: 'Document recovered successfully.', document });
+    } catch (error) {
+        console.error('Error recovering document:', error);
+        res.status(500).json({ message: 'Failed to recover document.' });
+    }
+};
+
+// Permanently delete a document
+const eraseDocument = async (req, res) => {
+    try {
+        const documentId = req.params.id;
+        const userId = req.user._id;
+
+        // Find the document
+        const document = await Document.findById(documentId);
+        if (!document) {
+            return res.status(404).json({ message: 'Document not found.' });
+        }
+
+        // Check if the document belongs to the requesting user
+        if (document.user.toString() !== userId.toString()) {
+            return res.status(403).json({ message: 'Unauthorized action.' });
+        }
+
+        // Permanently delete the document
+        await Document.findByIdAndDelete(documentId);
+
+        res.status(200).json({ message: 'Document permanently deleted.' });
+    } catch (error) {
+        console.error('Error erasing document:', error);
+        res.status(500).json({ message: 'Failed to erase document.' });
+    }
+};
 
 // Get all documents created by a user
 const getDocumentsByUser = async (req, res) => {
     try {
-        const documents = await Document.find({ user: req.params.userId })
+        // Add status filter if provided in query params
+        const statusFilter = req.query.status || 'active'; // Default to active
+        
+        const query = { 
+            user: req.params.userId,
+            ...(statusFilter !== 'all' && { status: statusFilter })
+        };
+        
+        const documents = await Document.find(query)
             .populate('template')
             .populate('organization');
 
@@ -117,5 +175,12 @@ const getDocumentsByUser = async (req, res) => {
     }
 };
 
-
-export { createDocument, getDocumentById, updateDocument, deleteDocument, getDocumentsByUser };
+export { 
+    createDocument, 
+    getDocumentById, 
+    updateDocument, 
+    deleteDocument, 
+    recoverDocument, 
+    eraseDocument, 
+    getDocumentsByUser 
+};

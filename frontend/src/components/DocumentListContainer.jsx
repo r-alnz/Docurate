@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../hooks/useAuthContext';
-import { getDocumentsByUser, deleteDocument } from '../services/documentService';
+import {
+  getDocumentsByUser,
+  deleteDocument,
+  recoverDocument,
+  eraseDocument
+} from '../services/documentService';
 import { useDocumentContext } from '../hooks/useDocumentContext';
 import { getToken } from '../utils/authUtil';
-import DeleteDocumentModal from './DeleteDocumentModal'; // Import the modal
+import DeleteDocumentModal from './DeleteDocumentModal';
+import { Eye, ArchiveX } from 'lucide-react'; // Import icons if you're using Lucide
 
 const DocumentListContainer = () => {
   const { documents, loading, error, dispatch } = useDocumentContext();
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  const [selectedDocument, setSelectedDocument] = useState(null); // Track the selected document for deletion
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(''); // Search query state
-  const [sortOption, setSortOption] = useState('name-asc'); // Sort option state
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEraseModalOpen, setIsEraseModalOpen] = useState(false);
+  const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
+  const [documentToErase, setDocumentToErase] = useState(null);
+  const [documentToRecover, setDocumentToRecover] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('name-asc');
+  const [statusFilter, setStatusFilter] = useState('active');
   const [message, setMessage] = useState(null);
 
   const showMessage = (text, type = 'success') => {
     setMessage({ text, type });
-    setTimeout(() => setMessage(null), 3000); // Auto-hide after 3 seconds
+    setTimeout(() => setMessage(null), 3000);
   };
 
   useEffect(() => {
@@ -26,7 +37,7 @@ const DocumentListContainer = () => {
       dispatch({ type: 'SET_LOADING', payload: true });
       try {
         const token = getToken();
-        const fetchedDocuments = await getDocumentsByUser(user._id, token);
+        const fetchedDocuments = await getDocumentsByUser(user._id, token, statusFilter);
         dispatch({ type: 'SET_DOCUMENTS', payload: fetchedDocuments });
       } catch (err) {
         console.error(err);
@@ -37,23 +48,68 @@ const DocumentListContainer = () => {
     };
 
     loadDocuments();
-  }, [dispatch, user]);
+  }, [dispatch, user, statusFilter]);
 
+  // Soft delete (archive) a document
   const handleDeleteDocument = async (documentId) => {
     try {
       const token = getToken();
       await deleteDocument(documentId, token);
       dispatch({ type: 'DELETE_DOCUMENT', payload: documentId });
-      showMessage('Document deleted successfully!');
+      showMessage('Document archived successfully!');
     } catch (error) {
       console.error(error);
-      showMessage('Failed to delete the document. Please try again.');
+      showMessage('Failed to archive the document. Please try again.', 'error');
     }
+    setIsDeleteModalOpen(false);
   };
 
+  // Recover a document
+  const handleRecoverDocument = async (documentId) => {
+    try {
+      const token = getToken();
+      const response = await recoverDocument(documentId, token);
+      dispatch({ type: 'RECOVER_DOCUMENT', payload: response.document });
+      showMessage('Document recovered successfully!');
+    } catch (error) {
+      console.error(error);
+      showMessage('Failed to recover the document. Please try again.', 'error');
+    }
+    setIsRecoverModalOpen(false);
+    setDocumentToRecover(null);
+  };
+
+  // Permanently delete a document
+  const handleEraseDocument = async (documentId) => {
+    try {
+      const token = getToken();
+      await eraseDocument(documentId, token);
+      dispatch({ type: 'ERASE_DOCUMENT', payload: documentId });
+      showMessage('Document permanently deleted!');
+    } catch (error) {
+      console.error(error);
+      showMessage('Failed to permanently delete the document. Please try again.', 'error');
+    }
+    setIsEraseModalOpen(false);
+    setDocumentToErase(null);
+  };
+
+  // Open delete modal
   const openDeleteModal = (document) => {
     setSelectedDocument(document);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Open recover modal
+  const openRecoverModal = (document) => {
+    setDocumentToRecover(document);
+    setIsRecoverModalOpen(true);
+  };
+
+  // Open erase modal
+  const openEraseModal = (document) => {
+    setDocumentToErase(document);
+    setIsEraseModalOpen(true);
   };
 
   // Filter documents by search query
@@ -84,7 +140,7 @@ const DocumentListContainer = () => {
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Your Documents</h2>
 
-      {/* Search and Sort */}
+      {/* Search, Sort, and Filter */}
       <div className="mb-4 flex gap-4">
         <input
           type="text"
@@ -103,6 +159,15 @@ const DocumentListContainer = () => {
           <option value="date-asc">Date (Oldest First)</option>
           <option value="date-desc">Date (Newest First)</option>
         </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border rounded p-2 shadow bg-white"
+        >
+          <option value="active">Active</option>
+          <option value="inactive">Archived</option>
+          <option value="all">All</option>
+        </select>
       </div>
 
       {/* Documents List */}
@@ -113,7 +178,8 @@ const DocumentListContainer = () => {
           {sortedDocuments.map((document) => (
             <div
               key={document._id}
-              className="border rounded-lg p-6 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white max-w-sm mx-auto flex flex-col justify-between h-full"
+              className={`border rounded-lg p-6 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white max-w-sm mx-auto flex flex-col justify-between h-full ${document.status === 'inactive' ? 'opacity-50' : ''
+                }`}
             >
               <div>
                 <h3 className="text-2xl font-semibold text-gray-800 mb-3 truncate">
@@ -123,38 +189,114 @@ const DocumentListContainer = () => {
                   <strong className="text-gray-900">Template:</strong>{" "}
                   {document.template?.name || "N/A"}
                 </p>
+                {document.status === 'inactive' && (
+                  <p className="text-red-500 mb-2">Archived</p>
+                )}
               </div>
 
               <div className="mt-auto flex gap-4">
-                <button
-                  className="bg-[#38b6ff] text-white py-2 px-6 rounded-lg hover:bg-[#2a9ed6] transition-all duration-200 transform hover:scale-105"
-                  onClick={() => navigate(`/documents/${document._id}`)}
-                >
-                  Open
-                </button>
-                <button
-                  className="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition-all duration-200 transform hover:scale-105"
-                  onClick={() => openDeleteModal(document)}
-                >
-                  Delete
-                </button>
+                {document.status === 'active' ? (
+                  <>
+                    <button
+                      className="bg-[#38b6ff] text-white py-2 px-6 rounded-lg hover:bg-[#2a9ed6] transition-all duration-200 transform hover:scale-105"
+                      onClick={() => navigate(`/documents/${document._id}`)}
+                    >
+                      Open
+                    </button>
+                    <button
+                      className="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition-all duration-200 transform hover:scale-105"
+                      onClick={() => openDeleteModal(document)}
+                    >
+                      Archive
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="bg-green-500 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
+                      onClick={() => openRecoverModal(document)}
+                    >
+                      Recover
+                    </button>
+                    <button
+                      className="bg-red-700 text-white py-2 px-6 rounded-lg hover:bg-red-900 transition-all duration-200 transform hover:scale-105"
+                      onClick={() => openEraseModal(document)}
+                    >
+                      Erase
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Delete Modal */}
-      {isModalOpen && selectedDocument && (
+      {/* Delete (Archive) Modal */}
+      {isDeleteModalOpen && selectedDocument && (
         <DeleteDocumentModal
-          isOpen={isModalOpen}
+          isOpen={isDeleteModalOpen}
           documentTitle={selectedDocument.title}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => setIsDeleteModalOpen(false)}
           onDelete={() => handleDeleteDocument(selectedDocument._id)}
+          actionText="Archive"
+          message="Are you sure you want to archive this document? You can recover it later."
         />
       )}
 
-      {/* Mini Message Box (Centered) */}
+      {/* Recover Modal */}
+      {isRecoverModalOpen && documentToRecover && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-lg font-semibold">Recover Document</p>
+            <p className="text-sm mt-1">
+              Are you sure you want to recover "{documentToRecover.title}"?
+            </p>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={() => setIsRecoverModalOpen(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleRecoverDocument(documentToRecover._id)}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+              >
+                Recover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Erase Modal */}
+      {isEraseModalOpen && documentToErase && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-lg font-semibold">Permanently Delete Document</p>
+            <p className="text-sm text-red-600 mt-1">
+              This action cannot be undone. Are you sure you want to permanently delete "{documentToErase.title}"?
+            </p>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={() => setIsEraseModalOpen(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleEraseDocument(documentToErase._id)}
+                className="px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800"
+              >
+                Permanently Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Box */}
       {message && (
         <div
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 

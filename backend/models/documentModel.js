@@ -1,3 +1,4 @@
+// documentModel.js - Add status field
 import mongoose from 'mongoose';
 
 const documentSchema = new mongoose.Schema(
@@ -19,12 +20,17 @@ const documentSchema = new mongoose.Schema(
         content: { 
             type: String, 
             required: true 
-        },  // Finalized HTML with placeholders replaced by user inputs
+        },
         user: { 
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'User', 
             required: true 
         },
+        status: {
+            type: String,
+            enum: ['active', 'inactive'],
+            default: 'active'
+        }
     },
     {
         timestamps: true
@@ -36,7 +42,6 @@ documentSchema.pre('save', async function (next) {
     
     next();
 });
-
 
 const Document = mongoose.model('Document', documentSchema);
 

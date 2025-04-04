@@ -1,3 +1,4 @@
+// documentService.js - Add functions for recover and erase
 import axios from 'axios';
 import { getApiUrl } from "../api.js";
 const API_URL = getApiUrl("/documents");
@@ -44,7 +45,7 @@ const updateDocument = async (id, documentData, token) => {
     }
 };
 
-// Delete a document
+// Soft delete a document (set status to inactive)
 const deleteDocument = async (id, token) => {
     try {
         const response = await axios.delete(`${API_URL}/${id}`, {
@@ -54,14 +55,42 @@ const deleteDocument = async (id, token) => {
         });
         return response.data;
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Error deleting document');
+        throw new Error(error.response?.data?.message || 'Error archiving document');
+    }
+};
+
+// Recover a document (set status back to active)
+const recoverDocument = async (id, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/recover/${id}`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Error recovering document');
+    }
+};
+
+// Permanently delete a document
+const eraseDocument = async (id, token) => {
+    try {
+        const response = await axios.delete(`${API_URL}/erase/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Error permanently deleting document');
     }
 };
 
 // Get all documents by a user
-const getDocumentsByUser = async (userId, token) => {
+const getDocumentsByUser = async (userId, token, status = 'active') => {
     try {
-        const response = await axios.get(`${API_URL}/user/${userId}`, {
+        const response = await axios.get(`${API_URL}/user/${userId}?status=${status}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -91,6 +120,8 @@ export {
     getDocumentById,
     updateDocument,
     deleteDocument,
+    recoverDocument,
+    eraseDocument,
     getDocumentsByUser,
     getDocumentTemplateById,
 };
