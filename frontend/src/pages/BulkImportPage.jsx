@@ -5,7 +5,7 @@ import { useUserContext } from "../hooks/useUserContext"
 import { getToken } from "../utils/authUtil"
 import { getApiUrl } from "../api.js";
 
-const API_URL = getApiUrl("/import"); 
+const API_URL = getApiUrl("/import");
 // const API_URL = "https://docurate.onrender.com/api/import"
 
 const BulkImportPage = () => {
@@ -29,36 +29,43 @@ const BulkImportPage = () => {
     }
 
     const handleFileUpload = (event) => {
-        const file = event.target.files[0]
-        if (!file) return
+        const file = event.target.files[0];
+        if (!file) return;
 
-        const reader = new FileReader()
-        reader.readAsBinaryString(file)
+        const reader = new FileReader();
+        reader.readAsBinaryString(file);
         reader.onload = (e) => {
-            const binaryString = e.target.result
-            const workbook = XLSX.read(binaryString, { type: "binary" })
+            const binaryString = e.target.result;
+            const workbook = XLSX.read(binaryString, { type: "binary" });
 
-            const sheetName = workbook.SheetNames[0]
-            const sheet = workbook.Sheets[sheetName]
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
 
-            // explicitly set missing values to `null`
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: null })
+            // Convert Excel to JSON with missing values set to `null`
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: null });
 
-            // remove empty columns dynamically
+            // Remove empty columns dynamically
             if (jsonData.length > 0) {
-                const validKeys = Object.keys(jsonData[0]).filter((key) => jsonData.some((row) => row[key] !== null))
+                const validKeys = Object.keys(jsonData[0]).filter((key) => jsonData.some((row) => row[key] !== null));
 
                 const filteredData = jsonData.map((row) => {
-                    const newRow = {}
-                    validKeys.forEach((key) => (newRow[key] = row[key]))
-                    return newRow
-                })
-                setData(filteredData)
+                    const newRow = {};
+                    validKeys.forEach((key) => {
+                        if (key.toLowerCase().includes("birthdate") && row[key]) {
+                            newRow[key] = excelDateToISO(row[key]); // Convert birthdate format
+                        } else {
+                            newRow[key] = row[key];
+                        }
+                    });
+                    return newRow;
+                });
+
+                setData(filteredData);
             } else {
-                setData([])
+                setData([]);
             }
-        }
-    }
+        };
+    };
 
     const showAlert = (title, message) => {
         setModalContent({ title, message })
@@ -76,25 +83,43 @@ const BulkImportPage = () => {
             return
         }
 
+        // Check if any of the required fields are empty
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            const requiredFields = ["firstname", "lastname", "email", "studentId", "birthdate", "college", "program", "password"]; // Modify this list as per your requirements
+            for (let field of requiredFields) {
+                if (!row[field]) {
+                    showAlert("Validation Error", `Row ${i + 1}: The field "${field}" cannot be empty.`)
+                    return
+                }
+            }
+        }
+
         showConfirm("Confirm Upload", "Are you sure you want to upload this data?", handleConfirmUpload)
     }
 
+    const excelDateToISO = (excelDate) => {
+        if (!excelDate || isNaN(excelDate)) return null; // Handle empty or invalid dates
+        const date = new Date((excelDate - 25569) * 86400000); // Convert Excel serial number to JS date
+        return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    };
+
     const handleConfirmUpload = async () => {
-        setLoading(true)
-        setMessage(null)
+        setLoading(true);
+        setMessage(null);
 
         try {
-            const token = localStorage.getItem("authToken")
-            console.log("Retrieved Token:", token)
+            const token = localStorage.getItem("authToken");
+            console.log("Retrieved Token:", token);
 
             if (!token) {
-                showAlert("Authentication Error", "No authentication token found. Please log in again.")
-                setLoading(false)
-                return
+                showAlert("Authentication Error", "No authentication token found. Please log in again.");
+                setLoading(false);
+                return;
             }
 
-            const formData = new FormData()
-            formData.append("file", document.querySelector('input[type="file"]').files[0])
+            const formData = new FormData();
+            formData.append("file", document.querySelector('input[type="file"]').files[0]);
 
             const response = await fetch(`${API_URL}/bulk-import`, {
                 method: "POST",
@@ -103,52 +128,56 @@ const BulkImportPage = () => {
                 },
                 body: formData,
                 credentials: "include",
-            })
+            });
 
-            const result = await response.json()
-            console.log("Server Response:", result)
+            const result = await response.json();
+            console.log("Server Response:", result);
 
             if (!response.ok) {
                 if (response.status === 409 && result.conflicts) {
                     // 🚨 Handle duplicate users (email or studentId)
-                    let conflictMessage = "Some users already exist:\n"
+                    let conflictMessage = "Some users already exist:\n";
 
                     result.conflicts.forEach((user) => {
-                        let duplicateInfo = `${user.name} - `
+                        let duplicateInfo = `${user.name} - `;
 
-                        if (result.duplicateEmails.includes(user.email)) {
-                            duplicateInfo += `Email: ${user.email}`
+                        if (result.duplicateEmails && result.duplicateEmails.includes(user.email)) {
+                            duplicateInfo += `Email: ${user.email}`;
                         }
 
-                        if (result.duplicateStudentIds.includes(user.studentId)) {
+                        if (result.duplicateStudentIds && result.duplicateStudentIds.includes(user.studentId)) {
                             if (duplicateInfo.includes("Email")) {
-                                duplicateInfo += `, `
+                                duplicateInfo += `, `;
                             }
-                            duplicateInfo += `Student ID: ${user.studentId}`
+                            duplicateInfo += `Student ID: ${user.studentId}`;
                         }
 
-                        conflictMessage += `\n${duplicateInfo}`
-                    })
+                        conflictMessage += `\n${duplicateInfo}`;
+                    });
 
-                    conflictMessage += "\n\nDo you want to skip these and upload the rest?"
+                    conflictMessage += "\n\nDo you want to skip these and upload the rest?";
+
+                    if (result.nonDuplicates && result.nonDuplicates.length === 0) {
+                        showAlert("All Users Exist", "All users already exist in the system.");
+                        setLoading(false);
+                        return;
+                    }
 
                     showConfirm("Duplicate Users", conflictMessage, async () => {
-                        if (result.nonDuplicates.length > 0) {
-                            // Create a new workbook with only non-duplicate users
-                            const ws = XLSX.utils.json_to_sheet(result.nonDuplicates)
-                            const wb = XLSX.utils.book_new()
-                            XLSX.utils.book_append_sheet(wb, ws, "NonDuplicates")
+                        if (result.nonDuplicates && result.nonDuplicates.length > 0) {
+                            // Process non-duplicate users
+                            const ws = XLSX.utils.json_to_sheet(result.nonDuplicates);
+                            const wb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(wb, ws, "NonDuplicates");
 
-                            // Convert to blob
-                            const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" })
+                            const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
                             const blob = new Blob([wbout], {
                                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            })
-                            const nonDuplicatesFile = new File([blob], "non_duplicates.xlsx", { type: blob.type })
+                            });
+                            const nonDuplicatesFile = new File([blob], "non_duplicates.xlsx", { type: blob.type });
 
-                            // Create new FormData with only non-duplicates
-                            const newFormData = new FormData()
-                            newFormData.append("file", nonDuplicatesFile)
+                            const newFormData = new FormData();
+                            newFormData.append("file", nonDuplicatesFile);
 
                             try {
                                 const retryResponse = await fetch(`${API_URL}/bulk-import`, {
@@ -158,63 +187,36 @@ const BulkImportPage = () => {
                                     },
                                     body: newFormData,
                                     credentials: "include",
-                                })
+                                });
 
-                                const retryResult = await retryResponse.json()
+                                const retryResult = await retryResponse.json();
 
                                 if (!retryResponse.ok) {
-                                    throw new Error(retryResult.error || "Failed to import non-duplicate users")
+                                    throw new Error(retryResult.error || "Failed to import non-duplicate users");
                                 }
 
-                                setMessage({ type: "success", text: "Non-duplicate users imported successfully!" })
-                                setData([]) // Clear table after successful upload
-                                loadUsers() // Refresh the user list
+                                setMessage({ type: "success", text: "Non-duplicate users imported successfully!" });
+                                setData([]); // Clear table after successful upload
+                                loadUsers(); // Refresh the user list
                             } catch (error) {
-                                console.error("Retry import error:", error)
-                                setMessage({ type: "error", text: error.message })
+                                console.error("Retry import error:", error);
+                                setMessage({ type: "error", text: error.message });
                             }
                         }
-                    })
-                    setLoading(false)
-                    return
+                    });
+                    setLoading(false);
+                    return;
                 }
-
-                if (response.status === 400 && result.invalidUsers) {
-                    // 🚨 Handle users with validation errors (missing fields or invalid format)
-                    let errorMessage = "Some users have validation errors:\n"
-
-                    result.invalidUsers.forEach((user) => {
-                        errorMessage += `\nFor ${user.email || "No Email"} (${user.name}):\n`
-
-                        if (user.missingFields && user.missingFields.length > 0) {
-                            errorMessage += `- Missing fields: [${user.missingFields.join(", ")}]\n`
-                        }
-
-                        if (user.invalidFields && user.invalidFields.length > 0) {
-                            errorMessage += `- Invalid fields: [${user.invalidFields.join(", ")}]\n`
-                        }
-                    })
-
-                    setMessage({
-                        type: "error",
-                        text: errorMessage,
-                    })
-                    setLoading(false)
-                    return
-                }
-
-                throw new Error(result.error || "Failed to import data")
             }
-            loadUsers()
-            setMessage({ type: "success", text: "Users imported successfully!" })
-            setData([]) // Clear table after successful upload
         } catch (error) {
-            console.error("Import error:", error)
-            setMessage({ type: "error", text: error.message })
-        } finally {
-            setLoading(false)
+            console.error("Upload error:", error);
+            setMessage({ type: "error", text: error.message });
+            setLoading(false);
         }
-    }
+    };
+
+
+
 
     // Modal components
     const AlertModal = () => {
@@ -330,4 +332,3 @@ const BulkImportPage = () => {
 }
 
 export default BulkImportPage
-

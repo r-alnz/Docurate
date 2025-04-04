@@ -128,6 +128,13 @@ router.post("/bulk-import", authToken, upload.single("file"), async (req, res) =
       })
     }
 
+    //Convert birthdate to storing
+    const convertExcelDate = (excelDate) => {
+      if (!excelDate || isNaN(excelDate)) return null; // Handle empty or invalid dates
+      const date = new Date((excelDate - 25569) * 86400000);
+      return date.toISOString().split("T")[0]; // Converts to YYYY-MM-DD format
+    };
+
     // Assign organization and insert valid users
     const formattedUsers = await Promise.all(
       users.map(async (user) => {
@@ -135,6 +142,7 @@ router.post("/bulk-import", authToken, upload.single("file"), async (req, res) =
         return {
           ...user,
           password: hashedPassword, // Store the hashed password
+          birthdate: convertExcelDate(user.birthdate), // ✅ Convert birthdate
           organization: new mongoose.Types.ObjectId(loggedInUser.organization),
           role: "student",
           studentId: user.studentId || "00000",

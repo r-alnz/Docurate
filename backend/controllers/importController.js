@@ -20,6 +20,12 @@ export const uploadExcel = async (req, res) => {
 
         console.log("📊 Parsed users data:", usersData);
 
+        const convertExcelDate = (excelDate) => {
+            if (!excelDate || isNaN(excelDate)) return null; // Handle invalid data
+            const date = new Date((excelDate - 25569) * 86400000);
+            return date.toISOString().split("T")[0]; // Converts to YYYY-MM-DD
+        };
+
         const users = usersData.map((row) => ({
             firstname: row.firstname,
             lastname: row.lastname,
@@ -30,6 +36,7 @@ export const uploadExcel = async (req, res) => {
                 : null,
             role: row.role || "student",
             studentId: row.studentId || null,
+            birthdate: convertExcelDate(row.birthdate), // ✅ Add birthdate conversion
         }));
 
         console.log("📝 Final users array (before saving):", users);
