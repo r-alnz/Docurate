@@ -1,9 +1,11 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
 import { fetchOrganizations } from "../services/superAdminService"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useOrganizationContext } from "../hooks/useOrganizationContext"
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react"
 
 const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const { token } = useAuthContext()
@@ -20,6 +22,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const [loading, setLoading] = useState(false)
   const [organizations, setOrganizations] = useState([])
   const [position, setPosition] = useState("")
+  const [customPosition, setCustomPosition] = useState("") // New state for 'Other' input
   const [showPassword, setShowPassword] = useState(false)
   const [message, setMessage] = useState(null)
   const [showMessageModal, setShowMessageModal] = useState(false)
@@ -34,6 +37,22 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const validateName = (name) => {
     const nameRegex = /^[A-Za-z\s]+$/
     return nameRegex.test(name)
+  }
+
+  const handlePositionChange = (e) => {
+    const selectedPosition = e.target.value
+    setPosition(selectedPosition) // Update position with the selected dropdown option
+
+    // If 'Other' is selected, allow the user to type a custom position
+    if (selectedPosition !== "Other") {
+      setCustomPosition("") // Clear custom position if it's no longer 'Other'
+    }
+  }
+
+  const handleCustomPositionChange = (e) => {
+    const customValue = e.target.value
+    setCustomPosition(customValue) // Only update the customPosition state
+    // Don't update position here, as it should remain "Other"
   }
 
   const validateEmail = (email) => {
@@ -138,7 +157,10 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
       return
     }
 
-    const userDetails = { firstname, lastname, email, birthdate, password, role, organization, position }
+    // Use customPosition value when "Other" is selected
+    const finalPosition = position === "Other" ? customPosition : position
+
+    const userDetails = { firstname, lastname, email, birthdate, password, role, organization, position: finalPosition }
 
     try {
       await onSubmit(userDetails)
@@ -174,9 +196,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
         <form onSubmit={handleSubmit}>
           {/* Organization */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Organization
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Organization</label>
             {loading ? (
               <p>Loading organizations...</p>
             ) : (
@@ -198,22 +218,35 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Position */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Position
-            </label>
-            <input
-              type="text"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
+            <label className="block text-gray-700 font-medium mb-2">Position</label>
+            <select
+              value={position} // Bind position state to the dropdown
+              onChange={handlePositionChange} // Handle dropdown change
               className="border rounded p-2 w-full"
-            />
+            >
+              <option value="">Select a position</option>
+              <option value="University Admin">University Admin</option>
+              <option value="Staff">Staff</option>
+              <option value="SASO">SASO</option>
+              <option value="Professor">Professor</option>
+              <option value="Other">Other</option> {/* 'Other' option */}
+            </select>
+
+            {/* If 'Other' is selected, show a text input for custom position */}
+            {position === "Other" && (
+              <input
+                type="text"
+                value={customPosition} // Use customPosition state for 'Other'
+                onChange={handleCustomPositionChange} // Update customPosition on input change
+                className="border rounded p-2 w-full mt-2"
+                placeholder="Please specify"
+              />
+            )}
           </div>
 
           {/* First Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              First Name
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">First Name</label>
             <input
               type="text"
               value={firstname}
@@ -225,9 +258,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Last Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Last Name
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Last Name</label>
             <input
               type="text"
               value={lastname}
@@ -239,9 +270,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Birthdate */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Birthdate
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Birthdate</label>
             <input
               type="date"
               value={birthdate}
@@ -263,11 +292,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 12H8m4-4v8"
-                ></path>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m4-4v8"></path>
               </svg>
               Account Information
             </span>
@@ -276,9 +301,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Email
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input
               type="email"
               value={email}
@@ -290,9 +313,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Password */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Password
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Password</label>
             <input
               type={showPassword ? "text" : "password"}
               value={password}
@@ -312,17 +333,15 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
               <br />
               Example: <i>delacruz2000</i>
             </p>
-            {passwordError && (
-              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-            )}
+            {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
           </div>
 
           {/* Inline Message - Moved below password section */}
           {message && !showMessageModal && (
             <div
               className={`mb-4 p-2 rounded ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
+                  ? "bg-green-100 text-green-700 border border-green-400"
+                  : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -353,14 +372,12 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
       {showMessageModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-            <p className="text-green-700 text-center font-medium text-lg">
-              ✅ Submission successful!
-            </p>
+            <p className="text-green-700 text-center font-medium text-lg">✅ Submission successful!</p>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
 
 AddAdminModal.propTypes = {
