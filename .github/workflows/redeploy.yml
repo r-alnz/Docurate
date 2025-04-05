@@ -1,0 +1,24 @@
+name: Trigger Redeployment
+
+on:
+  repository_dispatch:
+    types: [trigger-redeploy]
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Modify trigger.txt with timestamp and user
+        run: |
+          echo "Triggered at $(date) by ${{ github.event.client_payload.user }}" > trigger.txt
+          git config --global user.email "campusinvasionproject@gmail.com"
+          git config --global user.name "thepaulaaron"
+          git add trigger.txt
+          git commit -m "Trigger redeployment at $(date) by ${{ github.event.client_payload.user }}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
