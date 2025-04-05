@@ -1,4 +1,3 @@
-"use client"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useState, useEffect } from "react"
 import { Eye, EyeOff } from "lucide-react"
@@ -404,8 +403,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {message && (
             <div
               className={`mt-4 p-2 rounded ${message.type === "success"
-                  ? "bg-green-100 text-green-700 border border-green-400"
-                  : "bg-red-100 text-red-700 border border-red-400"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -458,8 +457,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                 )
                               }}
                               className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                  ? "bg-[#38b6ff] text-white"
-                                  : "bg-gray-100 text-gray-700"
+                                ? "bg-[#38b6ff] text-white"
+                                : "bg-gray-100 text-gray-700"
                                 } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
