@@ -123,6 +123,18 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       return
     }
 
+    // Add validation for required college field
+    if (role === "student" && !college.trim()) {
+      setMessage({ type: "error", text: "❌ College field is required" })
+      return
+    }
+
+    // Add validation for required program field
+    if (role === "student" && !program.trim()) {
+      setMessage({ type: "error", text: "❌ Program field is required" })
+      return
+    }
+
     if (passwordError) {
       setMessage({ type: "error", text: "❌ Please fix the password issues before submitting" })
       return
@@ -216,7 +228,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">College</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      College <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={college}
@@ -226,7 +240,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Program</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Program <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={program}
@@ -388,8 +404,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
           {message && (
             <div
               className={`mt-4 p-2 rounded ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
+                  ? "bg-green-100 text-green-700 border border-green-400"
+                  : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -442,8 +458,8 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                                 )
                               }}
                               className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                                ? "bg-[#38b6ff] text-white"
-                                : "bg-gray-100 text-gray-700"
+                                  ? "bg-[#38b6ff] text-white"
+                                  : "bg-gray-100 text-gray-700"
                                 } rounded mb-1`}
                             >
                               {org.firstname || "(No Name)"}
@@ -494,9 +510,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
                 </div>
                 <div>
                   <h3 className="text-lg font-medium">Confirm Adding</h3>
-                  <p className="text-gray-600 mt-1">
-                    Are you sure you want to add these user?
-                  </p>
+                  <p className="text-gray-600 mt-1">Are you sure you want to add these user?</p>
                 </div>
               </div>
               <div className="flex justify-end space-x-3">
