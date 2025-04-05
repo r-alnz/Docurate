@@ -14,7 +14,7 @@ jobs:
 
       - name: Modify trigger.txt with timestamp and user
         run: |
-          echo "\n[${{ github.event.client_payload.user }}] redeploys at $(date)" >> trigger.txt
+          echo -e "\n[${{ github.event.client_payload.user }}] redeploys at $(date)" >> trigger.txt
           git config --global user.email "campusinvasionproject@gmail.com"
           git config --global user.name "thepaulaaron"
           git add trigger.txt
