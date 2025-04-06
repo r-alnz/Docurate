@@ -4,6 +4,7 @@ import PropTypes from "prop-types"
 import { useAuthContext } from "../hooks/useAuthContext"
 import DeleteAdminModal from "./DeleteAdminModal"
 import EditAdminModal from "./EditAdminModal"
+import InactivateModal from "./InactivateModal.jsx"
 import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 import { getApiUrl } from "../api.js";
@@ -19,18 +20,18 @@ import ReqRemoveModal from "./ReqRemoveModal";
  * Displays a table of users with filtering, editing, and management capabilities
  * Different views and actions are available based on the current user's role
  */
-const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
+const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
+    const [isInactivateModalOpen, setIsInactivateModalOpen] = useState(false);
     const [resetMode, setResetMode] = useState("");
     const { user: currentUser } = useAuthContext();
     const [filteredUsers, setFilteredUsers] = useState(users);
     const [filterRole, setFilterRole] = useState("all");
     const [filterCollege, setFilterCollege] = useState("all");
-
     
     // State for displaying temporary notification messages
     const [message, setMessage] = useState(null)
@@ -72,13 +73,18 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
   }
 
     const handleDeleteClick = (user) => {
-        setSelectedUser(user)
-        setIsDeleteModalOpen(true)
+      setSelectedUser(user)
+      setIsDeleteModalOpen(true)
+    }
+
+    const handleInactivate = (user) => {
+      setSelectedUser(user)
+      setIsInactivateModalOpen(true)
     }
 
     const handleReqRemoveClick = (user) => {
-        setSelectedUser(user)
-        setIsReqRemoveOpen(true)
+      setSelectedUser(user)
+      setIsReqRemoveOpen(true)
     }
 
   const handleResetPasswordClick = (user, mode) => {
@@ -394,7 +400,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                             <div className="relative">
                               <UserMinus
                                 className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
-                                onClick={() => handleDeleteClick(user)}
+                                onClick={() => handleInactivate(user)}
                                 title="Mark as Inactive"
                                 onMouseEnter={() =>
                                   setActiveTooltip(`inactive-${user._id}`)
@@ -404,7 +410,7 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                               {activeTooltip === `inactive-${user._id}` && (
                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
                                   {/* Mark as Inactive */}
-                                  Delete
+                                  Inactivate
                                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                                 </div>
                               )}
@@ -514,16 +520,25 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
           suborganizations={suborganizations}
           onClose={() => setIsEditModalOpen(false)}
           onEdit={onEdit}
-                />
-            )}
+        />
+      )}
 
-            {isReqRemoveOpen && (
-                <ReqRemoveModal
-                    isOpen={isReqRemoveOpen}
-                    removing={selectedUser}
-                    onClose={() => setIsReqRemoveOpen(false)}
-                    onSubmit={handleReqRemoveClick}
-            />
+      {isInactivateModalOpen && (
+        <InactivateModal
+          isOpen={isInactivateModalOpen}
+          user={selectedUser}
+          onClose={() => setIsInactivateModalOpen(false)}
+          onInactivate={onInactivate}
+        />
+      )}
+
+      {isReqRemoveOpen && (
+        <ReqRemoveModal
+          isOpen={isReqRemoveOpen}
+          removing={selectedUser}
+          onClose={() => setIsReqRemoveOpen(false)}
+          onSubmit={handleReqRemoveClick}
+      />
       )}
 
       {/* Temporary notification message */}

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUserAccount, getUsers, editUserAccount, deleteUserAccount } from '../controllers/adminController.js';
+import { createUserAccount, getUsers, editUserAccount, deleteUserAccount, inactivateUserAccount } from '../controllers/adminController.js';
 import { authToken, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -11,6 +11,8 @@ router.post('/users', authToken, requireAdmin, createUserAccount);
 router.get('/users', authToken, requireAdmin, getUsers);
 
 router.patch('/users/:id', authToken, editUserAccount);
+// router.patch('/inactivate/:id', authToken, requireAdmin, inactivateUserAccount);
+router.patch('/inactivate/:id', authToken, inactivateUserAccount);
 router.delete('/users/:id', authToken, deleteUserAccount);
 
 
