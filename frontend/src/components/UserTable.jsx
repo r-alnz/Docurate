@@ -42,6 +42,7 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
     // ✅ Get unique colleges from users
     const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
 
+    const [showInactive, setShowInactive] = useState(false);
 
     useEffect(() => {
         let updatedUsers = users;
@@ -61,9 +62,15 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
     if (filterCollege && filterCollege !== "all") {
       updatedUsers = updatedUsers.filter((user) => user.college === filterCollege)
     }
+    // Apply exclusive Active/Inactive filter
+    if (showInactive) {
+      updatedUsers = updatedUsers.filter(user => user.inactive === true);
+    } else {
+      updatedUsers = updatedUsers.filter(user => user.inactive !== true);
+    }
 
     setFilteredUsers(updatedUsers)
-  }, [users, filterRole, filterCollege])
+  }, [users, filterRole, filterCollege, showInactive])
 
   // Handler functions for user actions
   const handleEditClick = (user) => {
@@ -198,6 +205,13 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
               </option>
             ))}
           </select>
+
+          {/* Active/Inactive filter */}
+          <button onClick={() => setShowInactive(!showInactive)} className="px-4 py-2 bg-white text-gray-800 font-medium rounded-lg shadow-md cursor-pointer ml-4
+               transition-all duration-300 border border-gray-300 hover:border-blue-400">
+            {showInactive ? 'Show Active' : 'Show Inactive'}
+          </button>
+
         </div>
       )}
 
@@ -394,28 +408,46 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
                           </div>
                         )}
 
-                        {/* Mark user as inactive button */}
-                        {(currentUser?.role === "admin" ||
-                          currentUser?.role === "superadmin") && (
-                            <div className="relative">
+                        {/* Show Inactivate or Delete button based on user's status */}
+                        {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                          <div className="relative">
+                            {user.inactive ? (
+                              // Show DELETE if user is already inactive
+                              <UserMinus
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                                onClick={() => handleDeleteClick(user)}
+                                title="Delete User"
+                                onMouseEnter={() => setActiveTooltip(`delete-${user._id}`)}
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                            ) : (
+                              // Show INACTIVATE if user is still active
                               <UserMinus
                                 className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
                                 onClick={() => handleInactivate(user)}
                                 title="Mark as Inactive"
-                                onMouseEnter={() =>
-                                  setActiveTooltip(`inactive-${user._id}`)
-                                }
+                                onMouseEnter={() => setActiveTooltip(`inactive-${user._id}`)}
                                 onMouseLeave={() => setActiveTooltip(null)}
                               />
-                              {activeTooltip === `inactive-${user._id}` && (
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                  {/* Mark as Inactive */}
-                                  Inactivate
-                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                            )}
+
+                            {/* Tooltip display */}
+                            {activeTooltip === `inactive-${user._id}` && !user.inactive && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Inactivate
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+
+                            {activeTooltip === `delete-${user._id}` && user.inactive && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Delete
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                       </div>
                     </div>
                   </td>
