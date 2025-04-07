@@ -39,6 +39,8 @@ const TemplateContainer = ({ suborgs }) => {
   const [message, setMessage] = useState(null)
   const [autoSaveStatus, setAutoSaveStatus] = useState(null)
   const [autoSaveTimer, setAutoSaveTimer] = useState(null)
+  const [templateId, setTemplateId] = useState(id || null)
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
 
   const showMessage = (text, type = "success") => {
     setMessage({ text, type })
@@ -413,6 +415,7 @@ const TemplateContainer = ({ suborgs }) => {
 
         setIsUpdateMode(true)
         setEditorLoaded(true)
+        setAutoSaveEnabled(true) // Enable auto-save for existing templates
       } catch (error) {
         console.error("Error loading template:", error.message)
         showMessage("Failed to load template. Please try again.")
@@ -564,6 +567,8 @@ const TemplateContainer = ({ suborgs }) => {
 
   // Helper function to trigger auto-save
   const triggerAutoSave = () => {
+    if (!autoSaveEnabled) return // Skip auto-save if not enabled
+
     if (autoSaveTimer) {
       clearTimeout(autoSaveTimer)
     }
@@ -600,7 +605,7 @@ const TemplateContainer = ({ suborgs }) => {
   }
 
   const handleAutoSave = async () => {
-    if (!documentName || !documentType || !requiredRole || pages.length === 0) {
+    if (!autoSaveEnabled || !documentName || !documentType || !requiredRole || pages.length === 0) {
       setAutoSaveStatus("error")
       setTimeout(() => setAutoSaveStatus(null), 3000)
       return
@@ -621,13 +626,9 @@ const TemplateContainer = ({ suborgs }) => {
 
     try {
       const token = getToken()
-      if (isUpdateMode) {
-        await updateTemplate(id, templateData, token)
-        setAutoSaveStatus("success")
-      } else {
-        await createTemplate(templateData, token)
-        setAutoSaveStatus("success")
-      }
+      // Always use updateTemplate since auto-save is only enabled after manual save
+      await updateTemplate(templateId || id, templateData, token)
+      setAutoSaveStatus("success")
       setTimeout(() => setAutoSaveStatus(null), 3000)
     } catch (error) {
       console.error("Error auto-saving template:", error.message)
@@ -735,8 +736,14 @@ const TemplateContainer = ({ suborgs }) => {
         await updateTemplate(id, templateData, token)
         showMessage("Template updated successfully!")
       } else {
-        await createTemplate(templateData, token)
+        const response = await createTemplate(templateData, token)
+        if (response && response._id) {
+          setTemplateId(response._id)
+          setIsUpdateMode(true) // Switch to update mode
+        }
         showMessage("Template created successfully!")
+        // Enable auto-save only after manual save is successful
+        setAutoSaveEnabled(true)
         navigate("/templates") // Navigate back to templates page
       }
     } catch (error) {
