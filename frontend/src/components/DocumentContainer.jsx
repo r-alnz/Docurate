@@ -839,12 +839,26 @@ const DocumentContainer = () => {
 
         {/* Add/Delete Buttons */}
         <div className="mb-4 flex justify-end gap-4">
-          <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+          {/* Auto-save Status Indicator */}
+          {autoSaveStatus && (
+            <div
+              className="p-3 rounded shadow-lg text-white text-sm z-50"
+              style={{
+                backgroundColor:
+                  autoSaveStatus === "success" ? "#4CAF50" : autoSaveStatus === "error" ? "#F44336" : "#FFC107",
+              }}
+            >
+              {autoSaveStatus === "success" && "Changes auto-saved"}
+              {autoSaveStatus === "error" && "Auto-save failed"}
+              {autoSaveStatus === "pending" && "Saving changes..."}
+            </div>
+          )}
+          {/* <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
             Add Page
           </button>
           <button onClick={handleDeletePage} className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700">
             Delete Page
-          </button>
+          </button> */}
         </div>
 
         {isDataLoaded ? (
@@ -954,43 +968,43 @@ const DocumentContainer = () => {
                     })
 
                     // Add Draggable Image Button - Copied exactly from template container
-                    editor.ui.registry.addButton("addDraggableImage", {
-                      text: "Insert Image",
-                      icon: "image",
-                      onAction: () => {
-                        const input = document.createElement("input")
-                        input.type = "file"
-                        input.accept = "image/*"
-                        input.onchange = async () => {
-                          const file = input.files[0]
-                          if (file) {
-                            try {
-                              addDraggableImage(editor, file)
-                            } catch (error) {
-                              console.error("Error adding draggable image:", error.message)
-                              showMessage("Failed to add image. Please try again.")
-                            }
-                          }
-                        }
-                        input.click()
-                      },
-                    })
+                    // editor.ui.registry.addButton("addDraggableImage", {
+                    //   text: "Insert Image",
+                    //   icon: "image",
+                    //   onAction: () => {
+                    //     const input = document.createElement("input")
+                    //     input.type = "file"
+                    //     input.accept = "image/*"
+                    //     input.onchange = async () => {
+                    //       const file = input.files[0]
+                    //       if (file) {
+                    //         try {
+                    //           addDraggableImage(editor, file)
+                    //         } catch (error) {
+                    //           console.error("Error adding draggable image:", error.message)
+                    //           showMessage("Failed to add image. Please try again.")
+                    //         }
+                    //       }
+                    //     }
+                    //     input.click()
+                    //   },
+                    // })
 
                     // Add Header Image Button - Copied exactly from template container
-                    editor.ui.registry.addButton("addHeaderImage", {
-                      text: "Add Header",
-                      icon: "image",
-                      tooltip: "Add Header Image",
-                      onAction: () => handleHeaderFooterUpload(editor, "header"),
-                    })
+                    // editor.ui.registry.addButton("addHeaderImage", {
+                    //   text: "Add Header",
+                    //   icon: "image",
+                    //   tooltip: "Add Header Image",
+                    //   onAction: () => handleHeaderFooterUpload(editor, "header"),
+                    // })
 
-                    // Add Footer Image Button - Copied exactly from template container
-                    editor.ui.registry.addButton("addFooterImage", {
-                      text: "Add Footer",
-                      icon: "image",
-                      tooltip: "Add Footer Image",
-                      onAction: () => handleHeaderFooterUpload(editor, "footer"),
-                    })
+                    // // Add Footer Image Button - Copied exactly from template container
+                    // editor.ui.registry.addButton("addFooterImage", {
+                    //   text: "Add Footer",
+                    //   icon: "image",
+                    //   tooltip: "Add Footer Image",
+                    //   onAction: () => handleHeaderFooterUpload(editor, "footer"),
+                    // })
 
                     editor.on("keydown", (event) => {
                       if (event.key === "Tab") {
@@ -1158,21 +1172,6 @@ const DocumentContainer = () => {
           }}
         >
           {message.text}
-        </div>
-      )}
-
-      {/* Auto-save Status Indicator */}
-      {autoSaveStatus && (
-        <div
-          className="fixed bottom-4 right-4 p-3 rounded shadow-lg text-white text-sm z-50"
-          style={{
-            backgroundColor:
-              autoSaveStatus === "success" ? "#4CAF50" : autoSaveStatus === "error" ? "#F44336" : "#FFC107",
-          }}
-        >
-          {autoSaveStatus === "success" && "Changes auto-saved"}
-          {autoSaveStatus === "error" && "Auto-save failed"}
-          {autoSaveStatus === "pending" && "Saving changes..."}
         </div>
       )}
     </div>
