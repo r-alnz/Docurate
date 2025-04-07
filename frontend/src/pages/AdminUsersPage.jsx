@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import UserTable from '../components/UserTable';
 import AddUserModal from '../components/AddUserModal';
-import { fetchUserAccounts, addUserAccount, editUserAccount, deleteUserAccount } from '../services/adminService'; // Use the service for users
+import { fetchUserAccounts, addUserAccount, editUserAccount, deleteUserAccount, inactivateUserAccount } from '../services/adminService'; // Use the service for users
 import { useAuthContext } from '../hooks/useAuthContext';
 import { useUserContext } from '../hooks/useUserContext';
 import { Plus } from "lucide-react"
@@ -103,6 +103,19 @@ const AdminUsersPage = () => {
         }
     };
 
+    const handleInactivateUser = async (userId) => {
+        try {
+            await inactivateUserAccount(token, userId);
+            dispatch({
+                type: 'SET_USERS',
+                payload: users.map((user) => 
+                    user._id === userId ? { ...user, inactive: true } : user
+                ),
+            });
+        } catch (error) {
+            console.error('Inactivation failed:', error);
+        }
+    };
 
     return (
         <div className="p-4">
@@ -151,6 +164,7 @@ const AdminUsersPage = () => {
                 users={filteredUsers}
                 onEdit={handleEditUser}
                 onDelete={handleDeleteUser}
+                onInactivate={handleInactivateUser}
                 suborganizations={suborganizations}
             />
 

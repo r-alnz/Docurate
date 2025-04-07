@@ -6,6 +6,7 @@ import PropTypes from "prop-types"
 import { useAuthContext } from "../hooks/useAuthContext"
 import DeleteAdminModal from "./DeleteAdminModal"
 import EditAdminModal from "./EditAdminModal"
+import InactivateModal from "./InactivateModal.jsx"
 import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 import { getApiUrl } from "../api.js"
@@ -21,17 +22,18 @@ import ReqRemoveModal from "./ReqRemoveModal"
  * Displays a table of users with filtering, editing, and management capabilities
  * Different views and actions are available based on the current user's role
  */
-const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false)
-  const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false)
-  const [resetMode, setResetMode] = useState("")
-  const { user: currentUser } = useAuthContext()
-  const [filteredUsers, setFilteredUsers] = useState(users)
-  const [filterRole, setFilterRole] = useState("all")
-  const [filterCollege, setFilterCollege] = useState("all")
+const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) => {
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
+  const [isInactivateModalOpen, setIsInactivateModalOpen] = useState(false);
+  const [resetMode, setResetMode] = useState("");
+  const { user: currentUser } = useAuthContext();
+  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [filterRole, setFilterRole] = useState("all");
+  const [filterCollege, setFilterCollege] = useState("all");
 
   // State for displaying temporary notification messages
   const [message, setMessage] = useState(null)
@@ -40,7 +42,9 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
   const [activeTooltip, setActiveTooltip] = useState(null)
 
   // ✅ Get unique colleges from users
-  const uniqueColleges = [...new Set(users.map((user) => user.college).filter(Boolean))]
+  const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
+
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
     let updatedUsers = users
@@ -62,9 +66,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
     if (filterCollege && filterCollege !== "all") {
       updatedUsers = updatedUsers.filter((user) => user.college === filterCollege)
     }
+    // Apply exclusive Active/Inactive filter
+    if (showInactive) {
+      updatedUsers = updatedUsers.filter(user => user.inactive === true);
+    } else {
+      updatedUsers = updatedUsers.filter(user => user.inactive !== true);
+    }
 
     setFilteredUsers(updatedUsers)
-  }, [users, filterRole, filterCollege])
+  }, [users, filterRole, filterCollege, showInactive])
 
   // Handler functions for user actions
   const handleEditClick = (user) => {
@@ -76,6 +86,11 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
   const handleDeleteClick = (user) => {
     setSelectedUser(user)
     setIsDeleteModalOpen(true)
+  }
+
+  const handleInactivate = (user) => {
+    setSelectedUser(user)
+    setIsInactivateModalOpen(true)
   }
 
   const handleReqRemoveClick = (user) => {
@@ -191,6 +206,13 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
               </option>
             ))}
           </select>
+
+          {/* Active/Inactive filter */}
+          <button onClick={() => setShowInactive(!showInactive)} className="px-4 py-2 bg-white text-gray-800 font-medium rounded-lg shadow-md cursor-pointer ml-4
+               transition-all duration-300 border border-gray-300 hover:border-blue-400">
+            {showInactive ? 'Show Active' : 'Show Inactive'}
+          </button>
+
         </div>
       )}
 
@@ -373,25 +395,46 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
                           </div>
                         )}
 
-                        {/* Mark user as inactive button */}
+                        {/* Show Inactivate or Delete button based on user's status */}
                         {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
                           <div className="relative">
-                            <UserMinus
-                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
-                              onClick={() => handleDeleteClick(user)}
-                              title="Mark as Inactive"
-                              onMouseEnter={() => setActiveTooltip(`inactive-${user._id}`)}
-                              onMouseLeave={() => setActiveTooltip(null)}
-                            />
-                            {activeTooltip === `inactive-${user._id}` && (
+                            {user.inactive ? (
+                              // Show DELETE if user is already inactive
+                              <UserMinus
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                                onClick={() => handleDeleteClick(user)}
+                                title="Delete User"
+                                onMouseEnter={() => setActiveTooltip(`delete-${user._id}`)}
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                            ) : (
+                              // Show INACTIVATE if user is still active
+                              <UserMinus
+                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
+                                onClick={() => handleInactivate(user)}
+                                title="Mark as Inactive"
+                                onMouseEnter={() => setActiveTooltip(`inactive-${user._id}`)}
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                            )}
+
+                            {/* Tooltip display */}
+                            {activeTooltip === `inactive-${user._id}` && !user.inactive && (
                               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                {/* Mark as Inactive */}
+                                Inactivate
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+
+                            {activeTooltip === `delete-${user._id}` && user.inactive && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
                                 Delete
                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                               </div>
                             )}
                           </div>
                         )}
+
                       </div>
                     </div>
                   </td>
@@ -478,6 +521,15 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
         />
       )}
 
+      {isInactivateModalOpen && (
+        <InactivateModal
+          isOpen={isInactivateModalOpen}
+          user={selectedUser}
+          onClose={() => setIsInactivateModalOpen(false)}
+          onInactivate={onInactivate}
+        />
+      )}
+
       {isReqRemoveOpen && (
         <ReqRemoveModal
           isOpen={isReqRemoveOpen}
@@ -491,8 +543,8 @@ const UserTable = ({ users, onEdit, onDelete, suborganizations }) => {
       {message && (
         <div
           className={`fixed top-20 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === "success"
-              ? "bg-green-100 text-green-700 border border-green-400"
-              : "bg-red-100 text-red-700 border border-red-400"
+            ? "bg-green-100 text-green-700 border border-green-400"
+            : "bg-red-100 text-red-700 border border-red-400"
             }`}
         >
           <div className="flex items-center">

@@ -59,7 +59,11 @@ const userSchema = new mongoose.Schema(
             type: String, 
             enum: ["superadmin", "admin", "organization", "student"], 
             default: "admin" 
-        }
+        },
+        inactive: {
+            type: Boolean,
+            default: false
+        }        
     }, 
     {
         timestamps: true
