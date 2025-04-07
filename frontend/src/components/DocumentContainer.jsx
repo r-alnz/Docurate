@@ -76,6 +76,9 @@ const DocumentContainer = () => {
   // Inside your DocumentContainer component, add this state
   const [existingTitles, setExistingTitles] = useState([])
   const [titleError, setTitleError] = useState(null)
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null)
+  const [autoSaveTimer, setAutoSaveTimer] = useState(null)
+  const [editorRef, setEditorRef] = useState(null)
 
   const DPI = 96 // Fixed DPI for page dimensions
   const pageSizes = {
@@ -247,6 +250,15 @@ const DocumentContainer = () => {
         margin: 0;
         margin-bottom: 8pt;
     }
+    
+    /* Ensure proper styling for bold and italic text */
+    .mce-content-body strong, .mce-content-body b {
+        font-weight: bold !important;
+    }
+    
+    .mce-content-body em, .mce-content-body i {
+        font-style: italic !important;
+    }
     `
 
   const printStyles = `
@@ -336,6 +348,15 @@ const DocumentContainer = () => {
             margin: 0;
             margin-bottom: 8pt;
         }
+        
+        /* Ensure proper styling for bold and italic text in print */
+        strong, b {
+            font-weight: bold !important;
+        }
+        
+        em, i {
+            font-style: italic !important;
+        }
     `
 
   useEffect(() => {
@@ -420,6 +441,7 @@ const DocumentContainer = () => {
     const reader = new FileReader()
     reader.onload = () => {
       editor.insertContent(`<img src="${reader.result}" alt="Compressed Image" />`)
+      triggerAutoSave()
     }
     reader.readAsDataURL(file)
   }
@@ -442,6 +464,84 @@ const DocumentContainer = () => {
     }
     input.click()
   }
+
+  // Helper function to trigger auto-save
+  const triggerAutoSave = () => {
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+    setAutoSaveStatus("pending")
+    const timer = setTimeout(() => {
+      handleAutoSave()
+    }, 8000) // 8 seconds delay
+    setAutoSaveTimer(timer)
+  }
+
+  // Auto-save function
+  const handleAutoSave = async () => {
+    if (!title || pages.length === 0) {
+      setAutoSaveStatus("error")
+      setTimeout(() => setAutoSaveStatus(null), 5000)
+      return
+    }
+
+    // Skip auto-save if title is invalid (duplicate)
+    if (existingTitles.includes(title.toLowerCase()) && !isUpdateMode) {
+      setAutoSaveStatus("error")
+      setTimeout(() => setAutoSaveStatus(null), 5000)
+      return
+    }
+
+    // Get the latest content directly from the editor if available
+    let updatedPages = [...pages]
+    if (editorRef) {
+      const currentContent = editorRef.getContent()
+      updatedPages = updatedPages.map((page) => (page.id === currentPage ? { ...page, content: currentContent } : page))
+    }
+
+    const combinedContent = updatedPages.map((page) => page.content).join('<hr style="page-break-after: always;">')
+
+    const documentData = {
+      title,
+      template: template?._id,
+      content: combinedContent,
+      margins,
+    }
+
+    try {
+      const token = getToken()
+      if (isUpdateMode) {
+        await updateDocument(id, documentData, token)
+        setAutoSaveStatus("success")
+      } else {
+        // Only auto-save for new documents if they have a valid title
+        if (validateTitle(title)) {
+          await createDocument(documentData, token)
+          setAutoSaveStatus("success")
+          // If this is the first save of a new document, switch to update mode
+          if (!isUpdateMode) {
+            setIsUpdateMode(true)
+          }
+        } else {
+          setAutoSaveStatus("error")
+        }
+      }
+      setTimeout(() => setAutoSaveStatus(null), 3000)
+    } catch (error) {
+      console.error("Error auto-saving document:", error.message)
+      setAutoSaveStatus("error")
+      setTimeout(() => setAutoSaveStatus(null), 3000)
+    }
+  }
+
+  // Clean up auto-save timer when component unmounts
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer)
+      }
+    }
+  }, [autoSaveTimer])
 
   // Add function to handle header/footer image upload - Copied exactly from template container
   const insertHeaderFooterImage = (editor, position, file) => {
@@ -509,6 +609,9 @@ const DocumentContainer = () => {
       // Make sure the editor knows content has changed
       editor.undoManager.add()
       editor.fire("change")
+
+      // Trigger auto-save after adding header/footer
+      triggerAutoSave()
     }
     reader.readAsDataURL(file)
   }
@@ -547,12 +650,33 @@ const DocumentContainer = () => {
         />
       `
       editor.insertContent(imageHtml)
+
+      // Trigger auto-save after adding image
+      triggerAutoSave()
     }
     reader.readAsDataURL(file)
   }
 
-  const handleEditorChange = (content, pageId) => {
+  const handleEditorChange = (content, editor, pageId) => {
+    // Store the editor reference for direct access
+    if (editor && !editorRef) {
+      setEditorRef(editor)
+    }
+
     setPages((prevPages) => prevPages.map((page) => (page.id === pageId ? { ...page, content } : page)))
+
+    // Trigger auto-save
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+
+    setAutoSaveStatus("pending")
+
+    const timer = setTimeout(() => {
+      handleAutoSave()
+    }, 5000) // 5 seconds delay
+
+    setAutoSaveTimer(timer)
   }
 
   const handleAddPage = () => {
@@ -567,6 +691,9 @@ const DocumentContainer = () => {
         const newPages = pages.filter((page) => page.id !== currentPage)
         setPages(newPages)
         setCurrentPage((prev) => (prev > newPages.length ? newPages.length : prev))
+
+        // Trigger auto-save after deleting a page
+        triggerAutoSave()
       }
     } else {
       showMessage("You cannot delete the last page!")
@@ -597,7 +724,14 @@ const DocumentContainer = () => {
       return
     }
 
-    const combinedContent = pages.map((page) => page.content).join('<hr style="page-break-after: always;">')
+    // Get the latest content directly from the editor if available
+    let updatedPages = [...pages]
+    if (editorRef) {
+      const currentContent = editorRef.getContent()
+      updatedPages = updatedPages.map((page) => (page.id === currentPage ? { ...page, content: currentContent } : page))
+    }
+
+    const combinedContent = updatedPages.map((page) => page.content).join('<hr style="page-break-after: always;">')
 
     const documentData = {
       title,
@@ -707,6 +841,7 @@ const DocumentContainer = () => {
           onChange={(e) => {
             setTitle(e.target.value)
             if (e.target.value) validateTitle(e.target.value)
+            triggerAutoSave()
           }}
           placeholder="Enter document title"
           className={`w-full border rounded p-2 ${titleError ? "border-red-500" : ""}`}
@@ -742,12 +877,26 @@ const DocumentContainer = () => {
 
         {/* Add/Delete Buttons */}
         <div className="mb-4 flex justify-end gap-4">
-          <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+          {/* Auto-save Status Indicator */}
+          {autoSaveStatus && (
+            <div
+              className="p-3 rounded shadow-lg text-white text-sm z-50"
+              style={{
+                backgroundColor:
+                  autoSaveStatus === "success" ? "#4CAF50" : autoSaveStatus === "error" ? "#F44336" : "#FFC107",
+              }}
+            >
+              {autoSaveStatus === "success" && "Changes auto-saved"}
+              {autoSaveStatus === "error" && "Auto-save failed"}
+              {autoSaveStatus === "pending" && "Saving changes..."}
+            </div>
+          )}
+          {/* <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
             Add Page
           </button>
           <button onClick={handleDeletePage} className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700">
             Delete Page
-          </button>
+          </button> */}
         </div>
 
         {isDataLoaded ? (
@@ -756,6 +905,7 @@ const DocumentContainer = () => {
               <Editor
                 apiKey="iao6fh65t97ayqmiahlxmxlj0bh94ynxw83kfyh0vbqaig9y"
                 value={page.content}
+                onInit={(evt, editor) => setEditorRef(editor)}
                 init={{
                   height: selectedPageSize.height,
                   menubar: true,
@@ -777,14 +927,21 @@ const DocumentContainer = () => {
                     "code",
                     "help",
                     "wordcount",
+                    "formatpainter",
                   ],
                   toolbar:
-                    "undo redo | formatselect | bold italic backcolor | " +
+                    "undo redo | blocks | " +
+                    "bold italic underline strikethrough | forecolor backcolor | " +
                     "alignleft aligncenter alignright alignjustify | " +
                     "bullist numlist outdent indent | addDraggableImage | addHeaderImage addFooterImage | addHangingIndent removeHangingIndent | help",
                   content_style: sharedStyles,
                   browser_spellcheck: true,
                   contextmenu: false, // Disable TinyMCE's default context menu to allow browser's spell check menu
+                  formats: {
+                    // Define custom formats to ensure proper handling of bold and italic
+                    bold: { inline: "strong", remove: "all" },
+                    italic: { inline: "em", remove: "all" },
+                  },
                   setup: (editor) => {
                     editor.on("drop", (event) => {
                       event.preventDefault() // Prevent TinyMCE's default drop handling
@@ -829,6 +986,9 @@ const DocumentContainer = () => {
                             editor.undoManager.add()
                             editor.fire("change")
                             console.log(editor.getContent()) // Verify updated content
+
+                            // Trigger auto-save after moving image
+                            triggerAutoSave()
                           } else {
                             console.warn("Draggable image has no ID. Ensure unique IDs are assigned.")
                           }
@@ -837,46 +997,60 @@ const DocumentContainer = () => {
                         iframeDoc.addEventListener("mousemove", onMouseMove)
                         iframeDoc.addEventListener("mouseup", onMouseUp)
                       })
+
+                      // Listen for any content changes that might not be caught by onEditorChange
+                      editor.on("ExecCommand", (e) => {
+                        // This catches most editor commands like formatting, inserting elements, etc.
+                        triggerAutoSave()
+                      })
+
+                      editor.on("SetContent", (e) => {
+                        // This catches direct content setting operations
+                        if (!e.initial) {
+                          // Skip the initial content setting
+                          triggerAutoSave()
+                        }
+                      })
                     })
 
                     // Add Draggable Image Button - Copied exactly from template container
-                    editor.ui.registry.addButton("addDraggableImage", {
-                      text: "Insert Image",
-                      icon: "image",
-                      onAction: () => {
-                        const input = document.createElement("input")
-                        input.type = "file"
-                        input.accept = "image/*"
-                        input.onchange = async () => {
-                          const file = input.files[0]
-                          if (file) {
-                            try {
-                              addDraggableImage(editor, file)
-                            } catch (error) {
-                              console.error("Error adding draggable image:", error.message)
-                              showMessage("Failed to add image. Please try again.")
-                            }
-                          }
-                        }
-                        input.click()
-                      },
-                    })
+                    // editor.ui.registry.addButton("addDraggableImage", {
+                    //   text: "Insert Image",
+                    //   icon: "image",
+                    //   onAction: () => {
+                    //     const input = document.createElement("input")
+                    //     input.type = "file"
+                    //     input.accept = "image/*"
+                    //     input.onchange = async () => {
+                    //       const file = input.files[0]
+                    //       if (file) {
+                    //         try {
+                    //           addDraggableImage(editor, file)
+                    //         } catch (error) {
+                    //           console.error("Error adding draggable image:", error.message)
+                    //           showMessage("Failed to add image. Please try again.")
+                    //         }
+                    //       }
+                    //     }
+                    //     input.click()
+                    //   },
+                    // })
 
                     // Add Header Image Button - Copied exactly from template container
-                    editor.ui.registry.addButton("addHeaderImage", {
-                      text: "Add Header",
-                      icon: "image",
-                      tooltip: "Add Header Image",
-                      onAction: () => handleHeaderFooterUpload(editor, "header"),
-                    })
+                    // editor.ui.registry.addButton("addHeaderImage", {
+                    //   text: "Add Header",
+                    //   icon: "image",
+                    //   tooltip: "Add Header Image",
+                    //   onAction: () => handleHeaderFooterUpload(editor, "header"),
+                    // })
 
-                    // Add Footer Image Button - Copied exactly from template container
-                    editor.ui.registry.addButton("addFooterImage", {
-                      text: "Add Footer",
-                      icon: "image",
-                      tooltip: "Add Footer Image",
-                      onAction: () => handleHeaderFooterUpload(editor, "footer"),
-                    })
+                    // // Add Footer Image Button - Copied exactly from template container
+                    // editor.ui.registry.addButton("addFooterImage", {
+                    //   text: "Add Footer",
+                    //   icon: "image",
+                    //   tooltip: "Add Footer Image",
+                    //   onAction: () => handleHeaderFooterUpload(editor, "footer"),
+                    // })
 
                     editor.on("keydown", (event) => {
                       if (event.key === "Tab") {
@@ -1007,7 +1181,7 @@ const DocumentContainer = () => {
                     })
                   },
                 }}
-                onEditorChange={(content) => handleEditorChange(content, page.id)}
+                onEditorChange={(content, editor) => handleEditorChange(content, editor, page.id)}
               />
             </div>
           ))
@@ -1025,20 +1199,6 @@ const DocumentContainer = () => {
           {isUpdateMode ? "Update Document" : "Save Document"}
         </button>
 
-        {/* Mini Message Box (Centered) */}
-        {message && (
-          <div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                    p-4 rounded shadow-lg text-white text-center w-80"
-            style={{
-              backgroundColor:
-                message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
-            }}
-          >
-            {message.text}
-          </div>
-        )}
-
         <button
           onClick={handlePrintDocument}
           className="bg-[#38b6ff] text-white py-2 px-4 rounded hover:bg-[#1a8cd8] flex items-center gap-2 hover:scale-105"
@@ -1047,6 +1207,19 @@ const DocumentContainer = () => {
           Print Document
         </button>
       </div>
+
+      {/* Mini Message Box (Centered) */}
+      {message && (
+        <div
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                  p-4 rounded shadow-lg text-white text-center w-80"
+          style={{
+            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
+          }}
+        >
+          {message.text}
+        </div>
+      )}
     </div>
   )
 }
