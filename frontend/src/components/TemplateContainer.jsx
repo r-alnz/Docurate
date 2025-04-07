@@ -37,6 +37,8 @@ const TemplateContainer = ({ suborgs }) => {
   const [templateSuggestions, setTemplateSuggestions] = useState([])
   const [filteredSuggestions, setFilteredSuggestions] = useState([])
   const [message, setMessage] = useState(null)
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null)
+  const [autoSaveTimer, setAutoSaveTimer] = useState(null)
 
   const showMessage = (text, type = "success") => {
     setMessage({ text, type })
@@ -534,6 +536,9 @@ const TemplateContainer = ({ suborgs }) => {
       // Make sure the editor knows content has changed
       editor.undoManager.add()
       editor.fire("change")
+
+      // Trigger auto-save after adding header/footer
+      triggerAutoSave()
     }
     reader.readAsDataURL(file)
   }
@@ -557,6 +562,18 @@ const TemplateContainer = ({ suborgs }) => {
     input.click()
   }
 
+  // Helper function to trigger auto-save
+  const triggerAutoSave = () => {
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+    setAutoSaveStatus("pending")
+    const timer = setTimeout(() => {
+      handleAutoSave()
+    }, 8000)
+    setAutoSaveTimer(timer)
+  }
+
   const handleEditorChange = (content, editor, pageId) => {
     const updatedContent = strictMode
       ? content.includes('class="non-editable"')
@@ -565,7 +582,68 @@ const TemplateContainer = ({ suborgs }) => {
       : content
 
     setPages((prevPages) => prevPages.map((page) => (page.id === pageId ? { ...page, content: updatedContent } : page)))
+
+    // Clear any existing timer
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+
+    // Set auto-save status to pending
+    setAutoSaveStatus("pending")
+
+    // Create a new timer for auto-save
+    const timer = setTimeout(() => {
+      handleAutoSave()
+    }, 5000) // 5 seconds delay
+
+    setAutoSaveTimer(timer)
   }
+
+  const handleAutoSave = async () => {
+    if (!documentName || !documentType || !requiredRole || pages.length === 0) {
+      setAutoSaveStatus("error")
+      setTimeout(() => setAutoSaveStatus(null), 3000)
+      return
+    }
+
+    const combinedContent = pages.map((page) => page.content).join('<hr style="page-break-after: always;">')
+
+    const templateData = {
+      name: documentName,
+      content: combinedContent,
+      type: isCustomType ? customType : documentType,
+      subtype: isCustomType ? customSubtype : documentSubtype,
+      requiredRole,
+      paperSize,
+      margins,
+      suborganizations: selectedSubOrg.length === 0 ? [] : [selectedSubOrg],
+    }
+
+    try {
+      const token = getToken()
+      if (isUpdateMode) {
+        await updateTemplate(id, templateData, token)
+        setAutoSaveStatus("success")
+      } else {
+        await createTemplate(templateData, token)
+        setAutoSaveStatus("success")
+      }
+      setTimeout(() => setAutoSaveStatus(null), 3000)
+    } catch (error) {
+      console.error("Error auto-saving template:", error.message)
+      setAutoSaveStatus("error")
+      setTimeout(() => setAutoSaveStatus(null), 3000)
+    }
+  }
+
+  useEffect(() => {
+    // Clean up the timer when component unmounts
+    return () => {
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer)
+      }
+    }
+  }, [autoSaveTimer])
 
   const preventOverflowTyping = (editor) => {
     editor.on("beforeInput", (event) => {
@@ -744,6 +822,9 @@ const TemplateContainer = ({ suborgs }) => {
                 />
             `
       editor.insertContent(imageHtml)
+
+      // Trigger auto-save after adding image
+      triggerAutoSave()
     }
     reader.readAsDataURL(file)
   }
@@ -992,6 +1073,20 @@ const TemplateContainer = ({ suborgs }) => {
 
           {/* Add/Delete Buttons */}
           <div className="mb-4 flex justify-end gap-4">
+            {/* Auto-save Status Indicator */}
+            {autoSaveStatus && (
+              <div
+                className="p-3 rounded shadow-lg text-white text-sm z-50"
+                style={{
+                  backgroundColor:
+                    autoSaveStatus === "success" ? "#4CAF50" : autoSaveStatus === "error" ? "#F44336" : "#FFC107",
+                }}
+              >
+                {autoSaveStatus === "success" && "Changes auto-saved"}
+                {autoSaveStatus === "error" && "Auto-save failed"}
+                {autoSaveStatus === "pending" && "Saving changes..."}
+              </div>
+            )}
             <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
               Add Page
             </button>
@@ -1111,6 +1206,20 @@ const TemplateContainer = ({ suborgs }) => {
 
                         iframeDoc.addEventListener("mousemove", onMouseMove)
                         iframeDoc.addEventListener("mouseup", onMouseUp)
+                      })
+
+                      // Listen for any content changes that might not be caught by onEditorChange
+                      editor.on("ExecCommand", (e) => {
+                        // This catches most editor commands like formatting, inserting elements, etc.
+                        triggerAutoSave()
+                      })
+
+                      editor.on("SetContent", (e) => {
+                        // This catches direct content setting operations
+                        if (!e.initial) {
+                          // Skip the initial content setting
+                          triggerAutoSave()
+                        }
                       })
                     })
 
@@ -1348,3 +1457,4 @@ const TemplateContainer = ({ suborgs }) => {
 export default TemplateContainer
 
 // latest na tlga itows
+
