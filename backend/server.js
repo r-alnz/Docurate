@@ -9,6 +9,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import templateRoutes from './routes/templateRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
+import documentRevisionRoutes from './routes/documentRevisionRoutes.js'; // Add this line
 import importRoutes from "./routes/importRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js"
 import removalRoutes from "./routes/removalRoutes.js"
@@ -54,6 +55,7 @@ app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api', documentRevisionRoutes); // Add this line
 app.use("/api/import", importRoutes);
 app.use("/api/email", emailRoutes);
 app.use('/api/removals', removalRoutes);

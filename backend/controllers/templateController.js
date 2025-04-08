@@ -82,7 +82,7 @@ const getTemplates = async (req, res) => {
 
         // Fetch templates
         const templates = await Template.find(query)
-            .populate('suborganizations', '_id firstname')
+            .populate('suborganizations', '_id firstname').select('-content')
           
 
         // console.log("Fetched Templates:", templates.length ? templates : "No templates found");
