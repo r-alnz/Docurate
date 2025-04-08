@@ -212,7 +212,7 @@ const getDocumentsByUser = async (req, res) => {
         
         const documents = await Document.find(query)
             .populate('template')
-            .populate('organization');
+            .populate('organization').select('-content');
 
         res.status(200).json(documents);
     } catch (error) {
