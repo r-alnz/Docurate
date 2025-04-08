@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react"
+"use client"
+
+import { useEffect, useState, useMemo } from "react"
 import { useTemplateContext } from "../hooks/useTemplateContext"
 import { fetchTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from "../services/templateService"
 import { useNavigate } from "react-router-dom"
@@ -7,15 +9,14 @@ import { useAuthContext } from "../hooks/useAuthContext"
 import { Eye, ArchiveX } from "lucide-react"
 import DeleteTemplateModal from "./DeleteTemplateModal"
 
+// Keep the Mosaic component as requested
 import { Mosaic } from "react-loading-indicators"
-
-import React from "react"
 
 const TemplateListContainer = () => {
   const { templates, dispatch } = useTemplateContext()
   const { user } = useAuthContext()
   const navigate = useNavigate()
-  const [delayedLoading, setDelayedLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [templateToDelete, setTemplateToDelete] = useState(null)
@@ -33,6 +34,7 @@ const TemplateListContainer = () => {
   const [templateToRecover, setTemplateToRecover] = useState(null)
 
   useEffect(() => {
+    // Fade in animation without delay
     setTimeout(() => setVisible(true), 100)
   }, [])
 
@@ -51,29 +53,64 @@ const TemplateListContainer = () => {
         const token = getToken()
         const fetchedTemplates = await fetchTemplates(token)
 
-        // Delay setting the templates to prevent UI flickering
-        setTimeout(() => {
-          dispatch({ type: "SET_TEMPLATES", payload: fetchedTemplates })
-          dispatch({ type: "SET_LOADING", payload: false })
-          setDelayedLoading(false)
-        }, 1400) // Adjust timeout duration if needed
+        // Remove the artificial delay - this is the key change
+        dispatch({ type: "SET_TEMPLATES", payload: fetchedTemplates })
+        dispatch({ type: "SET_LOADING", payload: false })
+        setLoading(false)
       } catch (err) {
         dispatch({ type: "SET_ERROR", payload: "Failed to fetch templates." })
-        setDelayedLoading(false)
+        setLoading(false)
       }
     }
 
-    dispatch({ type: "SET_TEMPLATES", payload: [] }) // Prevents stale data from showing
+    dispatch({ type: "SET_TEMPLATES", payload: [] })
     loadTemplates()
   }, [dispatch, user])
 
-  if (delayedLoading) {
-    return (
-      <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
-        <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
-      </div>
-    )
-  }
+  // Memoize filtered templates to prevent recalculation on every render
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((template) => {
+      const matchesSearch =
+        template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.type.toLowerCase().includes(searchQuery.toLowerCase())
+
+      const matchesRole = roleFilter === "All" || template.requiredRole === roleFilter
+      const matchesStatus = statusFilter === "All" || template.status === statusFilter.toLowerCase()
+      const matchesType = typeFilter === "All" || template.type === typeFilter
+
+      if (user.role === "organization") {
+        const isSubOrgMatch = template.suborganizations?.some((suborg) => String(suborg) === String(user._id))
+        const isOrgMatch = String(template.organization) === String(user.organization._id)
+
+        return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus && matchesType
+      }
+
+      return matchesSearch && matchesRole && matchesStatus && matchesType
+    })
+  }, [templates, searchQuery, roleFilter, statusFilter, typeFilter, user])
+
+  // Memoize sorted templates
+  const sortedTemplates = useMemo(() => {
+    return [...filteredTemplates].sort((a, b) => {
+      switch (sortOption) {
+        case "name-asc":
+          return a.name.localeCompare(b.name)
+        case "name-desc":
+          return b.name.localeCompare(a.name)
+        case "date-asc":
+          return new Date(a.createdAt) - new Date(b.createdAt)
+        case "date-desc":
+          return new Date(b.createdAt) - new Date(a.createdAt)
+        default:
+          return 0
+      }
+    })
+  }, [filteredTemplates, sortOption])
+
+  // Memoize unique template types
+  const uniqueTemplateTypes = useMemo(() => {
+    return ["All", ...new Set(templates.map((template) => template.type))]
+  }, [templates])
 
   const handleOpenModal = (template) => {
     setTemplateToDelete(template)
@@ -96,7 +133,7 @@ const TemplateListContainer = () => {
   }
 
   const confirmEraseTemplate = async () => {
-    if (!templateToErase) return // Prevent accidental execution
+    if (!templateToErase) return
 
     try {
       const token = getToken()
@@ -132,7 +169,6 @@ const TemplateListContainer = () => {
       showMessage("Failed to recover the template. Please try again.")
     }
 
-    // Close the modal after recovery
     setIsRecoverModalOpen(false)
     setTemplateToRecover(null)
   }
@@ -147,89 +183,25 @@ const TemplateListContainer = () => {
     setTemplateToRecover(null)
   }
 
-  const handleEraseTemplate = async (templateId) => {
-    const confirmDelete = window.confirm("Are you sure you want to erase this template? This action cannot be undone.")
-
-    if (!confirmDelete) return // Stop if the user cancels
-
-    try {
-      const token = getToken()
-      await eraseTemplate(templateId, token)
-      dispatch({ type: "ERASE_TEMPLATE", payload: templateId })
-      showMessage("Template erased successfully!")
-    } catch (error) {
-      showMessage("Failed to erase the template. Please try again.")
-    }
+  if (loading) {
+    return (
+      <div className="flex mt-16 justify-center h-screen z-10 overflow-hidden">
+        <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
+      </div>
+    )
   }
-
-  const filteredTemplates = templates.filter((template) => {
-    const matchesSearch =
-      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.type.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesRole = roleFilter === "All" || template.requiredRole === roleFilter
-    const matchesStatus = statusFilter === "All" || template.status === statusFilter.toLowerCase()
-    const matchesType = typeFilter === "All" || template.type === typeFilter
-
-    if (user.role === "organization") {
-      const isSubOrgMatch = template.suborganizations?.some((suborg) => String(suborg) === String(user._id))
-      const isOrgMatch = String(template.organization) === String(user.organization._id)
-
-      return (isSubOrgMatch || isOrgMatch) && matchesSearch && matchesStatus && matchesType
-    }
-
-    return matchesSearch && matchesRole && matchesStatus && matchesType
-  })
-
-  // Debugging logs
-  console.log("User role:", user.role)
-  console.log("User organization:", user.organization)
-  console.log("User ID:", user._id)
-  console.log("Templates before filtering:", templates)
-  console.log("Templates after filtering:", filteredTemplates)
-
-  const sortedTemplates = [...filteredTemplates].sort((a, b) => {
-    switch (sortOption) {
-      case "name-asc":
-        return a.name.localeCompare(b.name)
-      case "name-desc":
-        return b.name.localeCompare(a.name)
-      case "date-asc":
-        return new Date(a.createdAt) - new Date(b.createdAt)
-      case "date-desc":
-        return new Date(b.createdAt) - new Date(a.createdAt)
-      default:
-        return 0
-    }
-  })
-
-  const uniqueTemplateTypes = ["All", ...new Set(templates.map((template) => template.type))]
 
   return (
     <div className={`p-4 relative transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}>
-      {delayedLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-          <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
-          {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
-        </div>
-      )}
-
       <h2 className="text-2xl font-bold mb-4">Available Templates</h2>
 
-      <div className="mb-4 flex gap-4">
-        {delayedLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 overflow-hidden">
-            <Mosaic color={["#33CCCC", "#33CC36", "#B8CC33", "#FCCA00"]} size="large" text="Docurate!" />
-            {/* <Mosaic color="#38B6FF" size="medium" text="" textColor="" /> */}
-          </div>
-        )}
-
+      <div className="mb-4 flex flex-wrap gap-4">
         <input
           type="text"
           placeholder="Search templates by name, type, or subtype..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border rounded w-full p-2 shadow"
+          className="border rounded flex-1 p-2 shadow min-w-[200px]"
         />
         <select
           value={typeFilter}
@@ -349,7 +321,6 @@ const TemplateListContainer = () => {
                 ) : (
                   <>
                     <div className="flex gap-2">
-                      {/* View Button with Lucide Eye Icon */}
                       <button
                         className="bg-[#38b6ff] text-white p-2 rounded hover:bg-[#2a9ed6] flex items-center justify-center"
                         onClick={() =>
@@ -361,7 +332,6 @@ const TemplateListContainer = () => {
                         <Eye className="w-5 h-5" />
                       </button>
 
-                      {/* Inactive Button with Lucide Slash Icon (Visible for Admins Only) */}
                       {user.role === "admin" && (
                         <button
                           className="bg-red-500 text-white p-2 rounded hover:bg-red-700 flex items-center justify-center"
@@ -379,6 +349,7 @@ const TemplateListContainer = () => {
         </div>
       )}
 
+      {/* Modals - kept the same */}
       {templateToDelete && (
         <DeleteTemplateModal
           isOpen={isModalOpen}
@@ -387,6 +358,7 @@ const TemplateListContainer = () => {
           onDelete={handleDeleteTemplate}
         />
       )}
+
       {isEraseModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -432,7 +404,6 @@ const TemplateListContainer = () => {
         </div>
       )}
 
-      {/* Mini Message Box (Centered) */}
       {message && (
         <div
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
@@ -449,4 +420,3 @@ const TemplateListContainer = () => {
 }
 
 export default TemplateListContainer
-
