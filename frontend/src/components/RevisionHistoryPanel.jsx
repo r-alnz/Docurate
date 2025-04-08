@@ -10,7 +10,7 @@ import {
     deleteRevision,
 } from "../services/documentRevisionService"
 
-const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef }) => {
+const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPage, setPages }) => {
     const [revisions, setRevisions] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -83,8 +83,26 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef }) => {
                 const token = getToken()
                 const revision = await getRevisionById(documentId, revisionId, token)
 
-                // Set the editor content to the revision content
-                editorRef.current.setContent(revision.content)
+                // Instead of directly setting the editor content, we need to handle multi-page documents
+                const revisionContent = revision.content
+
+                // Split the content by page breaks
+                const contentPages = revisionContent.split('<hr style="page-break-after: always;">')
+
+                // Create new pages array with the content
+                const newPages = contentPages.map((content, index) => ({
+                    id: index + 1,
+                    content,
+                }))
+
+                // Update all pages at once
+                if (setPages) {
+                    setPages(newPages)
+                } else {
+                    // Fallback to the old method if setPages is not available
+                    editorRef.current.setContent(revision.content)
+                }
+
                 setLoading(false)
                 onClose() // Close the panel after restoration
             } catch (err) {

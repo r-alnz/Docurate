@@ -1279,6 +1279,8 @@ const DocumentContainer = () => {
         onClose={() => setShowRevisionHistory(false)}
         documentId={documentId}
         editorRef={editorRef}
+        currentPage={currentPage}
+        setPages={setPages}
       />
     </div>
   )
