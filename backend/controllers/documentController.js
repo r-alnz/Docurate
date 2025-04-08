@@ -1,6 +1,7 @@
 // documentController.js - Add soft delete, recover, and erase functions
 import Document from '../models/documentModel.js';
 import Template from '../models/templateModel.js';
+import DocumentRevision from "../models/documentRevisionModel.js"
 
 // Create a new document
 const createDocument = async (req, res) => {
@@ -33,6 +34,16 @@ const createDocument = async (req, res) => {
         });
 
         await document.save();
+        // Add this to the createDocument function, right after document.save()
+// Create initial revision
+const initialRevision = new DocumentRevision({
+    document: document._id,
+    content: content,
+    description: "Initial version",
+    user: req.user._id,
+    organization: req.user.organization,
+  })
+  await initialRevision.save()
         res.status(201).json(document);
     } catch (error) {
         console.error('Error creating document:', error);
@@ -101,6 +112,16 @@ const updateDocument = async (req, res) => {
         document.content = content || document.content;
 
         await document.save();
+        // Add this to the updateDocument function, right after document.save()
+// Create revision for this update
+const updateRevision = new DocumentRevision({
+    document: document._id,
+    content: content || document.content,
+    description: "Auto-saved update",
+    user: req.user._id,
+    organization: req.user.organization,
+  })
+  await updateRevision.save()
         res.status(200).json(document);
     } catch (error) {
         console.error('Error updating document:', error);
