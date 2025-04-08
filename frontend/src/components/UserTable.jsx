@@ -5,6 +5,7 @@ import { useAuthContext } from "../hooks/useAuthContext"
 import DeleteAdminModal from "./DeleteAdminModal"
 import EditAdminModal from "./EditAdminModal"
 import InactivateModal from "./InactivateModal.jsx"
+import ActivateModal from "./ActivateModal.jsx"
 import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
 import { getApiUrl } from "../api.js";
@@ -12,7 +13,7 @@ import { getApiUrl } from "../api.js";
 const API_URL = getApiUrl("/email");
 
 import "../index.css"
-import { Mail, KeyRound, Edit, UserMinus, Building, User } from "lucide-react"
+import { Mail, KeyRound, Edit, UserMinus, Building, User, UserPlus } from "lucide-react"
 import ReqRemoveModal from "./ReqRemoveModal";
 
 /**
@@ -20,13 +21,14 @@ import ReqRemoveModal from "./ReqRemoveModal";
  * Displays a table of users with filtering, editing, and management capabilities
  * Different views and actions are available based on the current user's role
  */
-const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) => {
+const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborganizations }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
     const [isInactivateModalOpen, setIsInactivateModalOpen] = useState(false);
+    const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
     const [resetMode, setResetMode] = useState("");
     const { user: currentUser } = useAuthContext();
     const [filteredUsers, setFilteredUsers] = useState(users);
@@ -87,6 +89,11 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
     const handleInactivate = (user) => {
       setSelectedUser(user)
       setIsInactivateModalOpen(true)
+    }
+
+    const handleActivate = (user)  => {
+      setSelectedUser(user)
+      setIsActivateModalOpen(true)
     }
 
     const handleReqRemoveClick = (user) => {
@@ -412,7 +419,9 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
                         {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
                           <div className="relative">
                             {user.inactive ? (
-                              // Show DELETE if user is already inactive
+                              <div className="flex">
+
+                              {/* // Show DELETE if user is already inactive */}
                               <UserMinus
                                 className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
                                 onClick={() => handleDeleteClick(user)}
@@ -420,6 +429,17 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
                                 onMouseEnter={() => setActiveTooltip(`delete-${user._id}`)}
                                 onMouseLeave={() => setActiveTooltip(null)}
                               />
+
+                              {/* // Show RESTORE if user is already inactive */}
+                              <UserPlus
+                                className="ml-1 w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-green-500 hover:text-white rounded-full hover:bg-green-500 dark:hover:bg-green-600 hover:shadow-lg"
+                                onClick={() => handleActivate(user)}
+                                title="Activate User"
+                                onMouseEnter={() => setActiveTooltip(`activate-${user._id}`)}
+                                onMouseLeave={() => setActiveTooltip(null)}
+                              />
+                              </div>
+                              
                             ) : (
                               // Show INACTIVATE if user is still active
                               <UserMinus
@@ -442,6 +462,13 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
                             {activeTooltip === `delete-${user._id}` && user.inactive && (
                               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
                                 Delete
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+
+                            {activeTooltip === `activate-${user._id}` && user.inactive && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Activate
                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                               </div>
                             )}
@@ -561,6 +588,15 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, suborganizations }) 
           user={selectedUser}
           onClose={() => setIsInactivateModalOpen(false)}
           onInactivate={onInactivate}
+        />
+      )}
+
+      {isActivateModalOpen && (
+        <ActivateModal
+          isOpen={isActivateModalOpen}
+          user={selectedUser}
+          onClose={() => setIsActivateModalOpen(false)}
+          onActivate={onActivate}
         />
       )}
 

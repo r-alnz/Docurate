@@ -196,4 +196,28 @@ const inactivateUserAccount = async (req, res) => {
     }
 };
 
-export { createUserAccount, getUsers, editUserAccount, deleteUserAccount, inactivateUserAccount };
+// Inactivate User Account
+const activateUserAccount = async (req, res) => {
+    const { id } = req.params; // User account ID
+    try {
+        if (!id) throw new Error('User account ID is required');
+
+        // Find the user and update the "inactive" field to true
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { inactive: false },
+            { new: true }
+        );
+
+        if (!updatedUser) throw new Error('User account not found');
+
+        res.status(200).json({
+            message: 'User account activated successfully',
+            user: updatedUser,
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export { createUserAccount, getUsers, editUserAccount, deleteUserAccount, inactivateUserAccount, activateUserAccount };
