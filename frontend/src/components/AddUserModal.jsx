@@ -128,6 +128,18 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
       return
     }
 
+    // Validate college name if role is student
+    if (role === "organization" && college && !validateCollege(college)) {
+      setMessage({ type: "error", text: "❌ College name should contain only letters" })
+      return
+    }
+
+    // Add validation for required college field
+    if (role === "organization" && !college.trim()) {
+      setMessage({ type: "error", text: "❌ College field is required" })
+      return
+    }
+
     // Add validation for required program field
     if (role === "student" && !program.trim()) {
       setMessage({ type: "error", text: "❌ Program field is required" })
@@ -315,7 +327,18 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               />
             </div>
           ) : null}
-
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              College <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={college}
+              onChange={(e) => setCollege(e.target.value)}
+              className="border rounded p-2 w-full"
+              required
+            />
+          </div>
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input

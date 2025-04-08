@@ -1,3 +1,5 @@
+"use client"
+
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
@@ -8,13 +10,13 @@ import InactivateModal from "./InactivateModal.jsx"
 import ActivateModal from "./ActivateModal.jsx"
 import ResetPasswordModal from "./ResetPasswordModal"
 import { resetUserPassword, resetAdminPassword } from "../services/authService"
-import { getApiUrl } from "../api.js";
+import { getApiUrl } from "../api.js"
 
-const API_URL = getApiUrl("/email");
+const API_URL = getApiUrl("/email")
 
 import "../index.css"
 import { Mail, KeyRound, Edit, UserMinus, Building, User, UserPlus } from "lucide-react"
-import ReqRemoveModal from "./ReqRemoveModal";
+import ReqRemoveModal from "./ReqRemoveModal"
 
 /**
  * UserTable Component
@@ -22,43 +24,45 @@ import ReqRemoveModal from "./ReqRemoveModal";
  * Different views and actions are available based on the current user's role
  */
 const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborganizations }) => {
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-    const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
-    const [isInactivateModalOpen, setIsInactivateModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isReqRemoveOpen, setIsReqRemoveOpen] = useState(false);
+  const [isInactivateModalOpen, setIsInactivateModalOpen] = useState(false);
     const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
-    const [resetMode, setResetMode] = useState("");
-    const { user: currentUser } = useAuthContext();
-    const [filteredUsers, setFilteredUsers] = useState(users);
-    const [filterRole, setFilterRole] = useState("all");
-    const [filterCollege, setFilterCollege] = useState("all");
-    
-    // State for displaying temporary notification messages
-    const [message, setMessage] = useState(null)
+  const [resetMode, setResetMode] = useState("");
+  const { user: currentUser } = useAuthContext();
+  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [filterRole, setFilterRole] = useState("all");
+  const [filterCollege, setFilterCollege] = useState("all");
 
-    // State for tracking which tooltip is currently visible
-    const [activeTooltip, setActiveTooltip] = useState(null)
+  // State for displaying temporary notification messages
+  const [message, setMessage] = useState(null)
 
-    // ✅ Get unique colleges from users
-    const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
+  // State for tracking which tooltip is currently visible
+  const [activeTooltip, setActiveTooltip] = useState(null)
 
-    const [showInactive, setShowInactive] = useState(false);
+  // ✅ Get unique colleges from users
+  const uniqueColleges = [...new Set(users.map(user => user.college).filter(Boolean))];
 
-    useEffect(() => {
-        let updatedUsers = users;
-        if (filterRole === "students") {
-            updatedUsers = users.filter(user => user.role === "student");
-        } else if (filterRole === "studentsUnderOrgs") {
-            updatedUsers = users.filter(user => user.role === "student" && user.suborganizations?.length > 0);
-        } else if (filterRole === "studentsNotUnderOrgs") {
-            updatedUsers = users.filter(user => user.role === "student" && (!user.suborganizations || user.suborganizations.length === 0));
-        } else if (filterRole === "organizations") {
-            updatedUsers = users.filter(user => user.role === "organization");
-        } else if (filterRole === "all") {
-            updatedUsers = users;
-        }
+  const [showInactive, setShowInactive] = useState(false);
+
+  useEffect(() => {
+    let updatedUsers = users
+    if (filterRole === "students") {
+      updatedUsers = users.filter((user) => user.role === "student")
+    } else if (filterRole === "studentsUnderOrgs") {
+      updatedUsers = users.filter((user) => user.role === "student" && user.suborganizations?.length > 0)
+    } else if (filterRole === "studentsNotUnderOrgs") {
+      updatedUsers = users.filter(
+        (user) => user.role === "student" && (!user.suborganizations || user.suborganizations.length === 0),
+      )
+    } else if (filterRole === "organizations") {
+      updatedUsers = users.filter((user) => user.role === "organization")
+    } else if (filterRole === "all") {
+      updatedUsers = users
+    }
 
     // College-based filtering (Only filter if a specific college is selected)
     if (filterCollege && filterCollege !== "all") {
@@ -81,25 +85,25 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
     setIsEditModalOpen(true)
   }
 
-    const handleDeleteClick = (user) => {
-      setSelectedUser(user)
-      setIsDeleteModalOpen(true)
-    }
+  const handleDeleteClick = (user) => {
+    setSelectedUser(user)
+    setIsDeleteModalOpen(true)
+  }
 
-    const handleInactivate = (user) => {
-      setSelectedUser(user)
-      setIsInactivateModalOpen(true)
-    }
+  const handleInactivate = (user) => {
+    setSelectedUser(user)
+    setIsInactivateModalOpen(true)
+  }
 
     const handleActivate = (user)  => {
       setSelectedUser(user)
       setIsActivateModalOpen(true)
     }
 
-    const handleReqRemoveClick = (user) => {
-      setSelectedUser(user)
-      setIsReqRemoveOpen(true)
-    }
+  const handleReqRemoveClick = (user) => {
+    setSelectedUser(user)
+    setIsReqRemoveOpen(true)
+  }
 
   const handleResetPasswordClick = (user, mode) => {
     setSelectedUser(user)
@@ -117,7 +121,6 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
 
   // Function to send email to a user with their credentials
   const handleSendEmail = async (user) => {
-
     let formattedBirthdate = user.birthdate
 
     // If the birthdate is a Date object, format it as MM/DD/YYYY
@@ -134,7 +137,7 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
       firstname: user.firstname,
       lastname: user.lastname,
       studentId: user.studentId,
-      birthdate: formattedBirthdate, // Include birthdate for superadmin 
+      birthdate: formattedBirthdate, // Include birthdate for superadmin
       role: user.role, // Include role to determine password generation logic
       // password: user.password || "Cannot decrypt password.", // Ensure password is present
     }
@@ -192,9 +195,7 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
             <option value="all"> All Users </option>
             <option value="students"> Students </option>
             <option value="studentsUnderOrgs"> Students (Under Orgs)</option>
-            <option value="studentsNotUnderOrgs">
-              Students (Not Under Orgs)
-            </option>
+            <option value="studentsNotUnderOrgs">Students (Not Under Orgs)</option>
             <option value="organizations"> Organizations </option>
           </select>
 
@@ -250,11 +251,6 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
                 </th>
               )}
 
-              {/* Dynamic column header based on user role hidden
-                            <th scope="col" className="px-6 py-3">
-                                {currentUser?.role === "superadmin" ? "Position" : "Role"}
-                            </th> */}
-
               {/* Fixed Dynamic column header based on user role */}
               {currentUser?.role === "superadmin" && (
                 <th scope="col" className="px-6 py-3">
@@ -263,31 +259,37 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
               )}
 
               {/* Student-specific columns for admin users */}
-              {currentUser?.role === "admin" &&
-                filterRole !== "organizations" && (
-                  <th scope="col" className="px-6 py-3">
-                    Student ID
-                  </th>
-                )}
-
-              {currentUser?.role === "admin" &&
-                filterRole !== "organizations" && (
-                  <>
-                    <th scope="col" className="px-6 py-3">
-                      College
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Program
-                    </th>
-                  </>
-                )}
-
-              {/* Organization/Suborganization column based on user role */}
-              {currentUser?.role !== "organization" && (
+              {currentUser?.role === "admin" && filterRole !== "organizations" && (
                 <th scope="col" className="px-6 py-3">
-                  {currentUser?.role === "superadmin"
-                    ? "Organization"
-                    : "Suborganizations"}
+                  Student ID
+                </th>
+              )}
+
+              {/* College column - show for all users when admin */}
+              {currentUser?.role === "admin" && (
+                <th scope="col" className="px-6 py-3">
+                  College
+                </th>
+              )}
+
+              {/* Program column - only show for students */}
+              {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                <th scope="col" className="px-6 py-3">
+                  Program
+                </th>
+              )}
+
+              {/* Suborganization column - only show for students */}
+              {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                <th scope="col" className="px-6 py-3">
+                  Suborganizations
+                </th>
+              )}
+
+              {/* Organization column for superadmin */}
+              {currentUser?.role === "superadmin" && (
+                <th scope="col" className="px-6 py-3">
+                  Organization
                 </th>
               )}
             </tr>
@@ -311,9 +313,7 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
                       <div className="flex items-center gap-x-2">
                         <div className="flex items-center">
                           <div
-                            className={`role-badge px-2 py-rounded-full text-sm font-semibold capitalize ${user.role === "organization"
-                              ? "bg-[#efc85f]  text-white"
-                              : "bg-[#2a9ed6]  text-white"
+                            className={`role-badge px-2 py-rounded-full text-sm font-semibold capitalize ${user.role === "organization" ? "bg-[#efc85f]  text-white" : "bg-[#2a9ed6]  text-white"
                               }`}
                           >
                             {user.role === "organization" ? (
@@ -327,83 +327,70 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
                         {/* Action buttons */}
 
                         {/* Send email icon button */}
-                        {(currentUser?.role === "admin" ||
-                          currentUser?.role === "superadmin") && (
-                            <div className="relative">
-                              <Mail
-                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-[#1E90FF] hover:text-white dark:hover:text-white rounded-full hover:bg-[#1E90FF] dark:hover:[#1C86EE] hover:shadow-lg"
-                                onClick={() => handleSendEmail(user)}
-                                title="Send Email"
-                                onMouseEnter={() =>
-                                  setActiveTooltip(`email-${user._id}`)
-                                }
-                                onMouseLeave={() => setActiveTooltip(null)}
-                              />
-                              {activeTooltip === `email-${user._id}` && (
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                  Send Email
-                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                        {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                          <div className="relative">
+                            <Mail
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-[#1E90FF] hover:text-white dark:hover:text-white rounded-full hover:bg-[#1E90FF] dark:hover:[#1C86EE] hover:shadow-lg"
+                              onClick={() => handleSendEmail(user)}
+                              title="Send Email"
+                              onMouseEnter={() => setActiveTooltip(`email-${user._id}`)}
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `email-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Send Email
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Reset Password button (admin/superadmin only) */}
-                        {(currentUser?.role === "admin" ||
-                          currentUser?.role === "superadmin") && (
-                            <div className="relative">
-                              <KeyRound
-                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-yellow-500 hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
-                                onClick={() =>
-                                  handleResetPasswordClick(user, user.role)
-                                }
-                                title="Reset Password"
-                                onMouseEnter={() =>
-                                  setActiveTooltip(`reset-${user._id}`)
-                                }
-                                onMouseLeave={() => setActiveTooltip(null)}
-                              />
-                              {activeTooltip === `reset-${user._id}` && (
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                  Reset Password
-                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                        {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                          <div className="relative">
+                            <KeyRound
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-yellow-500 hover:text-white rounded-full hover:bg-yellow-500 dark:hover:bg-yellow-600 hover:shadow-lg"
+                              onClick={() => handleResetPasswordClick(user, user.role)}
+                              title="Reset Password"
+                              onMouseEnter={() => setActiveTooltip(`reset-${user._id}`)}
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `reset-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Reset Password
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Edit user button */}
-                        {(currentUser?.role === "admin" ||
-                          currentUser?.role === "superadmin") && (
-                            <div className="relative">
-                              <Edit
-                                className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
-                                onClick={() => handleEditClick(user)}
-                                title="Edit"
-                                onMouseEnter={() =>
-                                  setActiveTooltip(`edit-${user._id}`)
-                                }
-                                onMouseLeave={() => setActiveTooltip(null)}
-                              />
-                              {activeTooltip === `edit-${user._id}` && (
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
-                                  Edit
-                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                        {(currentUser?.role === "admin" || currentUser?.role === "superadmin") && (
+                          <div className="relative">
+                            <Edit
+                              className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-gray-500 hover:text-white rounded-full hover:bg-gray-500 dark:hover:bg-gray-500 hover:shadow-lg"
+                              onClick={() => handleEditClick(user)}
+                              title="Edit"
+                              onMouseEnter={() => setActiveTooltip(`edit-${user._id}`)}
+                              onMouseLeave={() => setActiveTooltip(null)}
+                            />
+                            {activeTooltip === `edit-${user._id}` && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                Edit
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Request for removal user button */}
-                        {(currentUser?.role === "organization") && (
+                        {currentUser?.role === "organization" && (
                           <div className="relative">
                             <UserMinus
                               className="w-5 h-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 text-red-500 hover:text-white rounded-full hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-lg"
                               onClick={() => handleReqRemoveClick(user)}
                               title="Request Removal"
-                              onMouseEnter={() =>
-                                setActiveTooltip(`Removal-${user._id}`)
-                              }
+                              onMouseEnter={() => setActiveTooltip(`Removal-${user._id}`)}
                               onMouseLeave={() => setActiveTooltip(null)}
                             />
                             {activeTooltip === `Removal-${user._id}` && (
@@ -493,59 +480,38 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
                     </td>
                   )}
 
-                  {/* Role/Position column based on current user's role   hidden */}
-                  {/* {currentUser?.role === "admin" ? (
-                                        <td className="px-6 py-4">{user.role}</td>
-                                    ) : currentUser?.role === "superadmin" ? (
-                                        <td className="px-6 py-4">{user.position || "N/A"}</td>
-                                    ) : null} */}
+                  {/* Position column for superadmin */}
+                  {currentUser?.role === "superadmin" ? <td className="px-6 py-4">{user.position || "N/A"}</td> : null}
 
-                  {currentUser?.role === "superadmin" ? (
-                    <td className="px-6 py-4">{user.position || "N/A"}</td>
-                  ) : null}
+                  {/* Student ID column - only shown for students */}
+                  {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                    <td className="px-6 py-4">
+                      {user.role === "student" ? user.studentId || "N/A" : user.role === "organization" ? "N/A" : ""}
+                    </td>
+                  )}
 
-                  {/* Student-specific columns for admin users - Updated to show N/A for organizations */}
-                  {currentUser?.role === "admin" &&
-                    filterRole !== "organizations" && (
-                      <td className="px-6 py-4">
-                        {user.role === "student"
-                          ? user.studentId || "N/A"
-                          : user.role === "organization"
-                            ? "N/A"
-                            : ""}
-                      </td>
-                    )}
+                  {/* College column - show for all users when admin */}
+                  {currentUser?.role === "admin" && <td className="px-6 py-4">{user.college || "N/A"}</td>}
 
-                  {currentUser?.role === "admin" &&
-                    filterRole !== "organizations" && (
-                      <>
-                        <td className="px-6 py-4">
-                          {user.role === "student"
-                            ? user.college || "N/A"
-                            : user.role === "organization"
-                              ? "N/A"
-                              : ""}
-                        </td>
-                        <td className="px-6 py-4">
-                          {user.role === "student"
-                            ? user.program || "N/A"
-                            : user.role === "organization"
-                              ? "N/A"
-                              : ""}
-                        </td>
-                      </>
-                    )}
-                  {/* Organization/Suborganization column based on user role */}
-                  {currentUser?.role === "superadmin" ? (
-                    <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
-                  ) : currentUser?.role === "organization" ? (
-                    <td className="px-6 py-4"></td>
-                  ) : (
+                  {/* Program column - only show for students */}
+                  {currentUser?.role === "admin" && filterRole !== "organizations" && (
+                    <td className="px-6 py-4">
+                      {user.role === "student" ? user.program || "N/A" : user.role === "organization" ? "N/A" : ""}
+                    </td>
+                  )}
+
+                  {/* Suborganization column - only show for students */}
+                  {currentUser?.role === "admin" && filterRole !== "organizations" && (
                     <td className="px-6 py-4">
                       {user.suborganizations?.length > 0
                         ? user.suborganizations.map((suborgs) => `${suborgs.firstname} ${suborgs.lastname}`).join(", ")
                         : "N/A"}
                     </td>
+                  )}
+
+                  {/* Organization column for superadmin */}
+                  {currentUser?.role === "superadmin" && (
+                    <td className="px-6 py-4">{user.organization?.name || "N/A"}</td>
                   )}
                 </tr>
               ))
@@ -606,7 +572,7 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
           removing={selectedUser}
           onClose={() => setIsReqRemoveOpen(false)}
           onSubmit={handleReqRemoveClick}
-      />
+        />
       )}
 
       {/* Temporary notification message */}
@@ -618,9 +584,7 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
             }`}
         >
           <div className="flex items-center">
-            <span className="font-medium mr-2">
-              {message.type === "success" ? "✅" : "❌"}
-            </span>
+            <span className="font-medium mr-2">{message.type === "success" ? "✅" : "❌"}</span>
             {message.text}
           </div>
         </div>
@@ -632,13 +596,11 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
           isOpen={isResetModalOpen}
           user={selectedUser}
           onClose={() => setIsResetModalOpen(false)}
-          onResetPassword={
-            resetMode === "admin" ? resetAdminPassword : resetUserPassword
-          }
+          onResetPassword={resetMode === "admin" ? resetAdminPassword : resetUserPassword}
         />
       )}
     </div>
-  );
+  )
 }
 
 UserTable.propTypes = {
