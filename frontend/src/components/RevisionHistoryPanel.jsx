@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getToken } from "../utils/authUtil"
-import { X, RotateCcw, Save, Clock } from "lucide-react"
+import { X, RotateCcw, Save, Clock } from 'lucide-react'
 import {
     getDocumentRevisions,
     getRevisionById,
@@ -10,7 +10,7 @@ import {
     deleteRevision,
 } from "../services/documentRevisionService"
 
-const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPage, setPages }) => {
+const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPage, setPages, pages }) => {
     const [revisions, setRevisions] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -54,8 +54,19 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPag
         setError(null)
         try {
             const token = getToken()
-            const content = editorRef.current.getContent()
-            await createDocumentRevision(documentId, content, newRevisionName, token)
+
+            // Instead of just getting the current editor content, combine all pages
+            let combinedContent;
+
+            if (pages && Array.isArray(pages)) {
+                // If pages array is available, use it to get all pages content
+                combinedContent = pages.map(page => page.content).join('<hr style="page-break-after: always;">');
+            } else {
+                // Fallback to just the current editor content if pages array is not available
+                combinedContent = editorRef.current.getContent();
+            }
+
+            await createDocumentRevision(documentId, combinedContent, newRevisionName, token)
             setNewRevisionName("")
             setShowCreateForm(false)
             await loadRevisions() // Reload the revisions list

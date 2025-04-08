@@ -1281,6 +1281,7 @@ const DocumentContainer = () => {
         editorRef={editorRef}
         currentPage={currentPage}
         setPages={setPages}
+        pages={pages}
       />
     </div>
   )
