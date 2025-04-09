@@ -117,7 +117,9 @@ const updateDocument = async (req, res) => {
 const updateRevision = new DocumentRevision({
     document: document._id,
     content: content || document.content,
-    description: "Auto-saved update",
+    description: content && content !== document.content 
+    ? "Auto-saved content changes" 
+    : "Auto-saved minor update",  
     user: req.user._id,
     organization: req.user.organization,
   })
