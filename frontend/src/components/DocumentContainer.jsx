@@ -131,7 +131,9 @@ const DocumentContainer = () => {
         const documents = await getDocumentsByUser(userId, token, "active")
 
         // Filter out the current document's title if in update mode
-        const titles = documents.filter((doc) => !isUpdateMode || doc._id !== id).map((doc) => doc.title.toLowerCase())
+        const titles = documents
+          .filter((doc) => !isUpdateMode || doc._id !== documentId)
+          .map((doc) => doc.title.toLowerCase())
         setExistingTitles(titles)
       } catch (err) {
         console.error("Error loading document titles:", err)
@@ -144,16 +146,17 @@ const DocumentContainer = () => {
     if (getToken()) {
       loadExistingTitles()
     }
-  }, [id, isUpdateMode])
+  }, [documentId, isUpdateMode])
 
   // Add this validation function
-  const validateTitle = (title) => {
+  function validateTitle(title) {
     if (!title) {
       setTitleError("Title is required")
       return false
     }
 
-    if (existingTitles.includes(title.toLowerCase())) {
+    // In update mode, we should only check if the title exists for OTHER documents
+    if (existingTitles.includes(title.toLowerCase()) && !isUpdateMode) {
       setTitleError("A document with this title already exists. Please choose a different title.")
       return false
     }
