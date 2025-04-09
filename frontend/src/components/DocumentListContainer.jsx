@@ -1,154 +1,157 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../hooks/useAuthContext';
-import {
-  getDocumentsByUser,
-  deleteDocument,
-  recoverDocument,
-  eraseDocument
-} from '../services/documentService';
-import { useDocumentContext } from '../hooks/useDocumentContext';
-import { getToken } from '../utils/authUtil';
-import DeleteDocumentModal from './DeleteDocumentModal';
-import { Eye, ArchiveX } from 'lucide-react'; // Import icons if you're using Lucide
+"use client"
+
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuthContext } from "../hooks/useAuthContext"
+import { getDocumentsByUser, deleteDocument, recoverDocument, eraseDocument } from "../services/documentService"
+import { useDocumentContext } from "../hooks/useDocumentContext"
+import { getToken } from "../utils/authUtil"
+import DeleteDocumentModal from "./DeleteDocumentModal"
 
 const DocumentListContainer = () => {
-  const { documents, loading, error, dispatch } = useDocumentContext();
-  const { user } = useAuthContext();
-  const navigate = useNavigate();
-  const [selectedDocument, setSelectedDocument] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isEraseModalOpen, setIsEraseModalOpen] = useState(false);
-  const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
-  const [documentToErase, setDocumentToErase] = useState(null);
-  const [documentToRecover, setDocumentToRecover] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState('name-asc');
-  const [statusFilter, setStatusFilter] = useState('active');
-  const [message, setMessage] = useState(null);
+  const { documents, loading, error, dispatch } = useDocumentContext()
+  const { user } = useAuthContext()
+  const navigate = useNavigate()
+  const [selectedDocument, setSelectedDocument] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isEraseModalOpen, setIsEraseModalOpen] = useState(false)
+  const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false)
+  const [documentToErase, setDocumentToErase] = useState(null)
+  const [documentToRecover, setDocumentToRecover] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [sortOption, setSortOption] = useState("name-asc")
+  const [statusFilter, setStatusFilter] = useState("active")
+  const [message, setMessage] = useState(null)
 
-  const showMessage = (text, type = 'success') => {
-    setMessage({ text, type });
-    setTimeout(() => setMessage(null), 3000);
-  };
+  const showMessage = (text, type = "success") => {
+    setMessage({ text, type })
+    setTimeout(() => setMessage(null), 3000)
+  }
 
   useEffect(() => {
     const loadDocuments = async () => {
-      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: "SET_LOADING", payload: true })
       try {
-        const token = getToken();
-        const fetchedDocuments = await getDocumentsByUser(user._id, token, statusFilter);
-        dispatch({ type: 'SET_DOCUMENTS', payload: fetchedDocuments });
+        const token = getToken()
+        const fetchedDocuments = await getDocumentsByUser(user._id, token, statusFilter)
+        dispatch({ type: "SET_DOCUMENTS", payload: fetchedDocuments })
       } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to fetch documents. Please try again later.' });
+        console.error(err)
+        dispatch({ type: "SET_ERROR", payload: "Failed to fetch documents. Please try again later." })
       } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: "SET_LOADING", payload: false })
       }
-    };
+    }
 
-    loadDocuments();
-  }, [dispatch, user, statusFilter]);
+    if (user && user._id) {
+      loadDocuments()
+    }
+  }, [dispatch, user, statusFilter])
 
   // Soft delete (archive) a document
   const handleDeleteDocument = async (documentId) => {
     try {
-      const token = getToken();
-      await deleteDocument(documentId, token);
-      dispatch({ type: 'DELETE_DOCUMENT', payload: documentId });
-      showMessage('Document inactivate successfully!');
+      const token = getToken()
+      await deleteDocument(documentId, token)
+
+      // If we're viewing active documents, remove this one from the current view
+      if (statusFilter === "active") {
+        dispatch({ type: "REMOVE_FROM_VIEW", payload: documentId })
+      } else {
+        // Otherwise just mark it as deleted in the state
+        dispatch({ type: "DELETE_DOCUMENT", payload: documentId })
+      }
+
+      showMessage("Document inactivate successfully!")
     } catch (error) {
-      console.error(error);
-      showMessage('Failed to inactivate the document. Please try again.', 'error');
+      console.error(error)
+      showMessage("Failed to inactivate the document. Please try again.", "error")
     }
-    setIsDeleteModalOpen(false);
-  };
+    setIsDeleteModalOpen(false)
+  }
 
   // Recover a document
   // In your handleRecoverDocument function
   const handleRecoverDocument = async (documentId) => {
     try {
-      const token = getToken();
-      await recoverDocument(documentId, token);
+      const token = getToken()
+      const response = await recoverDocument(documentId, token)
 
-      if (statusFilter === 'inactive') {
-        // If we're viewing archived documents, remove this one from view
+      // If we're viewing inactive documents, remove this one from the current view
+      if (statusFilter === "inactive") {
+        dispatch({ type: "REMOVE_FROM_VIEW", payload: documentId })
+      } else {
+        // Otherwise just update its status in the state
         dispatch({
-          type: 'REMOVE_FROM_VIEW',
-          payload: documentId
-        });
-      } else if (statusFilter === 'all') {
-        // If we're viewing all documents, update its status
-        dispatch({
-          type: 'RECOVER_DOCUMENT',
-          payload: { _id: documentId }
-        });
+          type: "RECOVER_DOCUMENT",
+          payload: response.document || { _id: documentId, status: "active" },
+        })
       }
 
-      showMessage('Document recovered successfully!');
+      showMessage("Document recovered successfully!")
     } catch (error) {
-      console.error(error);
-      showMessage('Failed to recover the document. Please try again.', 'error');
+      console.error(error)
+      showMessage("Failed to recover the document. Please try again.", "error")
     }
-    setIsRecoverModalOpen(false);
-    setDocumentToRecover(null);
-  };
+    setIsRecoverModalOpen(false)
+    setDocumentToRecover(null)
+  }
   // Permanently delete a document
   const handleEraseDocument = async (documentId) => {
     try {
-      const token = getToken();
-      await eraseDocument(documentId, token);
-      dispatch({ type: 'ERASE_DOCUMENT', payload: documentId });
-      showMessage('Document permanently deleted!');
+      const token = getToken()
+      await eraseDocument(documentId, token)
+      dispatch({ type: "ERASE_DOCUMENT", payload: documentId })
+      showMessage("Document permanently deleted!")
     } catch (error) {
-      console.error(error);
-      showMessage('Failed to permanently delete the document. Please try again.', 'error');
+      console.error(error)
+      showMessage("Failed to permanently delete the document. Please try again.", "error")
     }
-    setIsEraseModalOpen(false);
-    setDocumentToErase(null);
-  };
+    setIsEraseModalOpen(false)
+    setDocumentToErase(null)
+  }
 
   // Open delete modal
   const openDeleteModal = (document) => {
-    setSelectedDocument(document);
-    setIsDeleteModalOpen(true);
-  };
+    setSelectedDocument(document)
+    setIsDeleteModalOpen(true)
+  }
 
   // Open recover modal
   const openRecoverModal = (document) => {
-    setDocumentToRecover(document);
-    setIsRecoverModalOpen(true);
-  };
+    setDocumentToRecover(document)
+    setIsRecoverModalOpen(true)
+  }
 
   // Open erase modal
   const openEraseModal = (document) => {
-    setDocumentToErase(document);
-    setIsEraseModalOpen(true);
-  };
+    setDocumentToErase(document)
+    setIsEraseModalOpen(true)
+  }
 
   // Filter documents by search query
   const filteredDocuments = documents.filter((document) =>
-    document.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    document.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   // Sort documents based on selected option
   const sortedDocuments = [...filteredDocuments].sort((a, b) => {
     switch (sortOption) {
-      case 'name-asc':
-        return a.title.localeCompare(b.title);
-      case 'name-desc':
-        return b.title.localeCompare(a.title);
-      case 'date-asc':
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      case 'date-desc':
-        return new Date(b.createdAt) - new Date(a.createdAt);
+      case "name-asc":
+        return a.title.localeCompare(b.title)
+      case "name-desc":
+        return b.title.localeCompare(a.title)
+      case "date-asc":
+        return new Date(a.createdAt) - new Date(b.createdAt)
+      case "date-desc":
+        return new Date(b.createdAt) - new Date(a.createdAt)
       default:
-        return 0;
+        return 0
     }
-  });
+  })
 
-  if (loading) return <p>Loading documents...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (loading) return <p>Loading documents...</p>
+  if (error) return <p className="text-red-500">{error}</p>
 
   return (
     <div className="p-4">
@@ -192,24 +195,19 @@ const DocumentListContainer = () => {
           {sortedDocuments.map((document) => (
             <div
               key={document._id}
-              className={`border rounded-lg p-6 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white max-w-sm mx-auto flex flex-col justify-between h-full ${document.status === 'inactive' ? 'opacity-50' : ''
+              className={`border rounded-lg p-6 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white max-w-sm mx-auto flex flex-col justify-between h-full ${document.status === "inactive" ? "opacity-50" : ""
                 }`}
             >
               <div>
-                <h3 className="text-2xl font-semibold text-gray-800 mb-3 truncate">
-                  {document.title}
-                </h3>
+                <h3 className="text-2xl font-semibold text-gray-800 mb-3 truncate">{document.title}</h3>
                 <p className="text-gray-600 mb-2">
-                  <strong className="text-gray-900">Template:</strong>{" "}
-                  {document.template?.name || "N/A"}
+                  <strong className="text-gray-900">Template:</strong> {document.template?.name || "N/A"}
                 </p>
-                {document.status === 'inactive' && (
-                  <p className="text-red-500 mb-2">Inactive</p>
-                )}
+                {document.status === "inactive" && <p className="text-red-500 mb-2">Inactive</p>}
               </div>
 
               <div className="mt-auto flex gap-4">
-                {document.status === 'active' ? (
+                {document.status === "active" ? (
                   <>
                     <button
                       className="bg-[#38b6ff] text-white py-2 px-6 rounded-lg hover:bg-[#2a9ed6] transition-all duration-200 transform hover:scale-105"
@@ -263,9 +261,7 @@ const DocumentListContainer = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg font-semibold">Recover Document</p>
-            <p className="text-sm mt-1">
-              Are you sure you want to recover "{documentToRecover.title}"?
-            </p>
+            <p className="text-sm mt-1">Are you sure you want to recover "{documentToRecover.title}"?</p>
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={() => setIsRecoverModalOpen(false)}
@@ -316,19 +312,14 @@ const DocumentListContainer = () => {
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                     p-4 rounded shadow-lg text-white text-center w-80 z-50"
           style={{
-            backgroundColor:
-              message.type === "success"
-                ? "#4CAF50"
-                : message.type === "error"
-                  ? "#F44336"
-                  : "#FFC107",
+            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
           }}
         >
           {message.text}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default DocumentListContainer;
+export default DocumentListContainer
