@@ -7,7 +7,7 @@ import { getToken } from "../utils/authUtil"
 import { createDocument, updateDocument, getDocumentById, getDocumentsByUser } from "../services/documentService"
 import { getTemplateById } from "../services/templateService"
 import imageCompression from "browser-image-compression"
-import { X, Printer, Save, Clock } from "lucide-react"
+import { X, Printer, Save, Clock, CheckCircle, XCircle, Loader } from "lucide-react"
 import RevisionHistoryPanel from "./RevisionHistoryPanel"
 
 // Function to find user ID from various storage locations
@@ -486,10 +486,14 @@ const DocumentContainer = () => {
     if (autoSaveTimer) {
       clearTimeout(autoSaveTimer)
     }
+
+    // Set status to pending immediately to show "Saving..." message
     setAutoSaveStatus("pending")
+
     const timer = setTimeout(() => {
       handleAutoSave()
-    }, 5000) // 5 seconds delay
+    }, 8000) // 8 seconds delay
+
     setAutoSaveTimer(timer)
   }
 
@@ -503,14 +507,14 @@ const DocumentContainer = () => {
 
     if (!title || pages.length === 0) {
       setAutoSaveStatus("error")
-      setTimeout(() => setAutoSaveStatus(null), 3000)
+      setTimeout(() => setAutoSaveStatus(null), 5000)
       return
     }
 
     // Skip auto-save if title is invalid (duplicate)
     if (existingTitles.includes(title.toLowerCase()) && !isUpdateMode) {
       setAutoSaveStatus("error")
-      setTimeout(() => setAutoSaveStatus(null), 3000)
+      setTimeout(() => setAutoSaveStatus(null), 5000)
       return
     }
 
@@ -883,42 +887,53 @@ const DocumentContainer = () => {
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between mb-4">
-          <button
-            disabled={currentPage === 1}
-            onClick={handlePreviousPage}
-            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {pages.length}
-          </span>
-          <button
-            disabled={currentPage === pages.length}
-            onClick={handleNextPage}
-            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
-          >
-            Next
-          </button>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-4">
+            <button
+              disabled={currentPage === 1}
+              onClick={handlePreviousPage}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {pages.length}
+            </span>
+            <button
+              disabled={currentPage === pages.length}
+              onClick={handleNextPage}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+            >
+              Next
+            </button>
+          </div>
+
+          {/* Auto-save Status Indicator */}
+          <div className="flex items-center gap-4 text-green-600 text-sm font-bold">
+            {autoSaveStatus === "success" && (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                <span>Auto-saved</span>
+              </>
+            )}
+            {autoSaveStatus === "error" && (
+              <>
+                <XCircle className="h-4 w-4 text-red-500" />
+                <span className="text-red-500">Failed to save</span>
+              </>
+            )}
+            {autoSaveStatus === "pending" && (
+              <>
+                <Loader className="h-4 w-4 animate-spin" />
+                <span>Saving...</span>
+              </>
+            )}
+            {!autoSaveStatus && hasBeenManuallySaved && <span className="text-green-400">Saved</span>}
+          </div>
         </div>
 
         {/* Add/Delete Buttons */}
         <div className="mb-4 flex justify-end gap-4">
-          {/* Auto-save Status Indicator */}
-          {autoSaveStatus && (
-            <div
-              className="p-3 rounded shadow-lg text-white text-sm z-50"
-              style={{
-                backgroundColor:
-                  autoSaveStatus === "success" ? "#4CAF50" : autoSaveStatus === "error" ? "#F44336" : "#FFC107",
-              }}
-            >
-              {autoSaveStatus === "success" && "Changes auto-saved"}
-              {autoSaveStatus === "error" && "Auto-save failed"}
-              {autoSaveStatus === "pending" && "Saving changes..."}
-            </div>
-          )}
           {/* <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
             Add Page
           </button>

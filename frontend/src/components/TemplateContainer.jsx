@@ -7,7 +7,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { getToken } from "../utils/authUtil.js"
 import { createTemplate, getTemplateById, updateTemplate, fetchDecisionTree } from "../services/templateService.js"
 import imageCompression from "browser-image-compression"
-import { X, Printer, Save } from "lucide-react"
+import { X, Printer, Save, Clock, CheckCircle, XCircle, Loader } from "lucide-react"
 
 const TemplateContainer = ({ suborgs }) => {
   console.log("suborgs:", suborgs)
@@ -1088,19 +1088,27 @@ const TemplateContainer = ({ suborgs }) => {
           {/* Add/Delete Buttons */}
           <div className="mb-4 flex justify-end gap-4">
             {/* Auto-save Status Indicator */}
-            {autoSaveStatus && (
-              <div
-                className="p-3 rounded shadow-lg text-white text-sm z-50"
-                style={{
-                  backgroundColor:
-                    autoSaveStatus === "success" ? "#4CAF50" : autoSaveStatus === "error" ? "#F44336" : "#FFC107",
-                }}
-              >
-                {autoSaveStatus === "success" && "Changes auto-saved"}
-                {autoSaveStatus === "error" && "Auto-save failed"}
-                {autoSaveStatus === "pending" && "Saving changes..."}
-              </div>
-            )}
+            <div className="flex items-center gap-4 text-green-600 text-sm font-bold">
+              {autoSaveStatus === "success" && (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Auto-saved</span>
+                </>
+              )}
+              {autoSaveStatus === "error" && (
+                <>
+                  <XCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-red-500">Failed to save</span>
+                </>
+              )}
+              {autoSaveStatus === "pending" && (
+                <>
+                  <Loader className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              )}
+              {!autoSaveStatus && hasBeenManuallySaved && <span className="text-green-400">Saved</span>}
+            </div>
             <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
               Add Page
             </button>
