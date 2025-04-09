@@ -7,7 +7,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { getToken } from "../utils/authUtil.js"
 import { createTemplate, getTemplateById, updateTemplate, fetchDecisionTree } from "../services/templateService.js"
 import imageCompression from "browser-image-compression"
-import { X, Printer, Save, Clock, CheckCircle, XCircle, Loader } from "lucide-react"
+import { X, Printer, Save, CheckCircle, XCircle, Loader } from "lucide-react"
 
 const TemplateContainer = ({ suborgs }) => {
   console.log("suborgs:", suborgs)
@@ -1107,7 +1107,7 @@ const TemplateContainer = ({ suborgs }) => {
                   <span>Saving...</span>
                 </>
               )}
-              {!autoSaveStatus && hasBeenManuallySaved && <span className="text-green-400">Saved</span>}
+              {!autoSaveStatus && templateId && <span className="text-green-400">Saved</span>}
             </div>
             <button onClick={handleAddPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
               Add Page
