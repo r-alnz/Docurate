@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getToken } from "../utils/authUtil"
-import { X, RotateCcw, Save, Clock } from 'lucide-react'
+import { X, RotateCcw, Save, Clock, AlertTriangle } from "lucide-react"
 import {
     getDocumentRevisions,
     getRevisionById,
@@ -16,6 +16,12 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPag
     const [error, setError] = useState(null)
     const [newRevisionName, setNewRevisionName] = useState("")
     const [showCreateForm, setShowCreateForm] = useState(false)
+    const [confirmDialog, setConfirmDialog] = useState({
+        show: false,
+        message: "",
+        onConfirm: null,
+        type: "",
+    })
 
     // Load revisions when the panel is shown
     useEffect(() => {
@@ -56,14 +62,14 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPag
             const token = getToken()
 
             // Instead of just getting the current editor content, combine all pages
-            let combinedContent;
+            let combinedContent
 
             if (pages && Array.isArray(pages)) {
                 // If pages array is available, use it to get all pages content
-                combinedContent = pages.map(page => page.content).join('<hr style="page-break-after: always;">');
+                combinedContent = pages.map((page) => page.content).join('<hr style="page-break-after: always;">')
             } else {
                 // Fallback to just the current editor content if pages array is not available
-                combinedContent = editorRef.current.getContent();
+                combinedContent = editorRef.current.getContent()
             }
 
             await createDocumentRevision(documentId, combinedContent, newRevisionName, token)
@@ -78,68 +84,88 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPag
         }
     }
 
+    const showConfirmDialog = (message, onConfirm, type) => {
+        setConfirmDialog({
+            show: true,
+            message,
+            onConfirm,
+            type,
+        })
+    }
+
+    const hideConfirmDialog = () => {
+        setConfirmDialog({
+            show: false,
+            message: "",
+            onConfirm: null,
+            type: "",
+        })
+    }
+
     const handleRestoreRevision = async (revisionId) => {
         if (!editorRef.current) {
             setError("Editor not available. Please try again.")
             return
         }
 
-        const confirmRestore = window.confirm(
+        showConfirmDialog(
             "Are you sure you want to restore this revision? This will replace your current document content.",
-        )
+            async () => {
+                try {
+                    setLoading(true)
+                    const token = getToken()
+                    const revision = await getRevisionById(documentId, revisionId, token)
 
-        if (confirmRestore) {
-            try {
-                setLoading(true)
-                const token = getToken()
-                const revision = await getRevisionById(documentId, revisionId, token)
+                    // Instead of directly setting the editor content, we need to handle multi-page documents
+                    const revisionContent = revision.content
 
-                // Instead of directly setting the editor content, we need to handle multi-page documents
-                const revisionContent = revision.content
+                    // Split the content by page breaks
+                    const contentPages = revisionContent.split('<hr style="page-break-after: always;">')
 
-                // Split the content by page breaks
-                const contentPages = revisionContent.split('<hr style="page-break-after: always;">')
+                    // Create new pages array with the content
+                    const newPages = contentPages.map((content, index) => ({
+                        id: index + 1,
+                        content,
+                    }))
 
-                // Create new pages array with the content
-                const newPages = contentPages.map((content, index) => ({
-                    id: index + 1,
-                    content,
-                }))
+                    // Update all pages at once
+                    if (setPages) {
+                        setPages(newPages)
+                    } else {
+                        // Fallback to the old method if setPages is not available
+                        editorRef.current.setContent(revision.content)
+                    }
 
-                // Update all pages at once
-                if (setPages) {
-                    setPages(newPages)
-                } else {
-                    // Fallback to the old method if setPages is not available
-                    editorRef.current.setContent(revision.content)
+                    setLoading(false)
+                    onClose() // Close the panel after restoration
+                } catch (err) {
+                    setError("Failed to restore revision. Please try again.")
+                    console.error("Error restoring revision:", err)
+                    setLoading(false)
                 }
-
-                setLoading(false)
-                onClose() // Close the panel after restoration
-            } catch (err) {
-                setError("Failed to restore revision. Please try again.")
-                console.error("Error restoring revision:", err)
-                setLoading(false)
-            }
-        }
+            },
+            "restore",
+        )
     }
 
     const handleDeleteRevision = async (revisionId) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this revision? This action cannot be undone.")
-
-        if (confirmDelete) {
-            try {
-                setLoading(true)
-                const token = getToken()
-                await deleteRevision(documentId, revisionId, token)
-                await loadRevisions() // Reload the revisions list
-                setLoading(false)
-            } catch (err) {
-                setError("Failed to delete revision. Please try again.")
-                console.error("Error deleting revision:", err)
-                setLoading(false)
-            }
-        }
+        showConfirmDialog(
+            "Are you sure you want to delete this revision? This action cannot be undone.",
+            async () => {
+                try {
+                    setLoading(true)
+                    const token = getToken()
+                    await deleteRevision(documentId, revisionId, token)
+                    await loadRevisions() // Reload the revisions list
+                    setLoading(false)
+                } catch (err) {
+                    setError("Failed to delete revision. Please try again.")
+                    console.error("Error deleting revision:", err)
+                    setLoading(false)
+                }
+            },
+            "delete",
+        )
     }
 
     if (!show) return null
@@ -158,6 +184,41 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPag
 
                 <div className="p-4 overflow-y-auto flex-grow">
                     {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+
+                    {/* Custom Confirmation Dialog */}
+                    {confirmDialog.show && (
+                        <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+                            <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+                                <div className="flex items-start mb-4">
+                                    <AlertTriangle
+                                        className={`mr-3 ${confirmDialog.type === "delete" ? "text-red-500" : "text-amber-500"}`}
+                                    />
+                                    <h3 className="text-lg font-medium">
+                                        {confirmDialog.type === "delete" ? "Confirm Deletion" : "Confirm Restore"}
+                                    </h3>
+                                </div>
+                                <p className="mb-6 text-gray-600">{confirmDialog.message}</p>
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        onClick={hideConfirmDialog}
+                                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            confirmDialog.onConfirm()
+                                            hideConfirmDialog()
+                                        }}
+                                        className={`px-4 py-2 text-white rounded ${confirmDialog.type === "delete" ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                                            }`}
+                                    >
+                                        {confirmDialog.type === "delete" ? "Delete" : "Restore"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {!showCreateForm ? (
                         <button
