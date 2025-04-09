@@ -172,6 +172,10 @@ userSchema.statics.login = async function (email, password) {
             throw new Error('Invalid credentials');
         }
 
+        if (user.inactive) {
+            throw new Error('Your account is inactive. Please contact support.');
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             throw new Error('Invalid credentials');
