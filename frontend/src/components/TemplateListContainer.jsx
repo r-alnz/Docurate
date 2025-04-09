@@ -4,7 +4,7 @@ import { fetchTemplates, deleteTemplate, recoverTemplate, eraseTemplate } from "
 import { useNavigate } from "react-router-dom"
 import { getToken } from "../utils/authUtil"
 import { useAuthContext } from "../hooks/useAuthContext"
-import { Eye, ArchiveX } from "lucide-react"
+import { Eye, ArchiveX, CheckCircle, AlertTriangle, XCircle } from "lucide-react"
 import DeleteTemplateModal from "./DeleteTemplateModal"
 
 import { Mosaic } from "react-loading-indicators"
@@ -432,18 +432,37 @@ const TemplateListContainer = () => {
         </div>
       )}
 
-      {/* Mini Message Box (Centered) */}
+      {/* Message Box */}
       {message && (
         <div
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                    p-4 rounded shadow-lg text-white text-center w-80"
-          style={{
-            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
-          }}
+              bg-white p-6 rounded-xl shadow-lg text-center w-80 z-50 flex flex-col items-center"
         >
-          {message.text}
+          {/* Icon based on message type */}
+          {message.type === "success" && (
+            <CheckCircle className="w-10 h-10 text-green-600 mb-2" />
+          )}
+          {message.type === "error" && (
+            <XCircle className="w-10 h-10 text-red-600 mb-2" />
+          )}
+          {message.type === "warning" && (
+            <AlertTriangle className="w-10 h-10 text-yellow-500 mb-2" />
+          )}
+
+          {/* Text */}
+          <p
+            className={`text-base font-medium ${message.type === "success"
+                ? "text-green-600"
+                : message.type === "error"
+                  ? "text-red-600"
+                  : "text-yellow-500"
+              }`}
+          >
+            {message.text}
+          </p>
         </div>
       )}
+
     </div>
   )
 }

@@ -42,7 +42,7 @@ const TemplateContainer = ({ suborgs }) => {
   const [templateId, setTemplateId] = useState(id || null)
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
 
-  const showMessage = (text, type = "success") => {
+  const showMessage = (text, type = "info") => {
     setMessage({ text, type })
     setTimeout(() => setMessage(null), 3000) // Auto-hide after 3 seconds
   }
@@ -212,9 +212,9 @@ const TemplateContainer = ({ suborgs }) => {
         @font-face {
             font-family: 'Century Gothic';
             src: local('Century Gothic'), /* Uses installed font on the system */
-                url('/fonts/CenturyGothic.woff2') format('woff2'),
-                url('/fonts/CenturyGothic.woff') format('woff'),
-                url('/fonts/CenturyGothic.ttf') format('truetype');
+            url('/fonts/CenturyGothic.woff2') format('woff2'),
+            url('/fonts/CenturyGothic.woff') format('woff'),
+            url('/fonts/CenturyGothic.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -418,7 +418,7 @@ const TemplateContainer = ({ suborgs }) => {
         setAutoSaveEnabled(true) // Enable auto-save for existing templates
       } catch (error) {
         console.error("Error loading template:", error.message)
-        showMessage("Failed to load template. Please try again.")
+        showMessage("Failed to load template. Please try again.", "error")
       }
     }
 
@@ -467,7 +467,7 @@ const TemplateContainer = ({ suborgs }) => {
           addImageToEditor(editor, compressedFile)
         } catch (error) {
           console.error("Error compressing image:", error.message)
-          showMessage("Failed to compress and insert image. Please try again.")
+          showMessage("Failed to compress and insert image. Please try again.", "error")
         }
       }
     }
@@ -558,7 +558,7 @@ const TemplateContainer = ({ suborgs }) => {
           insertHeaderFooterImage(editor, position, compressedFile)
         } catch (error) {
           console.error(`Error compressing ${position} image:`, error.message)
-          showMessage(`Failed to add ${position} image. Please try again.`)
+          showMessage(`Failed to add ${position} image. Please try again.`, "error")
         }
       }
     }
@@ -693,7 +693,7 @@ const TemplateContainer = ({ suborgs }) => {
         setCurrentPage((prev) => (prev > newPages.length ? newPages.length : prev))
       }
     } else {
-      showMessage("You cannot delete the last page!")
+      showMessage("You cannot delete the last page!", "error")
     }
   }
 
@@ -717,7 +717,7 @@ const TemplateContainer = ({ suborgs }) => {
       pages.length === 0 ||
       (isCustomType ? !customSubtype : !documentSubtype)
     ) {
-      showMessage("Please fill in all required fields including subtype and ensure there is content.")
+      showMessage("Please fill in all required fields including subtype and ensure there is content.", "error")
       return
     }
 
@@ -754,7 +754,7 @@ const TemplateContainer = ({ suborgs }) => {
       }
     } catch (error) {
       console.error("Error saving/updating template:", error.message)
-      showMessage("Failed to save/update template. Please try again.")
+      showMessage("Failed to save/update template. Please try again.", "error")
     }
   }
 
@@ -1050,7 +1050,7 @@ const TemplateContainer = ({ suborgs }) => {
         <button
           onClick={() => {
             if (!documentName || (!documentType && !customType) || !requiredRole || !paperSize) {
-              showMessage("Please fill in all required fields before starting template creation.")
+              showMessage("Please fill in all required fields before starting template creation.", "error")
               return
             }
             setEditorLoaded(true)
@@ -1259,7 +1259,7 @@ const TemplateContainer = ({ suborgs }) => {
                               addDraggableImage(editor, file)
                             } catch (error) {
                               console.error("Error adding draggable image:", error.message)
-                              showMessage("Failed to add image. Please try again.")
+                              showMessage("Failed to add image. Please try again.", "error")
                             }
                           }
                         }
@@ -1464,12 +1464,24 @@ const TemplateContainer = ({ suborgs }) => {
       {message && (
         <div
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                    p-4 rounded shadow-lg text-white text-center w-80 z-50"
-          style={{
-            backgroundColor: message.type === "success" ? "#4CAF50" : message.type === "error" ? "#F44336" : "#FFC107",
-          }}
+        p-4 rounded shadow-lg bg-white text-center w-80 z-50 flex items-center justify-center gap-2"
         >
-          {message.text}
+          {message.type === "success" && <CheckCircle className="h-5 w-5 text-green-500" />}
+          {message.type === "error" && <XCircle className="h-5 w-5 text-red-500" />}
+          {message.type === "info" && <Loader className="h-5 w-5 text-blue-500" />}
+          {message.type !== "success" && message.type !== "error" && message.type !== "info" && (
+            <Loader className="h-5 w-5 text-orange-500" />
+          )}
+          <span
+            className={`
+      ${message.type === "success" ? "text-green-500" : ""}
+      ${message.type === "error" ? "text-red-500" : ""}
+      ${message.type === "info" ? "text-blue-500" : ""}
+      ${message.type !== "success" && message.type !== "error" && message.type !== "info" ? "text-orange-500" : ""}
+    `}
+          >
+            {message.text}
+          </span>
         </div>
       )}
     </div>
