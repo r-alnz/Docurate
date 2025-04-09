@@ -327,18 +327,24 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, suborganizations, suborgAlrea
               />
             </div>
           ) : null}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              College <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={college}
-              onChange={(e) => setCollege(e.target.value)}
-              className="border rounded p-2 w-full"
-              required
-            />
-          </div>
+
+          {role === "organization" && (
+            <>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">
+                  College <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={college}
+                  onChange={(e) => setCollege(e.target.value)}
+                  className="border rounded p-2 w-full"
+                  required
+                />
+              </div>
+            </>
+          )}
+
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input
