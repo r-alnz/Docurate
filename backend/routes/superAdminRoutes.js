@@ -5,7 +5,9 @@ import {
     getOrganizations,
     getAdminAccounts,
     editAdminAccount,
-    deleteAdminAccount
+    deleteAdminAccount,
+    inactivateAdminAccount,
+    activateAdminAccount
 } from '../controllers/superAdminController.js';
 import { authToken, requireSuperAdmin } from '../middleware/auth.js';
 
@@ -20,4 +22,7 @@ router.get('/admins', authToken, requireSuperAdmin, getAdminAccounts);          
 
 router.put('/admins/:id', authToken, editAdminAccount);
 router.delete('/admins/:id', authToken, deleteAdminAccount);
+router.put('/inactivate/:id', authToken, requireSuperAdmin, inactivateAdminAccount);
+router.put('/activate/:id', authToken, requireSuperAdmin, activateAdminAccount);
+
 export default router;

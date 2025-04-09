@@ -31,7 +31,7 @@ const InactivateModal = ({ isOpen, user, onClose, onInactivate }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded shadow-lg max-w-sm">
-        <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
+        <h2 className="text-lg font-bold mb-4">Confirm Inactivation</h2>
         <p>
           Are you sure you want to inactivate{" "}
           <strong>

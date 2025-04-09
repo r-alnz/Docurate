@@ -6,6 +6,8 @@ import {
   addAdminAccount,
   editAdminAccount,
   deleteAdminAccount,
+  inactivateAdminAccount,
+  activateAdminAccount
 } from "../services/superAdminService"
 import { useAuthContext } from "../hooks/useAuthContext"
 import { useUserContext } from "../hooks/useUserContext"
@@ -82,6 +84,34 @@ const SuperAdminAdminsPage = () => {
       console.error("Failed to delete user:", error)
     }
   }
+  
+  const handleInactivateAdmin = async (userId) => {
+      try {
+          await inactivateAdminAccount(token, userId);
+          dispatch({
+              type: 'SET_USERS',
+              payload: users.map((user) => 
+                  user._id === userId ? { ...user, inactive: true } : user
+              ),
+          });
+      } catch (error) {
+          console.error('Inactivation failed:', error);
+      }
+  };
+
+  const handleActivateAdmin = async (userId) => {
+      try {
+          await activateAdminAccount(token, userId);
+          dispatch({
+              type: 'SET_USERS',
+              payload: users.map((user) => 
+                  user._id === userId ? { ...user, inactive: false } : user
+              ),
+          });
+      } catch (error) {
+          console.error('Activation failed:', error);
+      }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -112,11 +142,13 @@ const SuperAdminAdminsPage = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <UserTable
-            users={filteredUsers}
-            onEdit={handleEditAdmin}
-            onDelete={handleDeleteAdmin}
-          />
+        <UserTable
+          users={filteredUsers}
+          onEdit={handleEditAdmin}
+          onDelete={handleDeleteAdmin}
+          onInactivate={handleInactivateAdmin}
+          onActivate={handleActivateAdmin}
+        />
         </div>
       </div>
 

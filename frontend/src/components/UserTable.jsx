@@ -215,11 +215,20 @@ const UserTable = ({ users, onEdit, onDelete, onInactivate, onActivate, suborgan
           </select>
 
           {/* Active/Inactive filter */}
-          <button onClick={() => setShowInactive(!showInactive)} className="px-4 py-2 bg-white text-gray-800 font-medium rounded-lg shadow-md cursor-pointer ml-4
-               transition-all duration-300 border border-gray-300 hover:border-blue-400">
-            {showInactive ? 'Show Active' : 'Show Inactive'}
+          <button onClick={() => setShowInactive(!showInactive)}
+          className="px-4 py-2 bg-white text-gray-800 font-medium rounded-lg shadow-md cursor-pointer ml-4 transition-all duration-300 border border-gray-300 hover:border-blue-400">
+          {showInactive ? 'Show Active' : 'Show Inactive'}
           </button>
 
+        </div>
+      )}
+
+      {currentUser?.role === "superadmin" && (
+        <div className="mb-4 flex justify-end sticky left-0">
+        {/* Active/Inactive filter */}
+          <button onClick={() => setShowInactive(!showInactive)} className="px-4 py-2 bg-white text-gray-800 font-medium rounded-lg shadow-md cursor-pointer ml-4 transition-all duration-300 border border-gray-300 hover:border-blue-400">
+            {showInactive ? 'Show Active' : 'Show Inactive'}
+          </button>
         </div>
       )}
 
