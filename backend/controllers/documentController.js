@@ -117,7 +117,9 @@ const updateDocument = async (req, res) => {
 const updateRevision = new DocumentRevision({
     document: document._id,
     content: content || document.content,
-    description: "Auto-saved update",
+    description: content && content !== document.content 
+    ? "Auto-saved content changes" 
+    : "Auto-saved minor update",  
     user: req.user._id,
     organization: req.user.organization,
   })
@@ -210,10 +212,13 @@ const eraseDocument = async (req, res) => {
             return res.status(403).json({ message: 'Unauthorized action.' });
         }
 
-        // Permanently delete the document
+        // First delete all revisions for this document
+        await DocumentRevision.deleteMany({ document: documentId });
+
+        // Then permanently delete the document
         await Document.findByIdAndDelete(documentId);
 
-        res.status(200).json({ message: 'Document permanently deleted.' });
+        res.status(200).json({ message: 'Document and all its revisions permanently deleted.' });
     } catch (error) {
         console.error('Error erasing document:', error);
         res.status(500).json({ message: 'Failed to erase document.' });
