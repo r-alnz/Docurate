@@ -213,12 +213,14 @@ const RevisionHistoryPanel = ({ show, onClose, documentId, editorRef, currentPag
                                             </p>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleRestoreRevision(revision._id)}
-                                                className="bg-blue-100 text-blue-700 py-1 px-2 rounded hover:bg-blue-200 flex items-center text-sm"
-                                            >
-                                                <RotateCcw className="w-3 h-3 mr-1" /> Restore
-                                            </button>
+                                            {index > 0 && (
+                                                <button
+                                                    onClick={() => handleRestoreRevision(revision._id)}
+                                                    className="bg-blue-100 text-blue-700 py-1 px-2 rounded hover:bg-blue-200 flex items-center text-sm"
+                                                >
+                                                    <RotateCcw className="w-3 h-3 mr-1" /> Restore
+                                                </button>
+                                            )}
                                             {index > 0 && (
                                                 <button
                                                     onClick={() => handleDeleteRevision(revision._id)}
