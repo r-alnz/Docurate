@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getToken } from '../utils/authUtil';
 import { getUserDetails } from '../services/authService';
 import { useAuthContext } from '../hooks/useAuthContext';
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react";
 import '../index.css';
 
 const LoginPage = () => {
@@ -15,7 +15,7 @@ const LoginPage = () => {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
-  const [showPasswords, setShowPasswords] = useState("")
+  const [showPasswords, setShowPasswords] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -23,6 +23,12 @@ const LoginPage = () => {
     if (token) {
       getUserDetails(token)
         .then((userDetails) => {
+          // Check if the user is inactive
+          if (userDetails.inactive) {
+            setMessage('Your account is inactive. Please contact support.');
+            return; // Stop further login process if inactive
+          }
+
           dispatch({
             type: 'LOGIN',
             payload: { user: userDetails, token },
@@ -68,6 +74,11 @@ const LoginPage = () => {
     try {
       await login(email, password);
       if (user) {
+        // Check if the user is inactive after login attempt
+        if (user.inactive) {
+          setMessage('Your account is inactive. Please contact support.');
+          return; // Stop further navigation
+        }
         navigate(getRedirectPath(user.role));
       }
     } catch (err) {
@@ -118,7 +129,6 @@ const LoginPage = () => {
           >
             Password
           </label>
-
 
           <div className="relative w-full">
             {/* Input Field */}

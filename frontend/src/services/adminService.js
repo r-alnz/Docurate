@@ -59,3 +59,23 @@ export const deleteUserAccount = async (token, userId) => {
     });
     return response.data;
 };
+
+// Inactivate a user account
+export const inactivateUserAccount = async (token, userId) => {
+    const response = await axios.patch(`${API_URL}/inactivate/${userId}`, {}, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+// Inactivate a user account
+export const activateUserAccount = async (token, userId) => {
+    const response = await axios.patch(`${API_URL}/activate/${userId}`, {}, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};

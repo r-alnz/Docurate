@@ -118,5 +118,34 @@ const deleteAdminAccount = async (req, res) => {
     }
 };
 
+const inactivateAdminAccount = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const updatedAdmin = await User.findByIdAndUpdate(
+            id,
+            { inactive: true },
+            { new: true, runValidators: true }
+        );
+        if (!updatedAdmin) throw new Error('Admin account not found');
+        res.status(200).json({ message: 'Admin account inactivated', admin: updatedAdmin });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
 
-export { createOrganization, createAdminAccount, getOrganizations, getAdminAccounts, editAdminAccount, deleteAdminAccount };
+const activateAdminAccount = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const updatedAdmin = await User.findByIdAndUpdate(
+            id,
+            { inactive: false },
+            { new: true, runValidators: true }
+        );
+        if (!updatedAdmin) throw new Error('Admin account not found');
+        res.status(200).json({ message: 'Admin account activated', admin: updatedAdmin });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export { createOrganization, createAdminAccount, getOrganizations, getAdminAccounts, editAdminAccount, deleteAdminAccount, inactivateAdminAccount, activateAdminAccount };

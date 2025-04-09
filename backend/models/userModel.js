@@ -59,7 +59,11 @@ const userSchema = new mongoose.Schema(
             type: String, 
             enum: ["superadmin", "admin", "organization", "student"], 
             default: "admin" 
-        }
+        },
+        inactive: {
+            type: Boolean,
+            default: false
+        }        
     }, 
     {
         timestamps: true
@@ -166,6 +170,10 @@ userSchema.statics.login = async function (email, password) {
 
         if (!user) {
             throw new Error('Invalid credentials');
+        }
+
+        if (user.inactive) {
+            throw new Error('Your account is inactive. Please contact support.');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);

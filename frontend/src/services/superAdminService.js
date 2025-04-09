@@ -74,3 +74,30 @@ export const deleteAdminAccount = async (token, adminId) => {
     });
     return response.data;
 };
+
+export const inactivateAdminAccount = async (token, adminId) => {
+    const response = await axios.put(
+      `${API_URL}/inactivate/${adminId}`,
+      { inactive: true },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  };
+  
+  export const activateAdminAccount = async (token, adminId) => {
+    const response = await axios.put(
+      `${API_URL}/activate/${adminId}`,
+      { inactive: false },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  };
+  

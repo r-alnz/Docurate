@@ -19,7 +19,12 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        console.log("suborgsssL ", user.suborganizations);
+        // Check if the user is inactive
+        if (user.inactive) {
+            return res.status(401).json({ message: 'This account has been inactivated.' });
+        }
+
+        // console.log("suborgsssL ", user.suborganizations);
         // Generate token
         const token = generateToken(user._id, user.role, user.organization, user.suborganizations);
 
@@ -38,7 +43,7 @@ const loginUser = async (req, res) => {
         });
     } catch (error) {
         console.error('Login error:', error.message);
-        res.status(500).json({ message: 'Your email or password is incorrect. Please try again', error: error.message });
+        res.status(500).json({ message: error.message, error: error.message });
     }
 };
 
