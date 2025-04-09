@@ -710,8 +710,14 @@ const TemplateContainer = ({ suborgs }) => {
   }
 
   const handleSaveOrUpdateTemplate = async () => {
-    if (!documentName || !documentType || !requiredRole || pages.length === 0) {
-      showMessage("Please fill in all required fields and ensure there is content.")
+    if (
+      !documentName ||
+      !documentType ||
+      !requiredRole ||
+      pages.length === 0 ||
+      (isCustomType ? !customSubtype : !documentSubtype)
+    ) {
+      showMessage("Please fill in all required fields including subtype and ensure there is content.")
       return
     }
 
@@ -944,6 +950,7 @@ const TemplateContainer = ({ suborgs }) => {
           }}
           placeholder="Enter subtype"
           className="w-full border rounded p-2 mb-4"
+          required
         />
         <label className="block text-gray-700 font-medium mb-2">Template For:</label>
         <select
@@ -1464,4 +1471,3 @@ const TemplateContainer = ({ suborgs }) => {
 export default TemplateContainer
 
 // latest na tlga itows
-
