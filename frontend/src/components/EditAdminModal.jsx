@@ -1,9 +1,9 @@
-import { useOrganizationContext } from "../hooks/useOrganizationContext";
-import { useAuthContext } from '../hooks/useAuthContext';
-"use client"
+import { useAuthContext } from "../hooks/useAuthContext"
+  ; ("use client")
 import { useState, useEffect } from "react"
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react"
 import PropTypes from "prop-types"
+import { motion } from "framer-motion"
 
 const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => {
   console.log("Organizations from context:", suborganizations)
@@ -31,6 +31,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
   const { user: currentUser } = useAuthContext()
   const today = new Date()
   const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]
+  const [modalState, setModalState] = useState("")
 
   useEffect(() => {
     // Initialize selected suborganizations only when formData.suborganizations is available
@@ -149,12 +150,14 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
         setMessage({ text: "Edit successful!", type: "success" })
         setShowMessageModal(false)
+        setModalState("success")
 
         // Close the modal after 3 seconds
         setTimeout(() => {
+          setModalState("")
           setShowMessageModal(false)
           onClose() // ✅ Close modal only after showing success message
-        }, 1000)
+        }, 3000)
       } catch (error) {
         console.error("Edit failed:", error)
 
@@ -173,14 +176,9 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {currentUser?.role === "admin" && (
-          <h2 className="text-lg font-bold mb-4">Edit User</h2>
-        )}
-        {currentUser?.role === "superadmin" && (
-          <h2 className="text-lg font-bold mb-4">Edit Admin</h2>
-        )}
+        {currentUser?.role === "admin" && <h2 className="text-lg font-bold mb-4">Edit User</h2>}
+        {currentUser?.role === "superadmin" && <h2 className="text-lg font-bold mb-4">Edit Admin</h2>}
         <form>
-
           {user.role === "organization" && (
             <>
               <div className="mb-4">
@@ -279,23 +277,17 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Suborganizations
-                </label>
+                <label className="block text-gray-700 font-medium mb-2">Suborganizations</label>
 
                 {suborganizations.length === 0 ? (
-                  <div className="border rounded p-2 w-full text-gray-500">
-                    No suborganizations available.
-                  </div>
+                  <div className="border rounded p-2 w-full text-gray-500">No suborganizations available.</div>
                 ) : (
                   <div className="border rounded p-2 w-full h-32 overflow-y-auto">
                     {suborganizations.map((org) => (
                       <div
                         key={org._id}
                         onClick={() => toggleSubOrg(org._id)}
-                        className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-gray-700"
+                        className={`p-2 cursor-pointer ${selectedSubOrgs.includes(org._id) ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
                           } rounded mb-1`}
                       >
                         {org.firstname || "(No Name)"}
@@ -306,7 +298,6 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
               </div>
             </>
           )}
-
 
           {user.role === "admin" && (
             <>
@@ -335,9 +326,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
 
               <div className="mb-4">
                 <label className="block text-gray-700">Organization</label>
-                <div className="w-full border p-2 rounded">
-                  {user.organization.name}
-                </div>
+                <div className="w-full border p-2 rounded">{user.organization.name}</div>
               </div>
             </>
           )}
@@ -362,12 +351,7 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
           {showMessageModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm">
-                <p
-                  className={`mb-4 ${message.type === "success"
-                    ? "text-green-700"
-                    : "text-red-700"
-                    }`}
-                >
+                <p className={`mb-4 ${message.type === "success" ? "text-green-700" : "text-red-700"}`}>
                   {message.text}
                 </p>
               </div>
@@ -377,8 +361,8 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
           {message.text && (
             <div
               className={`mt-4 p-2 rounded ${message.type === "success"
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
+                  ? "bg-green-100 text-green-700 border border-green-400"
+                  : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -391,15 +375,12 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
                 {/* Icon and Text */}
                 <div className="flex items-center gap-3 mb-4">
                   <AlertCircle className="text-[#38b6ff] w-6 h-6" />
-                  <p className="text-gray-800 text-lg font-semibold">
-                    Confirm Changes
-                  </p>
+                  <p className="text-gray-800 text-lg font-semibold">Confirm Changes</p>
                 </div>
 
                 {/* Message */}
                 <p className="text-gray-600 mb-6 text-sm">
-                  Are you sure you want to save these changes? This action
-                  cannot be undone.
+                  Are you sure you want to save these changes? This action cannot be undone.
                 </p>
 
                 {/* Buttons */}
@@ -420,10 +401,34 @@ const EditAdminModal = ({ isOpen, user, onClose, onEdit, suborganizations }) => 
               </div>
             </div>
           )}
+          {modalState === "success" && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center">
+                <div className="flex flex-col items-center">
+                  {/* ✅ Animated Check Icon */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 10,
+                      delay: 0.2,
+                    }}
+                  >
+                    <CheckCircle className="text-green-600 w-12 h-12" />
+                  </motion.div>
+
+                  <h2 className="text-xl font-semibold text-green-600 mt-3">Success!</h2>
+                  <p className="text-gray-600 mt-1">Changes saved successfully!</p>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>
-  );
+  )
 }
 
 EditAdminModal.propTypes = {
@@ -434,4 +439,3 @@ EditAdminModal.propTypes = {
 }
 
 export default EditAdminModal
-
