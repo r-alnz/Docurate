@@ -56,10 +56,10 @@ const DocumentListContainer = () => {
       const token = getToken();
       await deleteDocument(documentId, token);
       dispatch({ type: 'DELETE_DOCUMENT', payload: documentId });
-      showMessage('Document archived successfully!');
+      showMessage('Document inactivate successfully!');
     } catch (error) {
       console.error(error);
-      showMessage('Failed to archive the document. Please try again.', 'error');
+      showMessage('Failed to inactivate the document. Please try again.', 'error');
     }
     setIsDeleteModalOpen(false);
   };
@@ -179,7 +179,7 @@ const DocumentListContainer = () => {
           className="border rounded p-2 shadow bg-white"
         >
           <option value="active">Active</option>
-          <option value="inactive">Archived</option>
+          <option value="inactive">Inactivate</option>
           <option value="all">All</option>
         </select>
       </div>
@@ -204,7 +204,7 @@ const DocumentListContainer = () => {
                   {document.template?.name || "N/A"}
                 </p>
                 {document.status === 'inactive' && (
-                  <p className="text-red-500 mb-2">Archived</p>
+                  <p className="text-red-500 mb-2">Inactive</p>
                 )}
               </div>
 
@@ -221,7 +221,7 @@ const DocumentListContainer = () => {
                       className="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition-all duration-200 transform hover:scale-105"
                       onClick={() => openDeleteModal(document)}
                     >
-                      Archive
+                      Inactive
                     </button>
                   </>
                 ) : (
@@ -254,7 +254,7 @@ const DocumentListContainer = () => {
           onClose={() => setIsDeleteModalOpen(false)}
           onDelete={() => handleDeleteDocument(selectedDocument._id)}
           actionText="Archive"
-          message="Are you sure you want to archive this document? You can recover it later."
+          message="Are you sure you want to inactive this document? You can recover it later."
         />
       )}
 
