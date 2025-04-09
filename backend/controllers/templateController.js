@@ -82,7 +82,7 @@ const getTemplates = async (req, res) => {
 
         // Fetch templates
         const templates = await Template.find(query)
-            .populate('suborganizations', '_id firstname')
+            .populate('suborganizations', '_id firstname').select('-content')
           
 
         // console.log("Fetched Templates:", templates.length ? templates : "No templates found");
@@ -290,51 +290,58 @@ const eraseTemplate = async (req, res) => {
 
 const fetchDecisionTree = async (req, res) => {
     try {
-        const { organization, role } = req.user; // Extract organization and role from user info
+        const { organization, role } = req.user;
 
         if (!organization) {
             return res.status(400).json({ message: 'Organization ID is required' });
         }
 
-        // Build query based on user role
-        const query = { organization, status: 'active' }; // Include status: 'active'
+        const query = { organization, status: 'active' };
 
-        // If the user's role is not admin, filter by `requiredRole`
         if (role !== 'admin') {
-            query.requiredRole = role; // Only fetch templates that match the user's role
+            query.requiredRole = role;
         }
 
-        // Fetch templates matching the query
         const templates = await Template.find(query);
 
         const decisionTree = {};
 
         templates.forEach((template) => {
-            const { type, subtype, name, _id, requiredRole } = template; // Include additional fields
+            const { type, subtype, name, _id, requiredRole, paperSize } = template;
 
+            // Level 1 – Type
             if (!decisionTree[type]) {
-                decisionTree[type] = { subtype: {} };
+                decisionTree[type] = { subtypes: {} };
             }
 
-            if (subtype) {
-                if (!decisionTree[type].subtype[subtype]) {
-                    decisionTree[type].subtype[subtype] = [];
-                }
-                decisionTree[type].subtype[subtype].push({
-                    name,
-                    id: _id,
-                    requiredRole, // Include other fields if necessary
-                });
-            } else {
-                if (!decisionTree[type].names) {
-                    decisionTree[type].names = [];
-                }
-                decisionTree[type].names.push({
-                    name,
-                    id: _id,
-                    requiredRole, // Include other fields if necessary
-                });
+            const typeNode = decisionTree[type];
+
+            // Level 2 – Subtype (or 'default' if empty)
+            const subKey = subtype || 'default';
+            if (!typeNode.subtypes[subKey]) {
+                typeNode.subtypes[subKey] = { paperSizes: {} };
             }
+
+            const subtypeNode = typeNode.subtypes[subKey];
+
+            // Level 3 – Paper Size
+            if (!subtypeNode.paperSizes[paperSize]) {
+                subtypeNode.paperSizes[paperSize] = { requiredRoles: {} };
+            }
+
+            const paperSizeNode = subtypeNode.paperSizes[paperSize];
+
+            // Level 4 – Required Role
+            if (!paperSizeNode.requiredRoles[requiredRole]) {
+                paperSizeNode.requiredRoles[requiredRole] = [];
+            }
+
+            paperSizeNode.requiredRoles[requiredRole].push({
+                id: _id,
+                name,
+                requiredRole,
+                paperSize
+            });
         });
 
         res.status(200).json(decisionTree);
@@ -343,7 +350,6 @@ const fetchDecisionTree = async (req, res) => {
         res.status(500).json({ message: 'Error generating decision tree', error: error.message });
     }
 };
-
 
 
 

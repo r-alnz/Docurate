@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Editor } from "@tinymce/tinymce-react"
 import { getToken } from "../utils/authUtil"
 import { createDocument, updateDocument, getDocumentById, getDocumentsByUser } from "../services/documentService"
 import { getTemplateById } from "../services/templateService"
 import imageCompression from "browser-image-compression"
-import { X, Printer, Save } from "lucide-react"
+import { X, Printer, Save, Clock } from "lucide-react"
+import RevisionHistoryPanel from "./RevisionHistoryPanel"
 
 // Function to find user ID from various storage locations
 const findUserId = () => {
@@ -78,6 +79,22 @@ const DocumentContainer = () => {
   const [titleError, setTitleError] = useState(null)
   const [autoSaveStatus, setAutoSaveStatus] = useState(null)
   const [autoSaveTimer, setAutoSaveTimer] = useState(null)
+  const [showRevisionHistory, setShowRevisionHistory] = useState(false)
+  const editorRef = useRef(null)
+  // Add a new state to track if the document has been manually saved at least once
+  const [hasBeenManuallySaved, setHasBeenManuallySaved] = useState(false)
+  const [documentId, setDocumentId] = useState(id || null)
+
+  // Debug log to check if isUpdateMode is true
+  useEffect(() => {
+    console.log("isUpdateMode:", isUpdateMode)
+    console.log("document ID:", id)
+
+    // If we're in update mode, we know the document has been saved before
+    if (isUpdateMode) {
+      setHasBeenManuallySaved(true)
+    }
+  }, [isUpdateMode, id])
 
   const DPI = 96 // Fixed DPI for page dimensions
   const pageSizes = {
@@ -114,7 +131,9 @@ const DocumentContainer = () => {
         const documents = await getDocumentsByUser(userId, token, "active")
 
         // Filter out the current document's title if in update mode
-        const titles = documents.filter((doc) => !isUpdateMode || doc._id !== id).map((doc) => doc.title.toLowerCase())
+        const titles = documents
+          .filter((doc) => !isUpdateMode || doc._id !== documentId)
+          .map((doc) => doc.title.toLowerCase())
         setExistingTitles(titles)
       } catch (err) {
         console.error("Error loading document titles:", err)
@@ -127,16 +146,17 @@ const DocumentContainer = () => {
     if (getToken()) {
       loadExistingTitles()
     }
-  }, [id, isUpdateMode])
+  }, [documentId, isUpdateMode])
 
   // Add this validation function
-  const validateTitle = (title) => {
+  function validateTitle(title) {
     if (!title) {
       setTitleError("Title is required")
       return false
     }
 
-    if (existingTitles.includes(title.toLowerCase())) {
+    // In update mode, we should only check if the title exists for OTHER documents
+    if (existingTitles.includes(title.toLowerCase()) && !isUpdateMode) {
       setTitleError("A document with this title already exists. Please choose a different title.")
       return false
     }
@@ -360,6 +380,7 @@ const DocumentContainer = () => {
           setTitle(documentData.title)
           setTemplate(documentData.template)
           setPaperSize(documentData.template?.paperSize)
+          setDocumentId(id)
 
           setPages(
             documentData.content.split('<hr style="page-break-after: always;">').map((content, index) => ({
@@ -369,6 +390,8 @@ const DocumentContainer = () => {
           )
 
           setIsUpdateMode(true)
+          setHasBeenManuallySaved(true) // Document exists, so it has been saved
+          console.log("Set isUpdateMode to true because id exists:", id)
         } else if (templateId) {
           const templateData = await getTemplateById(templateId, token)
 
@@ -422,7 +445,10 @@ const DocumentContainer = () => {
     const reader = new FileReader()
     reader.onload = () => {
       editor.insertContent(`<img src="${reader.result}" alt="Compressed Image" />`)
-      triggerAutoSave()
+      // Only trigger auto-save if the document has been manually saved at least once
+      if (hasBeenManuallySaved) {
+        triggerAutoSave()
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -448,6 +474,15 @@ const DocumentContainer = () => {
 
   // Helper function to trigger auto-save
   const triggerAutoSave = () => {
+    // Only proceed if the document has been manually saved at least once
+    if (!hasBeenManuallySaved) {
+      console.log("Auto-save skipped: Document has not been manually saved yet")
+      return
+    }
+
+    // Don't set a new timer if we're already in a pending state
+    if (autoSaveStatus === "pending") return
+
     if (autoSaveTimer) {
       clearTimeout(autoSaveTimer)
     }
@@ -460,6 +495,12 @@ const DocumentContainer = () => {
 
   // Auto-save function
   const handleAutoSave = async () => {
+    // Only proceed if the document has been manually saved at least once
+    if (!hasBeenManuallySaved) {
+      console.log("Auto-save skipped: Document has not been manually saved yet")
+      return
+    }
+
     if (!title || pages.length === 0) {
       setAutoSaveStatus("error")
       setTimeout(() => setAutoSaveStatus(null), 3000)
@@ -485,16 +526,20 @@ const DocumentContainer = () => {
     try {
       const token = getToken()
       if (isUpdateMode) {
-        await updateDocument(id, documentData, token)
+        await updateDocument(documentId, documentData, token)
         setAutoSaveStatus("success")
       } else {
-        // Only auto-save for new documents if they have a valid title
+        // This should only happen if hasBeenManuallySaved is true
+        // but isUpdateMode is false (edge case)
         if (validateTitle(title)) {
-          await createDocument(documentData, token)
+          const response = await createDocument(documentData, token)
           setAutoSaveStatus("success")
-          // If this is the first save of a new document, switch to update mode
-          if (!isUpdateMode) {
-            setIsUpdateMode(true)
+
+          // Update the component state
+          setIsUpdateMode(true)
+          if (response && response._id) {
+            setDocumentId(response._id)
+            console.log("Document auto-saved with ID:", response._id)
           }
         } else {
           setAutoSaveStatus("error")
@@ -584,8 +629,10 @@ const DocumentContainer = () => {
       editor.undoManager.add()
       editor.fire("change")
 
-      // Trigger auto-save after adding header/footer
-      triggerAutoSave()
+      // Trigger auto-save after adding header/footer only if document has been saved
+      if (hasBeenManuallySaved) {
+        triggerAutoSave()
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -625,8 +672,10 @@ const DocumentContainer = () => {
       `
       editor.insertContent(imageHtml)
 
-      // Trigger auto-save after adding image
-      triggerAutoSave()
+      // Trigger auto-save after adding image only if document has been saved
+      if (hasBeenManuallySaved) {
+        triggerAutoSave()
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -634,18 +683,19 @@ const DocumentContainer = () => {
   const handleEditorChange = (content, pageId) => {
     setPages((prevPages) => prevPages.map((page) => (page.id === pageId ? { ...page, content } : page)))
 
-    // Trigger auto-save
-    if (autoSaveTimer) {
-      clearTimeout(autoSaveTimer)
+    // Only trigger auto-save if the document has been manually saved at least once
+    if (hasBeenManuallySaved) {
+      // Instead of calling triggerAutoSave directly, use a timeout to break the render cycle
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer)
+      }
+
+      const timer = setTimeout(() => {
+        handleAutoSave()
+      }, 5000) // 5 seconds delay
+
+      setAutoSaveTimer(timer)
     }
-
-    setAutoSaveStatus("pending")
-
-    const timer = setTimeout(() => {
-      handleAutoSave()
-    }, 5000) // 5 seconds delay
-
-    setAutoSaveTimer(timer)
   }
 
   const handleAddPage = () => {
@@ -661,8 +711,10 @@ const DocumentContainer = () => {
         setPages(newPages)
         setCurrentPage((prev) => (prev > newPages.length ? newPages.length : prev))
 
-        // Trigger auto-save after deleting a page
-        triggerAutoSave()
+        // Trigger auto-save after deleting a page only if document has been saved
+        if (hasBeenManuallySaved) {
+          triggerAutoSave()
+        }
       }
     } else {
       showMessage("You cannot delete the last page!")
@@ -705,12 +757,23 @@ const DocumentContainer = () => {
     try {
       const token = getToken()
       if (isUpdateMode) {
-        await updateDocument(id, documentData, token)
+        await updateDocument(documentId, documentData, token)
         showMessage("✅ Document updated successfully!", "success")
       } else {
-        await createDocument(documentData, token)
+        const response = await createDocument(documentData, token)
         showMessage("✅ Document created successfully!", "success")
-        navigate("/documents")
+
+        // Set update mode to true but don't navigate
+        if (response && response._id) {
+          setIsUpdateMode(true)
+          setHasBeenManuallySaved(true) // Mark as manually saved
+          setDocumentId(response._id) // Store the document ID
+          // Instead of navigating, just update the component state
+          console.log("Document saved with ID:", response._id)
+          showMessage("✅ Document saved and ready for editing! Auto-save is now active.", "success")
+        } else {
+          navigate("/documents")
+        }
       }
     } catch (error) {
       if (error.message.includes("title already exists")) {
@@ -803,7 +866,10 @@ const DocumentContainer = () => {
           onChange={(e) => {
             setTitle(e.target.value)
             if (e.target.value) validateTitle(e.target.value)
-            triggerAutoSave()
+            // Only trigger auto-save if the document has been manually saved
+            if (hasBeenManuallySaved) {
+              triggerAutoSave()
+            }
           }}
           placeholder="Enter document title"
           className={`w-full border rounded p-2 ${titleError ? "border-red-500" : ""}`}
@@ -861,6 +927,13 @@ const DocumentContainer = () => {
           </button> */}
         </div>
 
+        {/* Auto-save status message */}
+        {!hasBeenManuallySaved && (
+          <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded">
+            <p>Auto-save will be activated after you manually save the document for the first time.</p>
+          </div>
+        )}
+
         {isDataLoaded ? (
           pages.map((page) => (
             <div key={page.id} style={{ display: currentPage === page.id ? "block" : "none" }}>
@@ -903,6 +976,8 @@ const DocumentContainer = () => {
                     })
 
                     editor.on("init", () => {
+                      // Add this reference to access the editor instance later
+                      editorRef.current = editor
                       const iframeDoc = editor.getDoc() // Access TinyMCE's iframe document
                       const editorBody = editor.getBody()
 
@@ -941,8 +1016,10 @@ const DocumentContainer = () => {
                             editor.fire("change")
                             console.log(editor.getContent()) // Verify updated content
 
-                            // Trigger auto-save after moving image
-                            triggerAutoSave()
+                            // Trigger auto-save after moving image only if document has been saved
+                            if (hasBeenManuallySaved) {
+                              debouncedAutoSave()
+                            }
                           } else {
                             console.warn("Draggable image has no ID. Ensure unique IDs are assigned.")
                           }
@@ -955,14 +1032,16 @@ const DocumentContainer = () => {
                       // Listen for any content changes that might not be caught by onEditorChange
                       editor.on("ExecCommand", (e) => {
                         // This catches most editor commands like formatting, inserting elements, etc.
-                        triggerAutoSave()
+                        if (hasBeenManuallySaved) {
+                          debouncedAutoSave()
+                        }
                       })
 
                       editor.on("SetContent", (e) => {
                         // This catches direct content setting operations
-                        if (!e.initial) {
+                        if (!e.initial && hasBeenManuallySaved) {
                           // Skip the initial content setting
-                          triggerAutoSave()
+                          debouncedAutoSave()
                         }
                       })
                     })
@@ -1133,6 +1212,19 @@ const DocumentContainer = () => {
                         }
                       },
                     })
+
+                    let autoSaveDebounceTimer
+                    const debouncedAutoSave = () => {
+                      if (!hasBeenManuallySaved) return
+
+                      if (autoSaveDebounceTimer) clearTimeout(autoSaveDebounceTimer)
+                      autoSaveDebounceTimer = setTimeout(() => {
+                        if (autoSaveStatus !== "pending") {
+                          setAutoSaveStatus("pending")
+                          handleAutoSave()
+                        }
+                      }, 5000)
+                    }
                   },
                 }}
                 onEditorChange={(content) => handleEditorChange(content, page.id)}
@@ -1160,6 +1252,15 @@ const DocumentContainer = () => {
           <Printer className="text-white" />
           Print Document
         </button>
+
+        {/* Always show the Revision History button for testing */}
+        <button
+          onClick={() => setShowRevisionHistory(true)}
+          className="bg-[#9c27b0] text-white py-2 px-4 rounded hover:bg-[#7b1fa2] flex items-center gap-2 hover:scale-105"
+        >
+          <Clock className="text-white" />
+          Revision History
+        </button>
       </div>
 
       {/* Mini Message Box (Centered) */}
@@ -1174,9 +1275,19 @@ const DocumentContainer = () => {
           {message.text}
         </div>
       )}
+
+      {/* Revision History Panel */}
+      <RevisionHistoryPanel
+        show={showRevisionHistory}
+        onClose={() => setShowRevisionHistory(false)}
+        documentId={documentId}
+        editorRef={editorRef}
+        currentPage={currentPage}
+        setPages={setPages}
+        pages={pages}
+      />
     </div>
   )
 }
 
 export default DocumentContainer
-
