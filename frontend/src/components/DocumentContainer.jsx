@@ -899,6 +899,38 @@ const DocumentContainer = () => {
             <span>
               Page {currentPage} of {pages.length}
             </span>
+
+          </div>
+
+          {/* Auto-save Status Indicator */}
+          {/* Container for auto-save status and next button */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Auto-save Status Indicator */}
+            <div className="flex items-center text-green-600 text-sm font-bold gap-1">
+              {autoSaveStatus === "success" && (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Auto-saved</span>
+                </>
+              )}
+              {autoSaveStatus === "error" && (
+                <>
+                  <XCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-red-500">Failed to save</span>
+                </>
+              )}
+              {autoSaveStatus === "pending" && (
+                <>
+                  <Loader className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              )}
+              {!autoSaveStatus && hasBeenManuallySaved && (
+                <span className="text-green-400">Saved</span>
+              )}
+            </div>
+
+            {/* Next Button */}
             <button
               disabled={currentPage === pages.length}
               onClick={handleNextPage}
@@ -907,30 +939,8 @@ const DocumentContainer = () => {
               Next
             </button>
           </div>
-
-          {/* Auto-save Status Indicator */}
-          <div className="flex items-center gap-4 text-green-600 text-sm font-bold">
-            {autoSaveStatus === "success" && (
-              <>
-                <CheckCircle className="h-4 w-4" />
-                <span>Auto-saved</span>
-              </>
-            )}
-            {autoSaveStatus === "error" && (
-              <>
-                <XCircle className="h-4 w-4 text-red-500" />
-                <span className="text-red-500">Failed to save</span>
-              </>
-            )}
-            {autoSaveStatus === "pending" && (
-              <>
-                <Loader className="h-4 w-4 animate-spin" />
-                <span>Saving...</span>
-              </>
-            )}
-            {!autoSaveStatus && hasBeenManuallySaved && <span className="text-green-400">Saved</span>}
-          </div>
         </div>
+
 
         {/* Add/Delete Buttons */}
         <div className="mb-4 flex justify-end gap-4">
