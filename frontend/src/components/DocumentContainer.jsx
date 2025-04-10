@@ -888,23 +888,34 @@ const DocumentContainer = () => {
 
       <div className="mb-4">
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-4">
+          {/* Previous button */}
+          <div>
             <button
               disabled={currentPage === 1}
               onClick={handlePreviousPage}
-              className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
+          </div>
+
+          {/* Centered page counter */}
+          <div className="text-center">
             <span>
               Page {currentPage} of {pages.length}
             </span>
-
           </div>
 
-          {/* Auto-save Status Indicator */}
-          {/* Container for auto-save status and next button */}
-          <div className="flex items-center justify-between gap-4">
+          {/* Next button and autosave status in a column */}
+          <div className="flex flex-col items-end gap-2">
+            <button
+              disabled={currentPage === pages.length}
+              onClick={handleNextPage}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+
             {/* Auto-save Status Indicator */}
             <div className="flex items-center text-green-600 text-sm font-bold gap-1">
               {autoSaveStatus === "success" && (
@@ -925,19 +936,8 @@ const DocumentContainer = () => {
                   <span>Saving...</span>
                 </>
               )}
-              {!autoSaveStatus && hasBeenManuallySaved && (
-                <span className="text-green-400">Saved</span>
-              )}
+              {!autoSaveStatus && hasBeenManuallySaved && <span className="text-green-400">Saved</span>}
             </div>
-
-            {/* Next Button */}
-            <button
-              disabled={currentPage === pages.length}
-              onClick={handleNextPage}
-              className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
-            >
-              Next
-            </button>
           </div>
         </div>
 
