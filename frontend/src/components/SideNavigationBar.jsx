@@ -63,7 +63,7 @@ const SideNavigationBar = ({ isOpen, setIsOpen }) => {
               <p className="text-xs opacity-80 truncate">
                 {user?.organization ? `(${user.organization.name})` : ""}
               </p>
-              <p className="text-xs opacity-80 truncate">{user?.email}</p>
+              {/* <p className="text-xs opacity-80 truncate">{user?.email}</p> */}
             </div>
           </div>
         )}

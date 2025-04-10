@@ -26,6 +26,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [message, setMessage] = useState(null)
   const [showMessageModal, setShowMessageModal] = useState(false)
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false)
   const today = new Date()
   const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]
 
@@ -157,6 +158,11 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
       return
     }
 
+    // Show confirmation modal instead of submitting
+    setShowConfirmationModal(true)
+  }
+
+  const handleConfirmSubmit = async () => {
     // Use customPosition value when "Other" is selected
     const finalPosition = position === "Other" ? customPosition : position
 
@@ -176,6 +182,9 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
       setOrganization("")
       setPosition("")
 
+      // Close confirmation modal
+      setShowConfirmationModal(false)
+
       // Show success message modal
       setMessage({ type: "success", text: "✅ Submission successful!" })
       setShowMessageModal(true)
@@ -184,6 +193,7 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
     } catch (error) {
       console.error("❌ Submission failed:", error)
       setMessage({ type: "error", text: "❌ Submission failed. Please try again." })
+      setShowConfirmationModal(false)
     }
   }
 
@@ -340,8 +350,8 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
           {message && !showMessageModal && (
             <div
               className={`mb-4 p-2 rounded ${message.type === "success"
-                  ? "bg-green-100 text-green-700 border border-green-400"
-                  : "bg-red-100 text-red-700 border border-red-400"
+                ? "bg-green-100 text-green-700 border border-green-400"
+                : "bg-red-100 text-red-700 border border-red-400"
                 }`}
             >
               {message.text}
@@ -376,6 +386,51 @@ const AddAdminModal = ({ isOpen, onClose, onSubmit }) => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      {showConfirmationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">Confirm Details</h3>
+
+            <div className="space-y-3 mb-4">
+              <div className="grid grid-cols-2 gap-2">
+                <p className="font-medium">Organization:</p>
+                <p>{organizations.find((org) => org._id === organization)?.name || "Not selected"}</p>
+
+                <p className="font-medium">Position:</p>
+                <p>{position === "Other" ? customPosition : position}</p>
+
+                <p className="font-medium">Name:</p>
+                <p>
+                  {firstname} {lastname}
+                </p>
+
+                <p className="font-medium">Email:</p>
+                <p>{email}</p>
+
+                <p className="font-medium">Birthdate:</p>
+                <p>{birthdate}</p>
+              </div>
+            </div>
+
+            <div className="border-t pt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setShowConfirmationModal(false)}
+                className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSubmit}
+                className="bg-[#38b6ff] text-white px-4 py-2 rounded hover:bg-[#2a9ed6] transition"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -387,4 +442,3 @@ AddAdminModal.propTypes = {
 }
 
 export default AddAdminModal
-
