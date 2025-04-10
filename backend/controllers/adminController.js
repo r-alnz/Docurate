@@ -1,39 +1,49 @@
 import User from '../models/userModel.js';
 import Organization from '../models/organizationModel.js';
 
-// Admin: Create User Account
+/* =========================
+    Admin: Create User Account
+============================ */
 const createUserAccount = async (req, res) => {
     try {
         console.log('📥 Received user data:', JSON.stringify(req.body, null, 2));
 
+        // Destructure fields from request body
         const { firstname, lastname, email, password, role, organization, college, program, studentId, suborganizations, birthdate } = req.body;
 
-
+        // Validate required fields
         if (!firstname || !lastname || !email || !password || !role) {
             return res.status(400).json({ message: 'All fields are required' });
         }
-        
+
+        // Students must provide birthdate
         if (role === 'student' && !birthdate) {
             return res.status(400).json({ message: 'Birthdate is required for students' });
-        }        
+        }
 
+        // Only allow roles: student or organization
         if (!['student', 'organization'].includes(role)) {
             return res.status(400).json({ message: 'Invalid role' });
         }
 
+        // Non-student roles must have an organization
         if (role !== 'student' && !organization) {
             return res.status(400).json({ message: 'Organization is required for this role' });
         }
 
+        // Check if the organization exists (if applicable)
         const orgExists = role !== 'student' ? await Organization.findById(organization) : true;
         if (!orgExists) return res.status(404).json({ message: 'Organization not found' });
 
+        // Check if email is already registered
         const emailExists = await User.findOne({ email });
         if (emailExists) return res.status(400).json({ message: 'Email already exists' });
 
+        // Prepare user data for creation
         const userPayload = { firstname, lastname, birthdate, email, password, role, organization, college, program, suborganizations: suborganizations || [] };
         if (role === 'student') userPayload.studentId = studentId;
 
+        // Create new user
         const newUser = await User.create(userPayload);
         res.status(201).json({ message: 'User created successfully', user: newUser });
 
@@ -43,42 +53,43 @@ const createUserAccount = async (req, res) => {
     }
 };
 
-
-
-
+/* =========================
+    Get Users (With Filters)
+============================ */
 const getUsers = async (req, res) => {
     try {
-        const { role } = req.query; // Role filter
-        const requestingAdminOrganization = req.user.organization; // Admin's organization ID from token
-        const requestingOrganizationId = req.user._id; // Organization user's ID
-        const requestingRole = req.user.role; // Get the role of the requester
+        // Extract filters & role of requester
+        const { role } = req.query;
+        const requestingAdminOrganization = req.user.organization;
+        const requestingOrganizationId = req.user._id;
+        const requestingRole = req.user.role;
 
-        // Allowed roles: 'student' and 'organization'
+        // Allowed roles for fetching
         const allowedRoles = ['student', 'organization'];
 
-        // Build the filter object dynamically
+        // Build filter query based on role
         const filter = {
-            role: { $in: allowedRoles }, // Only 'student' and 'organization' roles
+            role: { $in: allowedRoles },
         };
 
+        // Apply organization-based filters
         if (requestingRole === 'admin') {
-            // Admins can only see users within their organization
             filter.organization = requestingAdminOrganization;
         } else if (requestingRole === 'organization') {
-            // Organizations can only see users where their ID is in suborganizations
             filter.suborganizations = requestingOrganizationId;
         }
 
+        // Apply additional role filter if provided
         if (role && allowedRoles.includes(role)) {
-            filter.role = role; // Additional role filter if provided
+            filter.role = role;
         }
 
-        // Fetch users from the database
+        // Fetch users
         const users = await User.find(filter)
-            .populate('organization', '_id name') // Populate the organization name
-            .populate('suborganizations', '_id firstname lastname') // Populate suborganizations names
-            .select('-password') // Exclude password field
-            .sort({ createdAt: -1 }); // Sort by creation date descending
+            .populate('organization', '_id name')
+            .populate('suborganizations', '_id firstname lastname')
+            .select('-password')
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             message: 'Users retrieved successfully',
@@ -91,38 +102,41 @@ const getUsers = async (req, res) => {
     }
 };
 
-// Edit User Account
+/* =========================
+    Edit User Account
+============================ */
 const editUserAccount = async (req, res) => {
     const { id } = req.params;
-    console.log("📥 Raw Request Body:", JSON.stringify(req.body, null, 2)); // Log received body
+    console.log("📥 Raw Request Body:", JSON.stringify(req.body, null, 2));
 
     const { firstname, lastname, email, birthdate, password, organization, suborganizations, role, studentId, college, program } = req.body;
-    console.log(req.body);
     try {
         if (!id) throw new Error('User account ID is required');
 
         const updateData = {};
 
+        // Conditionally update fields if provided
         if (firstname) updateData.firstname = firstname;
         if (lastname) updateData.lastname = lastname;
         if (email) updateData.email = email;
         if (birthdate) updateData.birthdate = birthdate;
-        if (password) updateData.password = await User.hashPassword(password); // Hash new password
+        if (password) updateData.password = await User.hashPassword(password);
         if (organization) updateData.organization = organization;
         if (role) updateData.role = role;
         if (program) updateData.program = program;
         if (college) updateData.college = college;
 
-        // Conditionally handle `studentId`
+        // Handle student-specific fields
         if (role === 'student') {
-            updateData.studentId = studentId || null; // Include studentId only if role is student
+            updateData.studentId = studentId || null;
         } else {
             updateData.studentId = undefined;
         }
 
+        // Handle suborganizations array
         if (suborganizations !== undefined) {
             if (Array.isArray(suborganizations)) {
-                updateData.suborganizations = suborganizations.map((suborg) => 
+                updateData.suborganizations = suborganizations.map((suborg) =>
                     typeof suborg === "object" && suborg._id ? String(suborg._id) : String(suborg)
                 );
             } else {
@@ -133,7 +147,7 @@ const editUserAccount = async (req, res) => {
 
         console.log("🛠️ Update Payload:", JSON.stringify(updateData, null, 2));
 
-        // Update the user
+        // Update user
         const updatedUser = await User.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true })
             .populate('organization', '_id name')
             .populate('suborganizations', '_id firstname');
@@ -149,16 +163,14 @@ const editUserAccount = async (req, res) => {
     }
 };
 
-
-
-// Delete User Account
+/* =========================
+    Delete User Account
+============================ */
 const deleteUserAccount = async (req, res) => {
-    const { id } = req.params; // User account ID
-
+    const { id } = req.params;
     try {
         if (!id) throw new Error('User account ID is required');
 
-        // Find and delete the user in the User table
         const deletedUser = await User.findByIdAndDelete(id);
 
         if (!deletedUser) throw new Error('User account not found');
@@ -172,13 +184,14 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 
-// Inactivate User Account
+/* =========================
+    Inactivate User Account
+============================ */
 const inactivateUserAccount = async (req, res) => {
-    const { id } = req.params; // User account ID
+    const { id } = req.params;
     try {
         if (!id) throw new Error('User account ID is required');
 
-        // Find the user and update the "inactive" field to true
         const updatedUser = await User.findByIdAndUpdate(
             id,
             { inactive: true },
@@ -196,13 +209,14 @@ const inactivateUserAccount = async (req, res) => {
     }
 };
 
-// Inactivate User Account
+/* =========================
+    Activate User Account
+============================ */
 const activateUserAccount = async (req, res) => {
-    const { id } = req.params; // User account ID
+    const { id } = req.params;
     try {
         if (!id) throw new Error('User account ID is required');
 
-        // Find the user and update the "inactive" field to true
         const updatedUser = await User.findByIdAndUpdate(
             id,
             { inactive: false },
